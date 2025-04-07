@@ -1,9 +1,13 @@
 import * as React from "react"
 import {
+  ChevronFirstIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  ChevronLastIcon,
   MoreHorizontalIcon,
 } from "lucide-react"
+
+import { Link } from "@inertiajs/react"
 
 import { cn } from "@/lib/utils"
 import { Button, buttonVariants } from "@/components/ui/button"
@@ -40,61 +44,95 @@ function PaginationItem({ ...props }: React.ComponentProps<"li">) {
 type PaginationLinkProps = {
   isActive?: boolean
 } & Pick<React.ComponentProps<typeof Button>, "size"> &
-  React.ComponentProps<"a">
+  React.ComponentProps<typeof Link>
 
 function PaginationLink({
   className,
   isActive,
-  size = "icon",
+  // size = "icon",
   ...props
 }: PaginationLinkProps) {
   return (
-    <a
+    <Link
       aria-current={isActive ? "page" : undefined}
       data-slot="pagination-link"
       data-active={isActive}
       className={cn(
         buttonVariants({
           variant: isActive ? "outline" : "ghost",
-          size,
+          // size,
         }),
-        className
+        className,
       )}
       {...props}
     />
   )
 }
 
-function PaginationPrevious({
+function PaginationFirst({
+  disabled,
   className,
   ...props
 }: React.ComponentProps<typeof PaginationLink>) {
   return (
     <PaginationLink
+      disabled={disabled}
       aria-label="Go to previous page"
-      size="default"
-      className={cn("gap-1 px-2.5 sm:pl-2.5", className)}
+      className={cn("gap-1 px-2.5 sm:pl-2.5", className, disabled ? "hover:bg-transparent text-neutral-400 hover:text-neutral-400 dark:text-neutral-700 dark:hover:text-neutral-700" : "")}
+      {...props}
+    >
+      <ChevronFirstIcon />
+    </PaginationLink>
+  )
+}
+
+function PaginationPrevious({
+  disabled,
+  className,
+  ...props
+}: React.ComponentProps<typeof PaginationLink>) {
+  return (
+    <PaginationLink
+      disabled={disabled}
+      aria-label="Go to previous page"
+      className={cn("gap-1 px-2.5 sm:pl-2.5", className, disabled ? "hover:bg-transparent text-neutral-400 hover:text-neutral-400 dark:text-neutral-700 dark:hover:text-neutral-700" : "")}
       {...props}
     >
       <ChevronLeftIcon />
-      <span className="hidden sm:block">Previous</span>
     </PaginationLink>
   )
 }
 
 function PaginationNext({
+  disabled,
   className,
   ...props
 }: React.ComponentProps<typeof PaginationLink>) {
   return (
     <PaginationLink
+      disabled={disabled}
       aria-label="Go to next page"
-      size="default"
-      className={cn("gap-1 px-2.5 sm:pr-2.5", className)}
+      className={cn("gap-1 px-2.5 sm:pr-2.5", className, disabled ? "hover:bg-transparent text-neutral-400 hover:text-neutral-400 dark:text-neutral-700 dark:hover:text-neutral-700" : "")}
       {...props}
     >
-      <span className="hidden sm:block">Next</span>
       <ChevronRightIcon />
+    </PaginationLink>
+  )
+}
+
+function PaginationLast({
+  disabled,
+  className,
+  ...props
+}: React.ComponentProps<typeof PaginationLink>) {
+  return (
+    <PaginationLink
+      disabled={disabled}
+      aria-label="Go to next page"
+      className={cn("gap-1 px-2.5 sm:pr-2.5", className, disabled ? "hover:bg-transparent text-neutral-400 hover:text-neutral-400 dark:text-neutral-700 dark:hover:text-neutral-700" : "")}
+      {...props}
+    >
+      <ChevronLastIcon />
     </PaginationLink>
   )
 }
@@ -121,7 +159,9 @@ export {
   PaginationContent,
   PaginationLink,
   PaginationItem,
+  PaginationFirst,
   PaginationPrevious,
   PaginationNext,
+  PaginationLast,
   PaginationEllipsis,
 }

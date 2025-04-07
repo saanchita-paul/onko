@@ -15,11 +15,13 @@ import {
 } from "@/components/ui/table"
 
 interface DataTableProps<TData, TValue> {
+  className?: string;
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
 }
  
 export function DataTable<TData, TValue>({
+    className,
     columns,
     data,
 }: DataTableProps<TData, TValue>) {
@@ -30,7 +32,7 @@ export function DataTable<TData, TValue>({
     })
  
     return (
-        <div className="">
+        <div className={className ?? ""}>
             <Table>
                 <TableHeader>
                 {table.getHeaderGroups().map((headerGroup) => (

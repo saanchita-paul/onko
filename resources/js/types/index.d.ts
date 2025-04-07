@@ -57,6 +57,7 @@ export interface Product {
 
 interface LaravelPaginationItem {
     active: boolean;
-    label: string;
-    url?: string
+    label?: string;
+    url?: string;
+    ellipsis?: boolean;
 }
