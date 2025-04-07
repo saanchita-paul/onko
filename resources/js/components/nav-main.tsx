@@ -1,27 +1,30 @@
 import { SidebarGroup, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
-import { type NavItem } from '@/types';
+import { type NavGroup } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
+import { Banknote } from 'lucide-react';
 
-export function NavMain({ items = [] }: { items: NavItem[] }) {
+export function NavMain({ items = [] }: { items: NavGroup[] }) {
     const page = usePage();
     return (
-        <SidebarGroup className="px-2 py-0">
-            <SidebarGroupLabel>Platform</SidebarGroupLabel>
+
+        items.map((group) => (<SidebarGroup className="px-2 py-0">
+            <SidebarGroupLabel>{group.title}</SidebarGroupLabel>
             <SidebarMenu>
-                {items.map((item) => (
+                {group.items.map((item) => (
                     <SidebarMenuItem key={item.title}>
                         <SidebarMenuButton  
                             asChild isActive={item.href === page.url}
                             tooltip={{ children: item.title }}
                         >
                             <Link href={item.href} prefetch>
-                                {item.icon && <item.icon />}
-                                <span>{item.title}</span>
+                                {item.icon && <item.icon className="scale-115 mr-0.5" />}
+                                <span className="font">{item.title}</span>
                             </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                 ))}
             </SidebarMenu>
-        </SidebarGroup>
+        </SidebarGroup>))
+        
     );
 }
