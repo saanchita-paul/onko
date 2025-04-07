@@ -41,3 +41,22 @@ export interface User {
     updated_at: string;
     [key: string]: unknown; // This allows for additional properties...
 }
+
+export interface Product {
+    id: string;
+    name: string;
+    description?: string;
+    hasVariations: boolean;
+    price: number;
+    quantity?: number;
+    unit?: string;
+    created_at: string;
+    updated_at: string;
+
+}
+
+interface LaravelPaginationItem {
+    active: boolean;
+    label: string;
+    url?: string
+}
