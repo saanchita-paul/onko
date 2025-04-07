@@ -1,7 +1,6 @@
 import { SidebarGroup, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavGroup } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { Banknote } from 'lucide-react';
 
 export function NavMain({ items = [] }: { items: NavGroup[] }) {
     const page = usePage();

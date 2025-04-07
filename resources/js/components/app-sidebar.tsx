@@ -65,7 +65,7 @@ const mainNavGroups: NavGroup[] = [
         title: 'Capital / Finances',
         items: [{
             title: 'Bank Accounts',
-            href: '/products',
+            href: '/bank-accounts',
             icon: Landmark,
         },
         {
@@ -90,7 +90,7 @@ const mainNavGroups: NavGroup[] = [
         items: [
             {
                 title: 'Employees',
-                href: '/products',
+                href: '/employees',
                 icon: IdCard,
             },
             {
@@ -100,7 +100,7 @@ const mainNavGroups: NavGroup[] = [
             },
             {
                 title: 'Time off',
-                href: '/inventory',
+                href: '/time-off',
                 icon: TreePalm,
             }
         ],
