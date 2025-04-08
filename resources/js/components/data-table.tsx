@@ -32,9 +32,8 @@ export function DataTable<TData, TValue>({
     })
  
     return (
-        <div className={className ?? ""}>
-            <Table>
-                <TableHeader>
+            <Table className={className}>
+                <TableHeader className="sticky top-0 dark:bg-black bg-white">
                 {table.getHeaderGroups().map((headerGroup) => (
                     <TableRow key={headerGroup.id}>
                     {headerGroup.headers.map((header) => {
@@ -75,6 +74,5 @@ export function DataTable<TData, TValue>({
                 )}
                 </TableBody>
             </Table>
-        </div>
     )
 }

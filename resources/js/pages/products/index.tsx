@@ -16,6 +16,13 @@ import {
     PaginationNext,
     PaginationPrevious,
   } from "@/components/ui/pagination"
+  import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+  } from "@/components/ui/tooltip"
+  
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Products',
@@ -25,12 +32,24 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export const columns: ColumnDef<Product>[] = [
     {
-      accessorKey: "id",
-      header: "ID",
+        accessorKey: "id",
+        header: "ID",
+        cell: ({ row }) => {
+            console.log('row', row)
+            return (<TooltipProvider>
+                <Tooltip>
+                    <TooltipTrigger>{row.getValue("id").slice(0, 8)}</TooltipTrigger>
+                    <TooltipContent>
+                        <p>{row.getValue("id")}</p>
+                    </TooltipContent>
+                </Tooltip>
+            </TooltipProvider>);
+
+        }
     },
     {
-      accessorKey: "name",
-      header: "Name",
+        accessorKey: "name",
+        header: "Name",
     },
     // {
     //   accessorKey: "description",
@@ -65,32 +84,16 @@ export default function Index({ products } : Props) {
     const links = products.links
         .filter((_, idx) => idx > 0 && idx < (products.links.length - 1))
 
-    const ellipsis: LaravelPaginationItem = {
-        active: false,
-        ellipsis: true,
-    } 
-    
-    const formatted = (items: LaravelPaginationItem[]) => {
-        console.log('items', items)
-        const index = items.findIndex(({ active }) => active)
-        if (items.length > 10) {
-            return [
-                ...items.slice(0, 5),
-                ellipsis,
-                ...items.slice(-5)
-            ]
-        }
-        return items;
-    }
-
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Products" />
-            <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4">
+            <div className="flex flex-1 flex-col gap-4 rounded-xl p-4 relative">
                 <h1 className="text-5xl font-bold">Products</h1>
-                <div className=" min-h-[100vh] flex-1 overflow-hidden rounded-xl md:min-h-min">
+                {/* <div className="min-h-[100vh] flex-1 overflow-hidden rounded-xl md:min-h-min"> */}
                     <DataTable columns={columns} data={products.data} />
-                    <div className="w-full flex mt-5">
+                          
+                {/* </div> */}
+                <div className="w-full flex mt-5 sticky bottom-0 bg-white dark:bg-black py-3">
                         <div className="w-1/4 pl-2">
                             Showing {products.from} to {products.to} of {products.total}
                         </div>
@@ -125,8 +128,7 @@ export default function Index({ products } : Props) {
                                 </PaginationContent>
                             </Pagination>
                         </div>
-                    </div>        
-                </div>
+                </div>  
             </div>
         </AppLayout>
     );
