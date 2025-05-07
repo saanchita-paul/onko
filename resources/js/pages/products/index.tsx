@@ -22,7 +22,19 @@ import {
     TooltipProvider,
     TooltipTrigger,
   } from "@/components/ui/tooltip"
-  
+
+import {
+    Tabs,
+    TabsContent,
+    TabsList,
+    TabsTrigger,
+} from "@/components/ui/tabs";
+
+const tabTriggerClass =
+    "data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-md " +
+    "dark:data-[state=active]:bg-black dark:data-[state=active]:text-white dark:data-[state=active]:shadow-lg";
+
+
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Products',
@@ -85,9 +97,33 @@ export default function Index({ products } : Props) {
             <Head title="Products" />
             <div className="flex flex-1 flex-col gap-4 rounded-xl p-4 relative">
                 <h1 className="text-5xl font-bold">Products</h1>
-    
-                <DataTable columns={columns} data={products.data} />
-                          
+                <Tabs defaultValue="in-stock" className="w-full">
+                    <TabsList className="mb-4">
+                        <TabsTrigger value="in-stock" className={tabTriggerClass}>In Stock</TabsTrigger>
+                        <TabsTrigger value="arriving" className={tabTriggerClass}>Arriving</TabsTrigger>
+                        <TabsTrigger value="not-in-stock" className={tabTriggerClass}>Not In Stock</TabsTrigger>
+                        <TabsTrigger value="all" className={tabTriggerClass}>All Products</TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent value="in-stock">
+                        <DataTable columns={columns} data={products.data} />
+                    </TabsContent>
+
+                    <TabsContent value="arriving">
+                        <DataTable columns={columns} data={[]} />
+                    </TabsContent>
+
+                    <TabsContent value="not-in-stock">
+                        <DataTable columns={columns} data={[]} />
+                    </TabsContent>
+
+                    <TabsContent value="all">
+                        <DataTable columns={columns} data={products.data} />
+                    </TabsContent>
+                </Tabs>
+
+                {/*<DataTable columns={columns} data={products.data} />*/}
+
                 <div className="w-full flex mt-5 sticky bottom-0 bg-white dark:bg-black py-3">
                         <div className="w-1/4 pl-2">
                             Showing {products.from} to {products.to} of {products.total}
@@ -123,7 +159,7 @@ export default function Index({ products } : Props) {
                                 </PaginationContent>
                             </Pagination>
                         </div>
-                </div>  
+                </div>
             </div>
         </AppLayout>
     );
