@@ -51,10 +51,6 @@ export const columns: ColumnDef<Product>[] = [
         accessorKey: "name",
         header: "Name",
     },
-    // {
-    //   accessorKey: "description",
-    //   header: "Description",
-    // },
     {
         accessorKey: "price",
         header: "Price",
@@ -89,10 +85,9 @@ export default function Index({ products } : Props) {
             <Head title="Products" />
             <div className="flex flex-1 flex-col gap-4 rounded-xl p-4 relative">
                 <h1 className="text-5xl font-bold">Products</h1>
-                {/* <div className="min-h-[100vh] flex-1 overflow-hidden rounded-xl md:min-h-min"> */}
-                    <DataTable columns={columns} data={products.data} />
+    
+                <DataTable columns={columns} data={products.data} />
                           
-                {/* </div> */}
                 <div className="w-full flex mt-5 sticky bottom-0 bg-white dark:bg-black py-3">
                         <div className="w-1/4 pl-2">
                             Showing {products.from} to {products.to} of {products.total}

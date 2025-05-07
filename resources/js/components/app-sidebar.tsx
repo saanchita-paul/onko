@@ -1,10 +1,9 @@
-import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
-import { NavGroup, type NavItem } from '@/types';
+import { NavGroup } from '@/types';
 import { Link } from '@inertiajs/react';
-import { Banknote, Boxes, BringToFront, Calendar1, CalendarClock, ChartColumn, HandCoins, HandHelping, IdCard, Landmark, LayoutGrid, Package, ReceiptText, Shapes, Ship, ShoppingBag, ShoppingCart, Smile, TreePalm, Truck, Wallet, Warehouse } from 'lucide-react';
+import { Banknote, Boxes, CalendarClock, ChartColumn, HandHelping, IdCard, Landmark, Package, ReceiptText, Shapes, ShoppingBag, Smile, TreePalm, Truck, Wallet, Warehouse } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavGroups: NavGroup[] = [
@@ -40,7 +39,8 @@ const mainNavGroups: NavGroup[] = [
     },
     {
         title: 'Buy',
-        items: [{
+        items: [
+        {
             title: 'Products',
             href: '/products',
             icon: Shapes,
