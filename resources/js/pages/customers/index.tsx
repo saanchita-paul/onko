@@ -87,31 +87,36 @@ export const columns: ColumnDef<Product>[] = [
     },
     {
         accessorKey: "lifetime_value",
-        header: "Life Time Value",
+        header: () => <div className="text-right w-full">Life Time Value</div>,
         cell: ({ row }) => {
             const value = parseFloat(row.getValue("lifetime_value"));
             const [whole, decimal] = value.toFixed(2).split(".");
 
             return (
-                <span className="text-muted-foreground">
+                <div className="flex justify-end text-muted-foreground w-full">
+                    ৳&nbsp;
                     <span className="font-bold text-foreground">{whole}</span>
-                    <span className="text-muted-foreground">.{decimal}</span>  ৳
-                </span>
+                    <span className="text-muted-foreground">.{decimal}</span>
+                </div>
             );
         },
     },
     {
         accessorKey: "number_of_orders",
-        header: "# of Orders",
+        header: () => <div className="text-right w-full"># of Orders</div>,
         cell: ({ row }) => (
-            <span className="flex justify-center text-muted-foreground">{row.getValue("number_of_orders")}</span>
+            <div className="text-right text-muted-foreground w-full">
+                {row.getValue("number_of_orders")}
+            </div>
         ),
     },
     {
         accessorKey: "number_of_items",
-        header: "# of Items",
+        header: () => <div className="text-right w-full"># of Items</div>,
         cell: ({ row }) => (
-            <span className="flex justify-center text-muted-foreground">{row.getValue("number_of_items")}</span>
+            <div className="text-right text-muted-foreground w-full">
+                {row.getValue("number_of_items")}
+            </div>
         ),
     },
 ];
