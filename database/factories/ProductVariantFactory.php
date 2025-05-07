@@ -3,12 +3,13 @@
 namespace Database\Factories;
 
 use App\Models\Product;
+use App\Models\ProductAttribute;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\ProductAttribute>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\ProductVariant>
  */
-class ProductAttributeFactory extends Factory
+class ProductVariantFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -19,9 +20,8 @@ class ProductAttributeFactory extends Factory
     {
         return [
             'id' => fake()->uuid(),
-            'name' => fake()->word(),
             'product_id' => Product::factory(),
-            'options' => fake()->words(rand(1, 3)),
+            'name' => fake()->words(rand(1, 2), true),
         ];
     }
 }

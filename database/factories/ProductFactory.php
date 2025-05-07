@@ -2,6 +2,8 @@
 
 namespace Database\Factories;
 
+use App\Models\Product;
+use App\Models\ProductVariant;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
@@ -10,6 +12,32 @@ use Illuminate\Support\Str;
  */
 class ProductFactory extends Factory
 {
+    public function configure()
+    {
+        return $this->afterCreating(function(Product $product) {
+            $attributes = $product->productAttributes;
+            //$chunks = $attributes->chunk(1);
+            
+            
+            $headers = $attributes->map(fn($attr) => $attr->name);
+            $options = $attributes->map(fn($attr) => $attr->options);
+            
+            $joined = collect($options->first());
+            $options->each(function($op, $key) use (&$joined) {
+                if ($key > 0) {
+                    $joined = $joined->crossJoin($op);
+                }
+            });
+
+            $combined = $joined->map(fn($j) => $headers->combine($j));
+            $combined->map(function($c) use ($product) {
+                ProductVariant::factory()->create([
+                    'product_id' => $product->id,
+                    'options' => $c,
+                ]);
+            });
+        });
+    }
     /**
      * Define the model's default state.
      *
