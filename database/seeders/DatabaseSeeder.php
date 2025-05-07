@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         Product::factory()
+            ->hasProductAttributes(2)
             ->count(100)
             ->create();
 
