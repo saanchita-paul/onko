@@ -201,8 +201,6 @@ export default function Index({ customers } : Props) {
                     </TabsContent>
                 </Tabs>
 
-                {/*<DataTable columns={columns} data={customers.data} />*/}
-
                 <div className="w-full flex mt-5 sticky bottom-0 bg-white dark:bg-black py-3">
                         <div className="w-1/4 pl-2">
                             Showing {customers.from} to {customers.to} of {customers.total}
