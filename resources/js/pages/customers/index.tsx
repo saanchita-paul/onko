@@ -217,7 +217,6 @@ export default function Index({ customers } : Props) {
                                         <PaginationPrevious disabled={customers.links[0].url === null} href={customers.links[0].url ?? ""} />
                                     </PaginationItem>
                                     {
-                                        // JSON.stringify(formatted(links))
                                         links.map(({ label, active, url }) => {
                                             return (label === '...') ? <PaginationItem>
                                                 <PaginationEllipsis />
