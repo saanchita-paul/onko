@@ -22,7 +22,8 @@ import {
     TooltipProvider,
     TooltipTrigger,
   } from "@/components/ui/tooltip"
-  
+import { AddProductForm } from '@/components/produts/product-create-form';
+
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Products',
@@ -83,11 +84,12 @@ export default function Index({ products } : Props) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Products" />
+            <AddProductForm/>
             <div className="flex flex-1 flex-col gap-4 rounded-xl p-4 relative">
                 <h1 className="text-5xl font-bold">Products</h1>
-    
+
                 <DataTable columns={columns} data={products.data} />
-                          
+
                 <div className="w-full flex mt-5 sticky bottom-0 bg-white dark:bg-black py-3">
                         <div className="w-1/4 pl-2">
                             Showing {products.from} to {products.to} of {products.total}
@@ -123,7 +125,7 @@ export default function Index({ products } : Props) {
                                 </PaginationContent>
                             </Pagination>
                         </div>
-                </div>  
+                </div>
             </div>
         </AppLayout>
     );
