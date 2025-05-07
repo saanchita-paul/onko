@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('lc_num')->nullable();
             $table->integer('value')->nullable();
             $table->string('currency')->default('BDT');
-            $table->integer('exchange_rate')->default(1);
+            $table->integer('exchange_rate')->default(100);
             $table->timestamps();
         });
     }

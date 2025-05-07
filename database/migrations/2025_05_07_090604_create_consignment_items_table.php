@@ -13,10 +13,11 @@ return new class extends Migration
     {
         Schema::create('consignment_items', function (Blueprint $table) {
             $table->uuid('id')->primary();
+            $table->foreignUuid('consignment_id')->references('id')->on('consignments');
             $table->foreignUuid('product_id')->references('id')->on('products');
             $table->foreignUuid('product_variant_id')->references('id')->on('product_variants');
             $table->integer('cost_price')->default(0);
-            $table->integer('exchange_rate')->default(1);
+            $table->integer('exchange_rate')->default(100);
             $table->integer('qty')->default(1);
             $table->integer('qty_sold')->default(0);
             $table->integer('qty_waste')->default(0);

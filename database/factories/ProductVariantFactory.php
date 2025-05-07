@@ -22,6 +22,7 @@ class ProductVariantFactory extends Factory
             'id' => fake()->uuid(),
             'product_id' => Product::factory(),
             'name' => fake()->words(rand(1, 2), true),
+            'options' => fake()->words(rand(2,3))
         ];
     }
 }
