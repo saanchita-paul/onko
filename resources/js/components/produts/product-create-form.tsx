@@ -15,7 +15,7 @@ export function AddProductForm() {
     const [combinations, setCombinations] = useState<Record<string, string>[]>([]);
     const [hasVariation, setHasVariation] = useState(false);
 
-    const { data, setData, post, processing, errors, reset } = useForm({
+    const { data, setData, processing, errors } = useForm({
         product_name: '',
         product_description: '',
         has_variations: '',
@@ -65,7 +65,7 @@ export function AddProductForm() {
 
         return variants.reduce(
             (acc, variant) => {
-                const newCombinations: any[] = [];
+                const newCombinations: Record<string, string>[] = [];
 
                 for (const accItem of acc) {
                     for (const option of variant.options) {
