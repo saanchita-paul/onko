@@ -16,13 +16,10 @@ class ProductFactory extends Factory
     {
         return $this->afterCreating(function(Product $product) {
             $attributes = $product->productAttributes;
-            //$chunks = $attributes->chunk(1);
-            
-            
             $headers = $attributes->map(fn($attr) => $attr->name);
             $options = $attributes->map(fn($attr) => $attr->options);
-            
             $joined = collect($options->first());
+
             $options->each(function($op, $key) use (&$joined) {
                 if ($key > 0) {
                     $joined = $joined->crossJoin($op);
@@ -30,6 +27,7 @@ class ProductFactory extends Factory
             });
 
             $combined = $joined->map(fn($j) => $headers->combine($j));
+            
             $combined->map(function($c) use ($product) {
                 ProductVariant::factory()->create([
                     'product_id' => $product->id,
