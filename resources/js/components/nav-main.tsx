@@ -1,7 +1,6 @@
 import { SidebarGroup, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavGroup } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { Banknote } from 'lucide-react';
 
 export function NavMain({ items = [] }: { items: NavGroup[] }) {
     const page = usePage();
@@ -11,12 +10,12 @@ export function NavMain({ items = [] }: { items: NavGroup[] }) {
             <SidebarGroupLabel>{group.title}</SidebarGroupLabel>
             <SidebarMenu>
                 {group.items.map((item) => (
-                    <SidebarMenuItem key={item.title}>
+                    <SidebarMenuItem  key={item.title}>
                         <SidebarMenuButton  
                             asChild isActive={item.href === page.url}
                             tooltip={{ children: item.title }}
                         >
-                            <Link href={item.href} prefetch>
+                            <Link className="my-0.5" href={item.href} prefetch>
                                 {item.icon && <item.icon className="scale-115 mr-0.5" />}
                                 <span className="font">{item.title}</span>
                             </Link>
