@@ -20,7 +20,6 @@ class CustomerFactory extends Factory
         return [
             'id' => (string) Str::uuid(),
             'name' => $this->faker->name(),
-            'since' => $this->faker->dateTimeBetween('-2 years', 'now')->format('Y-m-d'),
             'lifetime_value' => $this->faker->randomFloat(2, 100, 20000),
             'number_of_orders' => $this->faker->numberBetween(1, 100),
             'number_of_items' => $this->faker->numberBetween(1, 300),

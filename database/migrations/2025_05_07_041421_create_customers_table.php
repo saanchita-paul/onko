@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('customers', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('name')->nullable();
-            $table->date('since')->nullable();
             $table->decimal('lifetime_value', 10, 2)->default(0);
             $table->integer('number_of_orders')->default(0);
             $table->integer('number_of_items')->default(0);
