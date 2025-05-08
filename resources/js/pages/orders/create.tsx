@@ -134,6 +134,13 @@ export default function CreateOrder() {
                                                 >
                                                     <ImageIcon className="w-4 h-4" />
                                                 </label>
+                                                {imagePreview && (
+                                                    <img
+                                                        src={imagePreview}
+                                                        alt="Preview"
+                                                        className="mt-2 w-full h-12 object-cover rounded-md"
+                                                    />
+                                                )}
                                             </div>
                                             <Input placeholder="Company Name" className="flex-1" />
                                         </div>
