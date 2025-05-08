@@ -16,4 +16,8 @@ class ProductController extends Controller
             'products' => Product::paginate(100)
         ]);
     }
+
+    public function store(Request $request){
+
+    }
 }
