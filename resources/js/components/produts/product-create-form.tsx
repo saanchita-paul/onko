@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { toast } from "sonner"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
@@ -14,17 +15,20 @@ export function AddProductForm() {
     const [showAdvanced, setShowAdvanced] = useState(false);
     const [combinations, setCombinations] = useState<Record<string, string>[]>([]);
     const [hasVariation, setHasVariation] = useState(false);
+    const [submitted, setSubmitted] = useState(false);
 
-    const { data, setData, processing, errors } = useForm<{
+    const { data, setData, post, processing, errors, reset } = useForm<{
         product_name: string;
         product_description: string;
         has_variations: boolean;
         variants: { name: string; options: string[] }[];
+        combinations: Record<string, string>[]
     }>({
         product_name: '',
         product_description: '',
         has_variations: false,
         variants: [{ name: '', options: [''] }],
+        combinations: []
     });
 
     const addVariant = () => {
@@ -96,8 +100,38 @@ export function AddProductForm() {
         setCombinations(getCombinations(data.variants));
     };
 
+    useEffect(() => {
+        if (submitted) {
+            post(route('products.store'),{
+                onSuccess: (response) => {
+
+                    reset();
+                    setShowAdvanced(false);
+                    setSubmitted(false);
+                    toast.success('Product created successfully!')
+
+                    console.log('Product created successfully!', response);
+                },
+                onError: (error) => {
+                    setHasVariation(false)
+                    setShowAdvanced(true)
+                    console.error('Error creating product:', error);
+                    toast.error('Error creating product:', error)
+                },
+            });
+        }
+    }, [data, submitted]);
+
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
+
+        const payload = {
+            ...data,
+            combinations,
+        }
+
+        setData(payload);
+        setSubmitted(true);
     };
 
     return (
@@ -199,6 +233,7 @@ export function AddProductForm() {
                                                 <X className="h-4 w-4" />
                                             </Button>
                                         </div>
+                                        <InputError message={(errors as Record<string, string>)[`variants.${vIdx}.name`]} />
 
                                         <Label className="text-muted-foreground">Options</Label>
                                         {variant.options.map((opt, oIdx) => (
@@ -213,6 +248,10 @@ export function AddProductForm() {
                                                     <X className="h-4 w-4" />
                                                 </Button>
                                             </div>
+                                        ))}
+                                        {variant.options.map((_, oIdx) => (
+                                            <InputError message={(errors as Record<string, string>)[`variants.${vIdx}.options.${oIdx}`]} />
+
                                         ))}
 
                                         <button

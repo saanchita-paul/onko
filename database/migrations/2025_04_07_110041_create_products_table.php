@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('unit')->nullable();
             $table->text('description');
             $table->boolean('hasVariations')->default(false);
-            $table->integer('price');
+            $table->integer('price')->nullable();
             $table->string('image_url')->nullable();
             $table->timestamps();
         });
