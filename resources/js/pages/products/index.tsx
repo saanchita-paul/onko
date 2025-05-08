@@ -22,6 +22,8 @@ import {
     TooltipProvider,
     TooltipTrigger,
   } from "@/components/ui/tooltip"
+import { AddProductForm } from '@/components/produts/product-create-form';
+
 
 import {
     Tabs,
@@ -95,6 +97,7 @@ export default function Index({ products } : Props) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Products" />
+            <AddProductForm/>
             <div className="flex flex-1 flex-col gap-4 rounded-xl p-4 relative">
                 <h1 className="text-5xl font-bold">Products</h1>
                 <Tabs defaultValue="in-stock" className="w-full">
