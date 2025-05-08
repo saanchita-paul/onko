@@ -96,14 +96,8 @@ export function AddProductForm() {
         setCombinations(getCombinations(data.variants));
     };
 
-    useEffect(() => {
-        console.log('All variants:', combinations);
-    }, [combinations]);
-
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
-
-        console.log('clicked to confirmed', data);
     };
 
     return (
