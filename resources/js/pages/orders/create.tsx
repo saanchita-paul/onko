@@ -106,7 +106,7 @@ export default function CreateOrder() {
                         <TabsContent value="new-invoice"></TabsContent>
                         <TabsContent value="all-orders"></TabsContent>
                     </Tabs>
-                    <Button>Edit Invoice Format</Button>
+                    <Button className="cursor-pointer">Edit Invoice Format</Button>
                 </div>
 
                 <h1 className="text-2xl font-bold">New Invoice</h1>
@@ -129,7 +129,7 @@ export default function CreateOrder() {
                                                 />
                                                 <label
                                                     htmlFor="fileUpload"
-                                                    className="flex items-center justify-center h-9 w-full rounded-md border border-input bg-white dark:bg-white-800 text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-100 dark:hover:bg-white-700"
+                                                    className="flex items-center justify-center h-9 w-full rounded-md border border-input bg-white-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 cursor-pointer hover:bg-white-200 dark:hover:bg-neutral-700"
                                                     title="Choose File"
                                                 >
                                                     <ImageIcon className="w-4 h-4" />
@@ -153,7 +153,7 @@ export default function CreateOrder() {
                                             <Input
                                                 placeholder="auto generates"
                                                 readOnly
-                                                className="flex-1 w-full cursor-pointer bg-gray-100 dark:bg-gray-800"
+                                                className="flex-1 w-full cursor-pointer bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300"
                                             />
                                         </div>
                                     </div>
@@ -209,10 +209,10 @@ export default function CreateOrder() {
                         </Card>
 
                         <div className="flex justify-end gap-2">
-                            <Button variant="outline">Add a fee or charge</Button>
-                            <Button variant="outline">Add discount</Button>
-                            <Button variant="outline">Add tax</Button>
-                            <Button>Create order</Button>
+                            <Button variant="outline" className="cursor-pointer">Add a fee or charge</Button>
+                            <Button variant="outline" className="cursor-pointer">Add discount</Button>
+                            <Button variant="outline" className="cursor-pointer">Add tax</Button>
+                            <Button className="cursor-pointer">Create order</Button>
                         </div>
                     </div>
 
