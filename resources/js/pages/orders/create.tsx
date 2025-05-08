@@ -18,10 +18,11 @@ import {
 } from "@/components/ui/tabs";
 import {
     Plus,
-    X
+    X,
+    Search
 } from 'lucide-react';
 import { useState } from 'react';
-import { Search } from 'lucide-react';
+import { Textarea } from "@/components/ui/textarea";
 
 const initialProducts = [
     { name: 'Felix 5 Kit', sku: 'MK-111', qty: 25 },
@@ -55,7 +56,6 @@ export default function CreateOrder() {
         );
     };
 
-
     const updateQty = (index, newQty) => {
         const delta = newQty - items[index].quantity;
         const updatedItems = [...items];
@@ -88,145 +88,143 @@ export default function CreateOrder() {
     return (
         <AppLayout>
             <Head title="Create Order" />
-            <div className="flex gap-6 p-6">
+            <div className="p-6">
+                <div className="flex justify-between items-center mb-4">
+                    <Tabs defaultValue="new-invoice">
+                        <TabsList className="px-1 py-1">
+                            <TabsTrigger value="new-invoice" className={tabTriggerClass}>New Invoice</TabsTrigger>
+                            <TabsTrigger value="all-orders" className={tabTriggerClass}>All Orders</TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="new-invoice"></TabsContent>
+                        <TabsContent value="all-orders"></TabsContent>
+                    </Tabs>
+                    <Button>Edit Invoice Format</Button>
+                </div>
 
-                <div className="flex-1 space-y-4">
-                    <div className="flex justify-between">
-                        <Tabs defaultValue="new-invoice" className="w-full">
-                            <TabsList className="mb-4 px-1 py-1">
-                                <TabsTrigger value="new-invoice" className={tabTriggerClass} p-4>
-                                    New Invoice
-                                </TabsTrigger>
-                                <TabsTrigger value="all-orders" className={tabTriggerClass}>
-                                    All Orders
-                                </TabsTrigger>
-                            </TabsList>
+                <h1 className="text-2xl font-bold">New Invoice</h1>
+                <p className="text-muted-foreground mb-4">Create a new Invoice or Sales Receipt</p>
 
-                            <TabsContent value="new-invoice"></TabsContent>
-
-                            <TabsContent value="all-orders"></TabsContent>
-                        </Tabs>
-                        <Button>Edit Invoice Format</Button>
-                    </div>
-                    <h1 className="text-2xl font-bold">New Invoice</h1>
-                    <p className="text-muted-foreground">Create a new Invoice or Sales Receipt</p>
-                    <Card>
-                        <CardContent className="space-y-4 p-6">
-                            <div className="grid grid-cols-2 gap-4">
-
-                                <div className="space-y-2">
-                                    <div className="flex items-center gap-2">
-
-                                        <Input type="file" className="w-24" onChange={(e) => setLogo(e.target.files[0])} />
-                                        <Input placeholder="Company Name" className="flex-1" />
+                <div className="flex items-start gap-6">
+                    <div className="flex-1 space-y-4">
+                        <Card>
+                            <CardContent className="space-y-4 p-6">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <div className="flex items-center gap-2">
+                                            <Input type="file" className="w-24" />
+                                            <Input placeholder="Company Name" className="flex-1" />
+                                        </div>
+                                        <Textarea placeholder="Company Address
+(optional)" />
                                     </div>
-                                    <Input placeholder="Company Address (optional)" />
-                                </div>
-
-
-                                <div className="space-y-2">
-                                    <div className="flex items-center gap-2">
-                                        <label className="text-sm font-medium">Date:</label>
-                                        <Input placeholder="dd-mm-yyyy" className="flex-1" />
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <label className="text-sm font-medium">#Order:</label>
-                                        <Input placeholder="auto generates" className="flex-1" disabled />
+                                    <div className="space-y-2">
+                                        <div className="flex items-center gap-2">
+                                            <label className="text-sm font-medium">Date:</label>
+                                            <Input placeholder="dd-mm-yyyy" className="flex-1" />
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <label className="text-sm font-medium">Order #</label>
+                                            <Input placeholder="auto generates" className="flex-1" disabled />
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
+                                <div className="flex justify-center">
+                                    <Input placeholder="INVOICE" className="w-40 text-center text-lg font-bold" />
+                                </div>
+                            </CardContent>
 
-                            <div className="flex justify-center">
-                                <Input placeholder="INVOICE" className="w-40 text-center text-lg font-bold" />
-                            </div>
-
-                            <div className="rounded-xl border p-4">
-                                <div className="mb-2 grid grid-cols-6 font-bold">
+                            <div className="p-0">
+                                <div className="mb-2 grid grid-cols-6 font-bold p-4">
                                     <span>#</span>
                                     <span>Item</span>
-                                    <span>Qty</span>
-                                    <span>Price</span>
-                                    <span>Total</span>
+                                    <span className="text-center">Qty</span>
+                                    <span className="text-center">Price</span>
+                                    <span className="text-center">Total</span>
                                     <span></span>
                                 </div>
                                 {items.map((item, index) => (
-                                    <div key={index} className="grid grid-cols-6 items-center gap-2 border-t py-2">
+                                    <div key={index} className="grid grid-cols-6 items-center gap-2 border-t py-2 p-4">
                                         <span>{index + 1}</span>
-                                        <Input value={item.name} readOnly />
-                                        <Input type="number" value={item.quantity} onChange={(e) => updateQty(index, parseInt(e.target.value))} />
-                                        <Input type="number" value={item.price} readOnly />
-                                        <span>{item.quantity * item.price} /-</span>
+                                        <div className="text-left">{item.name}</div>
+                                        <div className="flex justify-center">
+                                            <Input
+                                                type="number"
+                                                value={item.quantity}
+                                                onChange={(e) => updateQty(index, parseInt(e.target.value))}
+                                                className="text-center w-16 border"
+                                            />
+                                        </div>
+                                        <div className="text-right w-full pr-2 border px-2 py-1 rounded">{item.price}</div>
+                                        <div className="text-right w-full pr-2 border px-2 py-1 rounded">
+                                            {item.quantity * item.price} /-
+                                        </div>
                                         <Button variant="ghost" size="icon" onClick={() => removeItem(index)}>
                                             <X className="h-4 w-4" />
                                         </Button>
                                     </div>
                                 ))}
-                                <div className="mt-2 text-right font-bold">Subtotal: {subtotal} /-</div>
+                                <div className="mt-2 flex justify-between items-center border-t border-b pt-2 font-bold p-4">
+                                    <span>Subtotal</span>
+                                    <span className="pr-27">{subtotal} /-</span>
+                                </div>
                                 <div className="mt-2 flex justify-center">
                                     <Button variant="outline">Add custom product</Button>
                                 </div>
                             </div>
 
-                            <div className="flex items-center justify-between border-t pt-4 text-lg font-bold">
+                            <div className="flex items-center justify-between border-t pt-4 text-lg font-bold p-4">
                                 <span>Grand Total</span>
-                                <span>{subtotal} /-</span>
+                                <span className="pr-27">{subtotal} /-</span>
                             </div>
-                        </CardContent>
-                    </Card>
-                    <div className="flex justify-end gap-2">
-                        <Button variant="outline">Add a fee or charge</Button>
-                        <Button variant="outline">Add discount</Button>
-                        <Button variant="outline">Add tax</Button>
-                        <Button>Create order</Button>
-                    </div>
-                </div>
+                        </Card>
 
-
-                <div className="w-96">
-                    <div className="relative">
-                        <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
-                        <Input placeholder="Search for products" className="pl-10" />
+                        <div className="flex justify-end gap-2">
+                            <Button variant="outline">Add a fee or charge</Button>
+                            <Button variant="outline">Add discount</Button>
+                            <Button variant="outline">Add tax</Button>
+                            <Button>Create order</Button>
+                        </div>
                     </div>
 
-                    <Card>
-                        <CardContent className="space-y-4 p-4">
-                            <div className="flex items-center justify-between">
-                                <span className="font-bold">Products</span>
-                                <div className="flex gap-2 text-sm">
-                                    <Tabs defaultValue="in-stock" className="w-full">
-                                        <TabsList className="mb-4 px-1 py-1">
-                                            <TabsTrigger value="in-stock" className={tabTriggerClass} p-4>
-                                                In Stock
-                                            </TabsTrigger>
-                                            <TabsTrigger value="all" className={tabTriggerClass}>
-                                                All
-                                            </TabsTrigger>
+                    <div className="w-[350px] space-y-4">
+                        <div className="relative">
+                            <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+                            <Input placeholder="Search for products" className="pl-10" />
+                        </div>
+
+                        <Card>
+                            <CardContent className="space-y-4 p-4">
+                                <div className="flex items-center justify-between">
+                                    <span className="font-bold">Products</span>
+                                    <Tabs defaultValue="in-stock">
+                                        <TabsList className="px-1 py-1">
+                                            <TabsTrigger value="in-stock" className={tabTriggerClass}>In Stock</TabsTrigger>
+                                            <TabsTrigger value="all" className={tabTriggerClass}>All</TabsTrigger>
                                         </TabsList>
-
-                                        <TabsContent value="new-invoice"></TabsContent>
-
-                                        <TabsContent value="all-orders"></TabsContent>
+                                        <TabsContent value="in-stock"></TabsContent>
+                                        <TabsContent value="all"></TabsContent>
                                     </Tabs>
                                 </div>
-                            </div>
-                            <div className="space-y-2">
-                                {products.map((product, i) => (
-                                    <div key={i} className="flex items-center justify-between rounded-lg border px-4 py-2">
-                                        <div>
-                                            <div className="font-medium">{product.name}</div>
-                                            <div className="text-muted-foreground text-sm">{product.sku}</div>
+
+                                <div className="space-y-2">
+                                    {products.map((product, i) => (
+                                        <div key={i} className="flex items-center justify-between rounded-lg px-4 py-2">
+                                            <div>
+                                                <div className="font-medium">{product.name}</div>
+                                                <div className="text-muted-foreground text-sm">{product.sku}</div>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-sm">{product.qty}</span>
+                                                <Button variant="outline" size="icon" onClick={() => product.qty > 0 && addItem(product)}>
+                                                    <Plus className="h-4 w-4" />
+                                                </Button>
+                                            </div>
                                         </div>
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-sm">{product.qty}</span>
-                                            <Button variant="outline" size="icon" onClick={() => product.qty > 0 && addItem(product)}>
-                                                <Plus className="h-4 w-4" />
-                                            </Button>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </CardContent>
-                    </Card>
+                                    ))}
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
                 </div>
             </div>
         </AppLayout>
