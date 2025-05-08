@@ -12,7 +12,7 @@ const mainNavGroups: NavGroup[] = [
         items: [
             {
                 title: 'Invoices / Receipts',
-                href: '/sales',
+                href: '/orders',
                 icon: ReceiptText,
             },
             {
