@@ -1,5 +1,6 @@
 import AppLayout from '@/layouts/app-layout';
 import { Head } from '@inertiajs/react';
+import { OrderForm } from '@/pages/orders/order-form';
 import {
     Card,
     CardContent,
@@ -93,6 +94,8 @@ export default function CreateOrder() {
             setImagePreview(URL.createObjectURL(file));
         }
     };
+    const [drawerOpen, setDrawerOpen] = useState(false);
+
     return (
         <AppLayout>
             <Head title="Create Order" />
@@ -219,7 +222,9 @@ export default function CreateOrder() {
                             <Button variant="outline" className="cursor-pointer">Add a fee or charge</Button>
                             <Button variant="outline" className="cursor-pointer">Add discount</Button>
                             <Button variant="outline" className="cursor-pointer">Add tax</Button>
-                            <Button className="cursor-pointer">Create order</Button>
+                            <Button className="cursor-pointer" onClick={() => setDrawerOpen(true)}>
+                                Create order
+                            </Button>
                         </div>
                     </div>
 
@@ -264,6 +269,7 @@ export default function CreateOrder() {
                     </div>
                 </div>
             </div>
+            <OrderForm open={drawerOpen} onOpenChange={setDrawerOpen} />
         </AppLayout>
     );
 }
