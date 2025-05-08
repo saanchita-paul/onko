@@ -19,7 +19,7 @@ import {
 import {
     Plus,
     X,
-    Search
+    Search, ImageIcon
 } from 'lucide-react';
 import { useState } from 'react';
 import { Textarea } from "@/components/ui/textarea";
@@ -85,6 +85,14 @@ export default function CreateOrder() {
         "data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-md " +
         "dark:data-[state=active]:bg-black dark:data-[state=active]:text-white dark:data-[state=active]:shadow-lg";
 
+    const [imagePreview, setImagePreview] = useState(null);
+
+    const handleImageChange = (e) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setImagePreview(URL.createObjectURL(file));
+        }
+    };
     return (
         <AppLayout>
             <Head title="Create Order" />
@@ -111,7 +119,22 @@ export default function CreateOrder() {
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
                                         <div className="flex items-center gap-2">
-                                            <Input type="file" className="w-24" />
+                                            <div className="w-12">
+                                                <input
+                                                    type="file"
+                                                    id="fileUpload"
+                                                    className="hidden"
+                                                    accept="image/*"
+                                                    onChange={handleImageChange}
+                                                />
+                                                <label
+                                                    htmlFor="fileUpload"
+                                                    className="flex items-center justify-center h-9 w-full rounded-md border border-input bg-white dark:bg-white-800 text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-gray-100 dark:hover:bg-white-700"
+                                                    title="Choose File"
+                                                >
+                                                    <ImageIcon className="w-4 h-4" />
+                                                </label>
+                                            </div>
                                             <Input placeholder="Company Name" className="flex-1" />
                                         </div>
                                         <Textarea placeholder="Company Address
@@ -119,12 +142,19 @@ export default function CreateOrder() {
                                     </div>
                                     <div className="space-y-2">
                                         <div className="flex items-center gap-2">
-                                            <label className="text-sm font-medium">Date:</label>
-                                            <Input placeholder="dd-mm-yyyy" className="flex-1" />
+                                            <label className="text-sm font-medium w-20">Date:</label>
+                                            <Input
+                                                placeholder="dd-mm-yyyy"
+                                                className="flex-1 w-full cursor-pointer"
+                                            />
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            <label className="text-sm font-medium">Order #</label>
-                                            <Input placeholder="auto generates" className="flex-1" disabled />
+                                            <label className="text-sm font-medium w-20">Order #</label>
+                                            <Input
+                                                placeholder="auto generates"
+                                                readOnly
+                                                className="flex-1 w-full cursor-pointer bg-gray-100 dark:bg-gray-800"
+                                            />
                                         </div>
                                     </div>
                                 </div>
