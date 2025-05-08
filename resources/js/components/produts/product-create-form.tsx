@@ -15,10 +15,15 @@ export function AddProductForm() {
     const [combinations, setCombinations] = useState<Record<string, string>[]>([]);
     const [hasVariation, setHasVariation] = useState(false);
 
-    const { data, setData, processing, errors } = useForm({
+    const { data, setData, processing, errors } = useForm<{
+        product_name: string;
+        product_description: string;
+        has_variations: boolean;
+        variants: { name: string; options: string[] }[];
+    }>({
         product_name: '',
         product_description: '',
-        has_variations: '',
+        has_variations: false,
         variants: [{ name: '', options: [''] }],
     });
 
@@ -84,13 +89,11 @@ export function AddProductForm() {
 
     const goBackToAddProduct = () => {
         setHasVariation(false);
-        // setShowAdvanced(true)
     };
 
     const openVariationForm = () => {
         setHasVariation(true);
         setCombinations(getCombinations(data.variants));
-        // setShowAdvanced(false)
     };
 
     useEffect(() => {
@@ -100,14 +103,7 @@ export function AddProductForm() {
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
 
-        console.log('clicked to confirmed');
-
-        // post(route('products.store'), {
-        //     onSuccess: () => {
-        //         reset()
-        //         setShowAdvanced(false)
-        //     }
-        // })
+        console.log('clicked to confirmed', data);
     };
 
     return (
@@ -181,13 +177,16 @@ export function AddProductForm() {
                             <div className="space-y-4">
                                 <div>
                                     <Label>Variations</Label>
-                                    <Select onValueChange={(value) => setData('has_variations', value)} value={data.has_variations}>
+                                    <Select
+                                        value={String(data.has_variations)}
+                                        onValueChange={(value) => setData('has_variations', value === 'true')}
+                                    >
                                         <SelectTrigger className="w-full">
                                             <SelectValue placeholder="Has Product Variations" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="has">Has Product Variations</SelectItem>
-                                            <SelectItem value="none">No Variations</SelectItem>
+                                            <SelectItem value="true">Has Product Variations</SelectItem>
+                                            <SelectItem value="false">No Variations</SelectItem>
                                         </SelectContent>
                                     </Select>
                                     <InputError message={errors.has_variations} />
