@@ -2,14 +2,17 @@
 
 namespace Database\Factories;
 
+use App\Models\Consignment;
 use App\Models\Product;
 use App\Models\ProductAttribute;
+use App\Models\ProductVariant;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Facades\Log;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\ProductVariant>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\ConsignmentItem>
  */
-class ProductVariantFactory extends Factory
+class ConsignmentItemFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -21,8 +24,8 @@ class ProductVariantFactory extends Factory
         return [
             'id' => fake()->uuid(),
             'product_id' => Product::factory(),
-            'name' => fake()->words(rand(1, 2), true),
-            'options' => fake()->words(rand(2,3))
+            'product_variant_id' => fn( array $attr ) => ProductVariant::factory()
+                ->create([ 'product_id' => $attr['product_id'] ]),
         ];
     }
 }

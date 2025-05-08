@@ -20,6 +20,11 @@ class Product extends Model
         return $this->hasMany(ProductAttribute::class);
     }
 
+    public function productVariants(): HasMany
+    {
+        return $this->hasMany(ProductVariant::class);
+    }
+
     protected function shortId(): Attribute
     {
         return Attribute::make(
