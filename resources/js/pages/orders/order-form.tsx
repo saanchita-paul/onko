@@ -5,7 +5,7 @@ import {
     SheetDescription,
     SheetHeader,
     SheetTitle,
-} from "@/components/ui/sheet"
+} from "@/components/ui/custom-sheet"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Search, Smile, ChevronRight } from 'lucide-react';
@@ -20,7 +20,7 @@ export function OrderForm({ open, onOpenChange }: OrderFormProps) {
     return (
         <Sheet open={open} onOpenChange={onOpenChange}>
             <SheetContent
-                side="right"
+                side="right" showClose={false}
                 className="w-full sm:max-w-md overflow-auto hide-close-btn"
             >
                 <div className="flex justify-end px-4 pt-4">
