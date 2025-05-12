@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Consignment;
 use App\Models\Expense;
+use App\Models\Employee;
 use App\Models\Order;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -40,5 +41,9 @@ class DatabaseSeeder extends Seeder
                 'expensable_type' => Consignment::class,
             ]);
         }
+
+        Employee::factory()
+            ->count(10)
+            ->create();
     }
 }
