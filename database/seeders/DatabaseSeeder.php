@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Consignment;
+use App\Models\Employee;
 use App\Models\Order;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -20,6 +21,10 @@ class DatabaseSeeder extends Seeder
             ->create();
 
         Order::factory()
+            ->count(10)
+            ->create();
+
+        Employee::factory()
             ->count(10)
             ->create();
     }
