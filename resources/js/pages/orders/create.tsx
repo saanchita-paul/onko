@@ -30,7 +30,6 @@ interface Product {
     qty: number;
 }
 interface Item extends Product {
-    quantity: number;
     price: number;
 }
 const initialProducts = [
@@ -48,10 +47,10 @@ export default function CreateOrder() {
             const existingIndex = prevItems.findIndex(item => item.name === product.name);
             if (existingIndex !== -1) {
                 const updatedItems = [...prevItems];
-                updatedItems[existingIndex].quantity += 1;
+                updatedItems[existingIndex].qty += 1;
                 return updatedItems;
             } else {
-                return [...prevItems, { ...product, quantity: 1, price: 2500 }];
+                return [...prevItems, { ...product, qty: 1, price: 2500 }];
             }
         });
         setProducts((prev) =>
@@ -61,9 +60,9 @@ export default function CreateOrder() {
         );
     };
     const updateQty = (index: number, newQty: number) => {
-        const delta = newQty - items[index].quantity;
+        const delta = newQty - items[index].qty;
         const updatedItems = [...items];
-        updatedItems[index].quantity = newQty;
+        updatedItems[index].qty = newQty;
         setItems(updatedItems);
         setProducts((prev) =>
             prev.map((p) =>
@@ -75,12 +74,12 @@ export default function CreateOrder() {
         const removed = items[index];
         setProducts((prev) =>
             prev.map((p) =>
-                p.name === removed.name ? { ...p, qty: p.qty + removed.quantity } : p
+                p.name === removed.name ? { ...p, qty: p.qty + removed.qty } : p
             )
         );
         setItems((prev) => prev.filter((_, i) => i !== index));
     };
-    const subtotal = items.reduce((sum, item) => sum + item.quantity * item.price, 0);
+    const subtotal = items.reduce((sum, item) => sum + item.qty * item.price, 0);
     const tabTriggerClass =
         "data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-md " +
         "dark:data-[state=active]:bg-black dark:data-[state=active]:text-white dark:data-[state=active]:shadow-lg";
@@ -205,14 +204,14 @@ export default function CreateOrder() {
                                         <div className="flex justify-center">
                                             <Input
                                                 type="number"
-                                                value={item.quantity}
+                                                value={item.qty}
                                                 onChange={(e) => updateQty(index, parseInt(e.target.value))}
                                                 className="text-center w-16 border"
                                             />
                                         </div>
                                         <div className="text-right w-full pr-2 border px-2 py-1 rounded">{item.price}</div>
                                         <div className="text-right w-full pr-2 border px-2 py-1 rounded">
-                                            {item.quantity * item.price} /-
+                                            {item.qty * item.price} /-
                                         </div>
                                         <Button variant="ghost" size="icon" onClick={() => removeItem(index)}>
                                             <X className="h-4 w-4" />
