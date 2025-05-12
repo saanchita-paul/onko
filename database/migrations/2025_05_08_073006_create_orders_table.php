@@ -18,10 +18,10 @@ return new class extends Migration
             $table->integer('discount_total')->default(0);
             $table->integer('tax_total')->default(0);
             $table->integer('grand_total')->default(0);
-            $table->integer('payment_total')->default(0);
+            $table->integer('payments_total')->default(0);
             $table->string('status')->default('created');
             $table->json('meta')->nullable();
-            
+
             $table->timestamps();
         });
     }
