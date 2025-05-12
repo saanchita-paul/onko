@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\Consignment;
-use App\Models\Customer;
 use App\Models\Order;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
