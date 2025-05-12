@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Consignment;
-use App\Models\Customer;
+use App\Models\Order;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -19,8 +19,8 @@ class DatabaseSeeder extends Seeder
             ->count(15)
             ->create();
 
-        Customer::factory()
-            ->count(100)
+        Order::factory()
+            ->count(10)
             ->create();
     }
 }
