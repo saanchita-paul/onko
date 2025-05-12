@@ -16,6 +16,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('dashboard');
 
     Route::get('/products', [ProductController::class, 'index'])->name('products.index');
+    Route::post('/products', [ProductController::class, 'store'])->name('products.store');
     Route::get('/customers', [CustomerController::class, 'index'])->name('customers.index');
     Route::get('/orders', [OrderController::class, 'create'])->name('orders.create');
 });
