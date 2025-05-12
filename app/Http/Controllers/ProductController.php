@@ -4,12 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreProductRequest;
 use App\Models\Product;
-use App\Http\Controllers\Api\ProductController as ProductControllerApi;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\RedirectResponse;
+use App\Http\Controllers\Api\ProductController as ApiController;
 use Inertia\Inertia;
 
-class ProductController extends ProductControllerApi
+class ProductController extends ApiController
 {
     public function index()
     {
@@ -18,10 +16,6 @@ class ProductController extends ProductControllerApi
         ]);
     }
 
-    /**
-     * @param StoreProductRequest $request
-     * @return JsonResponse|RedirectResponse
-     */
     public function store(StoreProductRequest $request)
     {
         $response = parent::store($request);

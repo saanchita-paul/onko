@@ -3,7 +3,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { toast } from "sonner"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
@@ -108,7 +107,6 @@ export function AddProductForm() {
                     reset();
                     setShowAdvanced(false);
                     setSubmitted(false);
-                    toast.success('Product created successfully!')
 
                     console.log('Product created successfully!', response);
                 },
@@ -116,7 +114,6 @@ export function AddProductForm() {
                     setHasVariation(false)
                     setShowAdvanced(true)
                     console.error('Error creating product:', error);
-                    toast.error('Error creating product:', error)
                 },
             });
         }
