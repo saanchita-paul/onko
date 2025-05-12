@@ -26,6 +26,7 @@ class ConsignmentItemFactory extends Factory
             'product_id' => Product::factory(),
             'product_variant_id' => fn( array $attr ) => ProductVariant::factory()
                 ->create([ 'product_id' => $attr['product_id'] ]),
+            'qty' => rand(10, 50),
         ];
     }
 }
