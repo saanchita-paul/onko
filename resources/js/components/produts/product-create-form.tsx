@@ -10,19 +10,9 @@ import { useForm } from '@inertiajs/react';
 import { BadgeCheckIcon, ChevronLeft, LoaderCircle, Shapes, Trash2, X } from 'lucide-react';
 import { FormEvent, useState } from 'react';
 import { toast } from 'sonner';
-import { Page, PageProps } from '@inertiajs/core';
+import { InertiaResponse } from '@/types';
 
 export function AddProductForm() {
-    type FlashMessages = {
-        success?: string;
-        error?: string;
-        [key: string]: unknown;
-    };
-
-    type InertiaResponse<T = Record<string, unknown>> = Page<PageProps & {
-        flash?: FlashMessages;
-    } & T>;
-
     const [showAdvanced, setShowAdvanced] = useState(false);
     const [onVariationPage, setOnVariationPage] = useState(false);
 
