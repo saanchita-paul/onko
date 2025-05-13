@@ -29,7 +29,6 @@ class OrderFactory extends Factory
                             'order_id' => $order->id,
                             'consignment_item_id' => $consignment_item->id,
                             'qty' => function( array $attr ) use ($rand) {
-                                //$consignment->refresh();
                                 return $rand;
                             }
                         ]);
