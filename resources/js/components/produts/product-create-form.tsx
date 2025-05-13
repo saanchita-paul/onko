@@ -7,27 +7,36 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { useForm } from '@inertiajs/react';
-import { ChevronLeft, LoaderCircle, Shapes, Trash2, X } from 'lucide-react';
-import { FormEvent, useEffect, useState } from 'react';
+import { BadgeCheckIcon, ChevronLeft, LoaderCircle, Shapes, Trash2, X } from 'lucide-react';
+import { FormEvent, useState } from 'react';
+import { toast } from 'sonner';
 
 export function AddProductForm() {
+    type InertiaData<T = any> = {
+        props: {
+            flash: {
+                success?: string;
+                error?: string;
+                [key: string]: any;
+            };
+            [key: string]: any;
+        } & T;
+    };
     const [showAdvanced, setShowAdvanced] = useState(false);
-    const [combinations, setCombinations] = useState<Record<string, string>[]>([]);
-    const [hasVariation, setHasVariation] = useState(false);
-    const [submitted, setSubmitted] = useState(false);
+    const [onVariationPage, setOnVariationPage] = useState(false);
 
     const { data, setData, post, processing, errors, reset } = useForm<{
         product_name: string;
         product_description: string;
         has_variations: boolean;
         variants: { name: string; options: string[] }[];
-        combinations: Record<string, string>[]
+        combinations: Record<string, string>[];
     }>({
         product_name: '',
         product_description: '',
-        has_variations: false,
+        has_variations: true,
         variants: [{ name: '', options: [''] }],
-        combinations: []
+        combinations: [],
     });
 
     const addVariant = () => {
@@ -65,7 +74,9 @@ export function AddProductForm() {
     };
 
     const removeVariation = (index: number) => {
-        setCombinations((prev) => prev.filter((_, i) => i !== index));
+        const updatedCombinations = [...data.combinations];
+        updatedCombinations.splice(index, 1);
+        setData('combinations', updatedCombinations);
     };
 
     const getCombinations = (variants: { name: string; options: string[] }[]) => {
@@ -91,44 +102,64 @@ export function AddProductForm() {
     };
 
     const goBackToAddProduct = () => {
-        setHasVariation(false);
+        setOnVariationPage(false);
     };
 
     const openVariationForm = () => {
-        setHasVariation(true);
-        setCombinations(getCombinations(data.variants));
+        setOnVariationPage(true);
+        setData('combinations', getCombinations(data.variants));
     };
 
-    useEffect(() => {
-        if (submitted) {
-            post(route('products.store'),{
-                onSuccess: (response) => {
-
-                    reset();
-                    setShowAdvanced(false);
-                    setSubmitted(false);
-
-                    console.log('Product created successfully!', response);
-                },
-                onError: (error) => {
-                    setHasVariation(false)
-                    setShowAdvanced(true)
-                    console.error('Error creating product:', error);
-                },
-            });
-        }
-    }, [data, submitted]);
+    const demo = () => {
+        toast.custom(() => (
+            <div className="flex h-[100px] w-[350px] items-start gap-2 rounded-xl border border-blue-700 bg-white p-4 shadow-lg dark:border-gray-200 dark:bg-zinc-900">
+                <BadgeCheckIcon className="text-blue-600 h-5 w-5" />
+                <div>
+                    <p className="text-sm font-semibold text-blue-600">Product Created</p>
+                    <p className="text-sm text-zinc-700 dark:text-zinc-300">Your new product has been created.</p>
+                    <div className="mt-3 flex justify-start gap-4 text-sm text-blue-600">
+                        <button className="hover:underline">Add another</button>
+                        <button className="text-zinc-500 hover:underline dark:text-zinc-400">Details</button>
+                    </div>
+                </div>
+            </div>
+        ));
+    };
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
 
-        const payload = {
-            ...data,
-            combinations,
-        }
-
-        setData(payload);
-        setSubmitted(true);
+        post(route('products.store'), {
+            onSuccess: (data: InertiaData) => {
+                reset();
+                setShowAdvanced(false);
+                if (data.props.flash.success) {
+                    toast.custom(() => (
+                        <div
+                            className="flex h-[100px] w-[350px] items-start gap-2 rounded-xl border border-blue-700 bg-white p-4 shadow-lg dark:border-gray-200 dark:bg-zinc-900">
+                            <BadgeCheckIcon className="text-blue-600 h-5 w-5" />
+                            <div>
+                                <p className="text-sm font-semibold text-blue-600">Product Created</p>
+                                <p className="text-sm text-zinc-700 dark:text-zinc-300">{data.props.flash.success}</p>
+                                <div className="mt-3 flex justify-start gap-4 text-sm text-blue-600">
+                                    <button className="hover:underline">Add another</button>
+                                    <button className="text-zinc-500 hover:underline dark:text-zinc-400">Details
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    ));
+                }
+                else if(data.props.flash.error){
+                    toast.error(data.props.flash.error);
+                }
+            },
+            onError: (error) => {
+                setOnVariationPage(false);
+                setShowAdvanced(true);
+                toast.error(Object.values(error)[0])
+            },
+        });
     };
 
     return (
@@ -140,7 +171,7 @@ export function AddProductForm() {
             </div>
 
             <SheetContent side="right" className="w-full p-6 sm:w-[490px]">
-                {hasVariation && (
+                {onVariationPage && (
                     <span>
                         <ChevronLeft className="h-6 w-6" onClick={() => goBackToAddProduct()} />
                     </span>
@@ -149,27 +180,34 @@ export function AddProductForm() {
                 <SheetHeader className="mb-4 flex items-center">
                     <SheetTitle className="flex items-center gap-2 text-lg">
                         <Shapes className="h-5 w-5" />
-                        {hasVariation ? 'Confirm Variations' : 'Add Product'}
+                        {onVariationPage ? 'Confirm Variations' : 'Add Product'}
                     </SheetTitle>
                 </SheetHeader>
 
+                <button type="button" onClick={demo}>
+                    Demo
+                </button>
+
                 <form onSubmit={handleSubmit} className="space-y-4 overflow-y-auto">
                     <div className="items-center space-y-2">
-                        {hasVariation && <Label className="text-gray-500">Product Name</Label>}
+                        {onVariationPage && <Label className="text-gray-500">Product Name</Label>}
                         <div className="mt-2 flex w-full justify-center">
                             <Input
                                 className="w-[98%]"
                                 placeholder="Product Name"
                                 value={data.product_name}
-                                onChange={(e) => setData('product_name', e.target.value)}
+                                onChange={(e) => {
+                                    setData('product_name', e.target.value);
+                                    console.log('Data', data);
+                                }}
                                 disabled={processing}
-                                readOnly={hasVariation}
+                                readOnly={onVariationPage}
                             />
                         </div>
 
                         <InputError message={errors.product_name} />
 
-                        {hasVariation && <Label className="text-gray-500">Product Description</Label>}
+                        {onVariationPage && <Label className="text-gray-500">Product Description</Label>}
                         <div className="mt-2 flex w-full justify-center">
                             <Input
                                 className="w-[98%]"
@@ -177,25 +215,25 @@ export function AddProductForm() {
                                 value={data.product_description}
                                 onChange={(e) => setData('product_description', e.target.value)}
                                 disabled={processing}
-                                readOnly={hasVariation}
+                                readOnly={onVariationPage}
                             />
                         </div>
                         <InputError message={errors.product_description} />
                     </div>
 
-                    {!hasVariation && (
+                    {!onVariationPage && (
                         <div className="flex justify-center">
                             <button
                                 type="button"
                                 onClick={() => setShowAdvanced((prev) => !prev)}
-                                className="text-sm text-blue-600 hover:underline cursor-pointer"
+                                className="cursor-pointer text-sm text-blue-600 hover:underline"
                             >
                                 {showAdvanced ? 'Hide advanced options' : 'Show advanced options'}
                             </button>
                         </div>
                     )}
 
-                    {showAdvanced && !hasVariation && (
+                    {showAdvanced && !onVariationPage && (
                         <>
                             <Separator />
 
@@ -248,7 +286,6 @@ export function AddProductForm() {
                                         ))}
                                         {variant.options.map((_, oIdx) => (
                                             <InputError message={(errors as Record<string, string>)[`variants.${vIdx}.options.${oIdx}`]} />
-
                                         ))}
 
                                         <button
@@ -270,10 +307,12 @@ export function AddProductForm() {
                         </>
                     )}
 
-                    {hasVariation && <Label className="text-sm text-gray-500">Confirm {combinations.length} product variations and create</Label>}
+                    {onVariationPage && (
+                        <Label className="text-sm text-gray-500">Confirm {data.combinations.length} product variations and create</Label>
+                    )}
 
-                    {hasVariation &&
-                        combinations.map((variation, index) => {
+                    {onVariationPage &&
+                        data.combinations.map((variation, index) => {
                             const entries = Object.entries(variation);
 
                             return (
@@ -301,14 +340,14 @@ export function AddProductForm() {
                             );
                         })}
 
-                    {!hasVariation && (
+                    {!onVariationPage && (
                         <Button type="button" className="mt-4 w-full" onClick={openVariationForm}>
                             {processing && <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />}
                             Continue
                         </Button>
                     )}
 
-                    {hasVariation && (
+                    {onVariationPage && (
                         <Button className="mt-4 w-full" type="submit" disabled={processing}>
                             {processing && <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />}
                             Confirm
