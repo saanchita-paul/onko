@@ -10,18 +10,19 @@ import { useForm } from '@inertiajs/react';
 import { BadgeCheckIcon, ChevronLeft, LoaderCircle, Shapes, Trash2, X } from 'lucide-react';
 import { FormEvent, useState } from 'react';
 import { toast } from 'sonner';
+import { Page, PageProps } from '@inertiajs/core';
 
 export function AddProductForm() {
-    type InertiaData<T = any> = {
-        props: {
-            flash: {
-                success?: string;
-                error?: string;
-                [key: string]: any;
-            };
-            [key: string]: any;
-        } & T;
+    type FlashMessages = {
+        success?: string;
+        error?: string;
+        [key: string]: unknown;
     };
+
+    type InertiaResponse<T = Record<string, unknown>> = Page<PageProps & {
+        flash?: FlashMessages;
+    } & T>;
+
     const [showAdvanced, setShowAdvanced] = useState(false);
     const [onVariationPage, setOnVariationPage] = useState(false);
 
@@ -130,17 +131,17 @@ export function AddProductForm() {
         e.preventDefault();
 
         post(route('products.store'), {
-            onSuccess: (data: InertiaData) => {
+            onSuccess: (data: InertiaResponse) => {
                 reset();
                 setShowAdvanced(false);
-                if (data.props.flash.success) {
+                if (data.props.flash?.success) {
                     toast.custom(() => (
                         <div
                             className="flex h-[100px] w-[350px] items-start gap-2 rounded-xl border border-blue-700 bg-white p-4 shadow-lg dark:border-gray-200 dark:bg-zinc-900">
                             <BadgeCheckIcon className="text-blue-600 h-5 w-5" />
                             <div>
                                 <p className="text-sm font-semibold text-blue-600">Product Created</p>
-                                <p className="text-sm text-zinc-700 dark:text-zinc-300">{data.props.flash.success}</p>
+                                <p className="text-sm text-zinc-700 dark:text-zinc-300">{data.props.flash?.success}</p>
                                 <div className="mt-3 flex justify-start gap-4 text-sm text-blue-600">
                                     <button className="hover:underline">Add another</button>
                                     <button className="text-zinc-500 hover:underline dark:text-zinc-400">Details
@@ -150,7 +151,7 @@ export function AddProductForm() {
                         </div>
                     ));
                 }
-                else if(data.props.flash.error){
+                else if(data.props.flash?.error){
                     toast.error(data.props.flash.error);
                 }
             },
