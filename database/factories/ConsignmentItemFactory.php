@@ -24,9 +24,8 @@ class ConsignmentItemFactory extends Factory
         return [
             'id' => fake()->uuid(),
             'product_id' => Product::factory(),
-            'product_variant_id' => fn( array $attr ) => ProductVariant::factory()
-                ->create([ 'product_id' => $attr['product_id'] ]),
             'qty' => rand(10, 50),
+            'product_variant_id' => fn( array $attr ) => ProductVariant::where('product_id', $attr['product_id'])->first()->id,
         ];
     }
 }
