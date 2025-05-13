@@ -189,7 +189,6 @@ export function AddProductForm() {
                                 value={data.product_name}
                                 onChange={(e) => {
                                     setData('product_name', e.target.value);
-                                    console.log('Data', data);
                                 }}
                                 disabled={processing}
                                 readOnly={onVariationPage}
