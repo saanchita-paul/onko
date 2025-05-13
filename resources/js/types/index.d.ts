@@ -1,5 +1,6 @@
 import { LucideIcon } from 'lucide-react';
 import type { Config } from 'ziggy-js';
+import { Page, PageProps } from '@inertiajs/core';
 
 export interface Auth {
     user: User;
@@ -61,3 +62,14 @@ interface LaravelPaginationItem {
     url?: string;
     ellipsis?: boolean;
 }
+
+type FlashMessages = {
+    success?: string;
+    error?: string;
+    [key: string]: unknown;
+};
+
+export type InertiaResponse<T = Record<string, unknown>> = Page<PageProps & {
+    flash?: FlashMessages;
+} & T>;
+
