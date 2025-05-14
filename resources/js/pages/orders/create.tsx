@@ -25,6 +25,7 @@ import {
 import { useRef, useState } from 'react';
 import { Textarea } from "@/components/ui/textarea";
 import { PageProps } from '@inertiajs/core';
+import { LaravelPaginationItem } from '@/types';
 interface Product {
     id: string;
     name: string;
@@ -37,11 +38,7 @@ interface InertiaProps extends PageProps {
         data: Product[];
         current_page: number;
         last_page: number;
-        links: {
-            url: string | null;
-            label: string;
-            active: boolean;
-        }[];
+        links: LaravelPaginationItem[];
     };
 }
 interface Item extends Product {
@@ -247,7 +244,7 @@ export default function CreateOrder({ products }: InertiaProps) {
                                             />
                                         </div>
                                         <div className="text-right w-full pr-2 border px-2 py-1 rounded">{item.price}</div>
-                                        <div className="text-right w-full pr-2 border px-2 py-1 rounded">
+                                        <div className="text-right w-full">
                                             {item.qty * item.price} /-
                                         </div>
                                         <Button variant="ghost" size="icon" onClick={() => removeItem(index)}>
@@ -351,7 +348,7 @@ export default function CreateOrder({ products }: InertiaProps) {
                                                 onClick={() => {
                                                     if (link.url) window.location.href = link.url;
                                                 }}
-                                                dangerouslySetInnerHTML={{ __html: link.label }}
+                                                dangerouslySetInnerHTML={{ __html: link.label ?? '' }}
                                             />
                                         ))}
                                     </div>
