@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Route;
@@ -20,6 +21,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/customers', [CustomerController::class, 'index'])->name('customers.index');
     Route::get('/orders/create', [OrderController::class, 'create'])->name('orders.create');
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+    Route::get('/employees', [EmployeeController::class, 'index'])->name('employees.index');
 });
 
 require __DIR__.'/settings.php';

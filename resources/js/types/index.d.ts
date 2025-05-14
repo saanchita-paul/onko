@@ -42,7 +42,15 @@ export interface User {
     updated_at: string;
     [key: string]: unknown; // This allows for additional properties...
 }
+export interface Employee {
+    id: string;
+    name: string;
+    position: string;
+    hired_on: string;
+    created_at: string;
+    updated_at: string;
 
+}
 export interface Product {
     id: string;
     name: string;
