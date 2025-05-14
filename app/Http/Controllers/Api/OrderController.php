@@ -19,11 +19,8 @@ class OrderController extends Controller
 
     public function create(Request $request)
     {
-        $products = Product::select('id', 'name', 'quantity', 'price')
+        return Product::select('id', 'name', 'quantity', 'price')
             ->paginate(10);
-        return response()->json([
-            'products' => $products
-        ]);
     }
 
 }

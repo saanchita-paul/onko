@@ -21,7 +21,7 @@ class OrderController extends ApiOrderController
     public function create(Request $request)
     {
         $response = parent::create($request);
-        $products = json_decode($response->getContent(), true)['products'];
+        $products = $response;
         return Inertia::render('orders/create', [
             'products' => $products,
         ]);
