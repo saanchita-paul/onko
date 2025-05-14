@@ -1,5 +1,5 @@
 import AppLayout from '@/layouts/app-layout';
-import { Head } from '@inertiajs/react';
+import { Head, useForm } from '@inertiajs/react';
 import { OrderForm } from '@/pages/orders/order-form';
 import {
     Card,
@@ -20,12 +20,17 @@ import {
 import {
     Plus,
     X,
-    Search, ImageIcon
+    Search, ImageIcon, CalendarIcon
 } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { Textarea } from "@/components/ui/textarea";
 import { PageProps } from '@inertiajs/core';
 import { LaravelPaginationItem } from '@/types';
+import { Inertia } from '@inertiajs/inertia';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
 interface Product {
     id: string;
     name: string;
@@ -111,6 +116,21 @@ export default function CreateOrder({ products }: InertiaProps) {
     const handleTabChange = (tabValue: string) => {
         setSelectedTab(tabValue);
     };
+
+
+
+    const { data, setData, post } = useForm({
+        company_name: '',
+        company_address: '',
+        invoice_date: new Date(),
+    });
+
+    const submit = () => {
+        console.log('log', data);
+        if (!data.company_name ||!data.company_address || !data.invoice_date) return;
+        post(route('options.saveCompanyDetails'));
+
+    };
     return (
         <AppLayout>
             <Head title="Create Order" />
@@ -186,18 +206,52 @@ export default function CreateOrder({ products }: InertiaProps) {
                                                     </button>
                                                 )}
                                             </div>
-                                            <Input placeholder="Company Name" className="flex-1" />
+                                            <Input
+                                                placeholder="Company Name"
+                                                className="flex-1"
+                                                value={data.company_name}
+                                                onChange={(e) => setData('company_name', e.target.value)}
+                                                onBlur={submit}
+                                                onKeyDown={(e) => e.key === 'Enter' && submit()}
+                                            />
                                         </div>
-                                        <Textarea placeholder="Company Address
-(optional)" />
+                                        <Textarea
+                                            placeholder="Company Address (optional)"
+                                            value={data.company_address}
+                                            onChange={(e) => setData('company_address', e.target.value)}
+                                            onBlur={submit}
+                                            onKeyDown={(e) => e.key === 'Enter' && submit()}
+                                        />
                                     </div>
                                     <div className="space-y-2">
                                         <div className="flex items-center gap-2">
                                             <label className="text-sm font-medium w-20">Date:</label>
-                                            <Input
-                                                placeholder="dd-mm-yyyy"
-                                                className="flex-1 w-full cursor-pointer"
-                                            />
+                                            <Popover>
+                                                <PopoverTrigger asChild>
+                                                    <button
+                                                        type="button"
+                                                        className={cn(
+                                                            'flex justify-between items-center w-full border rounded-md px-3 py-2 text-left text-sm',
+                                                            !data.invoice_date && 'text-muted-foreground'
+                                                        )}
+                                                    >
+                                                        {data.invoice_date ? format(data.invoice_date, 'dd-MM-yyyy') : 'Pick a date'}
+                                                        <CalendarIcon className="ml-2 h-4 w-4 text-muted-foreground" />
+                                                    </button>
+                                                </PopoverTrigger>
+                                                <PopoverContent className="w-auto p-0">
+                                                    <Calendar
+                                                        mode="single"
+                                                        selected={data.invoice_date ?? new Date()}
+                                                        onSelect={(date) => {
+                                                            if (date) {
+                                                                setData('invoice_date', date);
+                                                                setTimeout(submit, 150);
+                                                            }
+                                                        }}
+                                                    />
+                                                </PopoverContent>
+                                            </Popover>
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <label className="text-sm font-medium w-20">Order #</label>
