@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Product;
 use Inertia\Inertia;
 use App\Http\Controllers\Api\OrderController as ApiOrderController;
 use Illuminate\Http\Request;
@@ -17,8 +18,12 @@ class OrderController extends ApiOrderController
             'orders' => $orders
         ]);
     }
-    public function create()
+    public function create(Request $request)
     {
-        return Inertia::render('orders/create');
+        $response = parent::create($request);
+        $products = $response;
+        return Inertia::render('orders/create', [
+            'products' => $products,
+        ]);
     }
 }
