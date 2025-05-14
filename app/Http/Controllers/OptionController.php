@@ -2,24 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Option;
-use Illuminate\Http\Request;
+use App\Http\Requests\StoreCompanyDetailsRequest;
+use App\Http\Controllers\Api\OptionController as ApiOptionController;
 
-class OptionController extends Controller
+class OptionController extends ApiOptionController
 {
 
-    public function saveCompanyDetails(Request $request)
+    public function store(StoreCompanyDetailsRequest $request)
     {
-        $validated = $request->validate([
-            'company_name' => 'required|string|max:255',
-            'company_address' => 'nullable|string',
-            'invoice_date' => 'required|date',
-        ]);
-
-        Option::setValue('company_name', $validated['company_name']);
-        Option::setValue('company_address', $validated['company_address'] ?? '');
-        Option::setValue('invoice_date', $validated['invoice_date']);
-
-        return redirect()->back()->with('success', 'Company details saved.');
+        return parent::store($request);
     }
 }

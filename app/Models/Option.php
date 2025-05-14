@@ -8,6 +8,7 @@ class Option extends Model
 {
     protected $fillable = ['key', 'value'];
 
+
     public $timestamps = true;
 
     public static function getValue(string $key, $default = null): mixed

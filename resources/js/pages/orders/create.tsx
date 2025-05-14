@@ -26,7 +26,6 @@ import { useRef, useState } from 'react';
 import { Textarea } from "@/components/ui/textarea";
 import { PageProps } from '@inertiajs/core';
 import { LaravelPaginationItem } from '@/types';
-import { Inertia } from '@inertiajs/inertia';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
@@ -128,14 +127,14 @@ export default function CreateOrder({ products }: InertiaProps) {
     const submit = () => {
         console.log('log', data);
         if (!data.company_name ||!data.company_address || !data.invoice_date) return;
-        post(route('options.saveCompanyDetails'));
+        post(route('options.store'));
 
     };
     return (
         <AppLayout>
             <Head title="Create Order" />
-            <div className="p-6">
-                <div className="flex justify-between items-center mb-4">
+            <div className="p-6 sm:p-6">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
                     <Tabs defaultValue="new-invoice">
                         <TabsList className="px-1 py-1">
                             <TabsTrigger value="new-invoice" className={tabTriggerClass}>New Invoice</TabsTrigger>
@@ -144,14 +143,14 @@ export default function CreateOrder({ products }: InertiaProps) {
                         <TabsContent value="new-invoice"></TabsContent>
                         <TabsContent value="all-orders"></TabsContent>
                     </Tabs>
-                    <Button className="cursor-pointer">Edit Invoice Format</Button>
+                    <Button className="cursor-pointer sm:w-auto">Edit Invoice Format</Button>
                 </div>
                 <h1 className="text-2xl font-bold">New Invoice</h1>
                 <p className="text-muted-foreground mb-4">Create a new Invoice or Sales Receipt</p>
-                <div className="flex items-start gap-6">
-                    <div className="flex-1 space-y-4">
+                <div className="flex flex-col lg:flex-row gap-6">
+                    <div className="w-full lg:flex-1 space-y-4">
                         <Card>
-                            <CardContent className="space-y-4 p-6">
+                            <CardContent className="space-y-4 p-6 sm:p-6">
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
                                         <div className="flex items-center gap-2">
@@ -216,7 +215,8 @@ export default function CreateOrder({ products }: InertiaProps) {
                                             />
                                         </div>
                                         <Textarea
-                                            placeholder="Company Address (optional)"
+                                            placeholder="Company Address
+(optional)"
                                             value={data.company_address}
                                             onChange={(e) => setData('company_address', e.target.value)}
                                             onBlur={submit}
@@ -254,7 +254,7 @@ export default function CreateOrder({ products }: InertiaProps) {
                                             </Popover>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            <label className="text-sm font-medium w-20">Order #</label>
+                                            <label className="text-sm font-medium w-14">Order #</label>
                                             <Input
                                                 placeholder="auto generates"
                                                 readOnly
@@ -319,7 +319,7 @@ export default function CreateOrder({ products }: InertiaProps) {
                                 <span className="pr-27">{subtotal} /-</span>
                             </div>
                         </Card>
-                        <div className="flex justify-end gap-2">
+                        <div className="flex flex-wrap justify-end gap-2">
                             <Button variant="outline" className="cursor-pointer">Add a fee or charge</Button>
                             <Button variant="outline" className="cursor-pointer">Add discount</Button>
                             <Button variant="outline" className="cursor-pointer">Add tax</Button>

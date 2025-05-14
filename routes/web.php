@@ -21,7 +21,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/customers', [CustomerController::class, 'index'])->name('customers.index');
     Route::get('/orders/create', [OrderController::class, 'create'])->name('orders.create');
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
-    Route::post('/options/save-company-details', [OptionController::class, 'saveCompanyDetails'])->name('options.saveCompanyDetails');
+    Route::post('/options', [OptionController::class, 'store'])->name('options.store');
 });
 
 require __DIR__.'/settings.php';
