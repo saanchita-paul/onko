@@ -3,14 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Models\Consignment;
+use App\Http\Controllers\Api\ConsignmentController as ApiConsignmentController;
 use Inertia\Inertia;
 
-class ConsignmentController extends Controller
+class ConsignmentController extends ApiConsignmentController
 {
     public function index()
     {
+        $consignments = parent::index();
+
         return Inertia::render('consignment/index', [
-            'consignments' => Consignment::paginate(100)
+            'consignments' => $consignments
         ]);
     }
 }

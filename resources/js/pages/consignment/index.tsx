@@ -30,13 +30,12 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-import { format } from 'date-fns';
 import { useEffect, useState } from 'react';
 
 export const columns: ColumnDef<Consignment>[] = [
     {
         accessorKey: 'id',
-        header: 'Order #',
+        header: 'Consignment ID',
         cell: ({ row }) => {
             return (
                 <TooltipProvider>
@@ -51,9 +50,11 @@ export const columns: ColumnDef<Consignment>[] = [
         },
     },
     {
-        accessorKey: 'lc_num',
-        header: () => <div className="w-full text-center">LC Number</div>,
-        cell: ({ row }) => <div className="text-muted-foreground w-full text-center">{row.getValue('lc_num')}</div>,
+        accessorKey: 'total_items',
+        header: () => <div className="w-full text-center">Total Items</div>,
+        cell: ({ row }) => (
+            <div className="text-muted-foreground w-full text-center">{row.getValue('total_items')}</div>
+        ),
     },
     {
         accessorKey: 'value',

@@ -68,6 +68,7 @@ export interface Consignment {
     id: string;
     lc_num: string | null;
     value: number | null;
+    total_items: number;
     currency: string;
     exchange_rate: number;
     created_at: string;
