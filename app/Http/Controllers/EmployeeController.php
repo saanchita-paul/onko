@@ -14,10 +14,8 @@ class EmployeeController extends ApiController
      */
     public function index(Request $request)
     {
-        $employees = parent::index($request);
-        //$employees = json_decode($response->getContent(), true)['employees'];
         return Inertia::render('employees/index', [
-            'employees' => $employees,
+            'employees' => parent::index($request),
         ]);
     }
 

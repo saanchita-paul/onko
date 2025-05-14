@@ -1,6 +1,6 @@
 
 import AppLayout from '@/layouts/app-layout';
-import { Employee, Product, type BreadcrumbItem } from '@/types';
+import { Employee, type BreadcrumbItem } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { DataTable } from '@/components/data-table';
@@ -45,10 +45,8 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 import { format } from 'date-fns';
 import { useEffect, useState } from 'react';
-import { DateRangePicker } from '@/components/date-range-picker';
-import { DateRange } from 'react-day-picker';
 
-export const columns: ColumnDef<Product>[] = [
+export const columns: ColumnDef<Employee>[] = [
     {
         accessorKey: "id",
         header: "ID",
@@ -56,7 +54,7 @@ export const columns: ColumnDef<Product>[] = [
             return (
                 <TooltipProvider>
                     <Tooltip>
-                        <TooltipTrigger className="text-muted-foreground">{(row.getValue("id") as string).slice(0, 8)}</TooltipTrigger>
+                        <TooltipTrigger className="text-muted-foreground">{(row.getValue("id") as string).slice(-12)}</TooltipTrigger>
                         <TooltipContent>
                             <p>{row.getValue("id") as string}</p>
                         </TooltipContent>
@@ -66,56 +64,27 @@ export const columns: ColumnDef<Product>[] = [
         },
     },
     {
-        accessorKey: "created_at",
-        header: "Date",
-        cell: ({ row }) => {
-            const date = new Date(row.getValue("created_at"));
-            return (
-                <span className="text-muted-foreground">
-        {isNaN(date.getTime()) ? "--" : format(date, "d MMM, yyyy")}
-      </span>
-            );
-        },
-    },
-    {
         accessorKey: "name",
-        header: () => <div className="text-right w-full">Name</div>,
-        cell: ({ row }) => {
-            return row.getValue('name')
-            // const value = parseFloat(row.getValue("grand_total"));
-            // const [whole, decimal] = value.toFixed(2).split(".");
-            // return (
-            //     <div className="flex justify-end text-muted-foreground w-full">
-            //         ৳&nbsp;
-            //         <span className="font-bold text-foreground">{whole}</span>
-            //         <span className="text-muted-foreground">.{decimal}</span>
-            //     </div>
-            // );
-        },
+        header: () => <div className="w-full">Name</div>,
+        cell: ({ row }) => row.getValue('name'),
     },
     {
         accessorKey: "position",
-        header: () => <div className="text-center w-full">Position</div>,
+        header: () => <div className="w-full">Position</div>,
         cell: ({ row }) => {
            return row.getValue('position'); 
-        //     return (
-        //     <div className="text-center text-muted-foreground w-full">
-        //         {row.getValue("order_items_count")}
-        //     </div>
-        // )
         },
     },
     {
         accessorKey: "hired_on",
         header: "Hired On",
         cell: ({ row }) => {
-            return row.getValue('hired_on');
-            // const customer_id = row.getValue("customer_id") as string;
-            // return (
-            //     <span className="font-medium text-muted-foreground">
-            //     {customer_id && customer_id !== "" ? customer_id : "--"}
-            // </span>
-            // );
+            const date = new Date(row.getValue("hired_on"));
+            return (
+                <span className="text-muted-foreground">
+                    {isNaN(date.getTime()) ? "--" : format(date, "d MMM, yyyy")}
+                </span>
+            );
         },
     },
 ];
@@ -139,17 +108,11 @@ export default function Index({ employees } : Props) {
     const { url } = usePage();
     const searchParams = new URLSearchParams(url.split('?')[1]);
 
-    const [tab, setTab] = useState(searchParams.get('tab') || 'all-orders');
-    const [range, setRange] = useState(searchParams.get('range') || 'all');
-    const [dateRange, setDateRange] = useState<DateRange | undefined>({
-        from: undefined,
-        to: undefined,
-    });
+    const [tab, setTab] = useState(searchParams.get('tab') || 'all-employees');
 
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
-        setTab(params.get('tab') || 'all-orders');
-        setRange(params.get('range') || 'all');
+        setTab(params.get('tab') || 'all-employees');
     }, [url]);
     const handleTabChange = (value: string) => {
         setTab(value);
@@ -158,82 +121,25 @@ export default function Index({ employees } : Props) {
         Inertia.visit(`${window.location.pathname}?${params.toString()}`, { preserveScroll: true, preserveState: true });
     };
 
-    const handleRangeChange = (value: string) => {
-        setRange(value);
-        const params = new URLSearchParams(window.location.search);
-        params.set('range', value);
-        Inertia.visit(`${window.location.pathname}?${params.toString()}`, { preserveScroll: true, preserveState: true });
-    };
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Orders" />
+            <Head title="Employees" />
             <div className="flex flex-1 flex-col gap-4 rounded-xl p-4 relative">
                 <Tabs value={tab} onValueChange={handleTabChange} className="w-full">
                     <TabsList className="mb-4 px-1 py-1">
-                        <TabsTrigger value="todys-highlights" className={tabTriggerClass}>Today's Highlights</TabsTrigger>
-                        <TabsTrigger value="all-orders" className={tabTriggerClass}>All Orders</TabsTrigger>
-                        <TabsTrigger value="returns" className={tabTriggerClass}>Returns</TabsTrigger>
-                        <TabsTrigger value="refund-policy" className={tabTriggerClass}>Refund Policy</TabsTrigger>
+                        <TabsTrigger value="all-employees" className={tabTriggerClass}>All Employees</TabsTrigger>
+                        <TabsTrigger value="unused-tab" className={tabTriggerClass}>Other tab</TabsTrigger>
                     </TabsList>
 
-                    <TabsContent value="todys-highlights">
+                    <TabsContent value="unused-tab">
 
                     </TabsContent>
 
-                    <TabsContent value="all-orders">
+                    <TabsContent value="all-employees">
                         <h1 className="text-5xl font-bold">Employees</h1>
-                        <Tabs value={range} onValueChange={handleRangeChange} className="w-full pt-4">
-                            <div className="flex gap-2">
-                                <TabsList className="mb-4 px-1 py-1">
-                                    <TabsTrigger value="all" className={tabTriggerClass}>All</TabsTrigger>
-                                    <TabsTrigger value="week" className={tabTriggerClass}>Week</TabsTrigger>
-                                    <TabsTrigger value="month" className={tabTriggerClass}>Month</TabsTrigger>
-                                    <TabsTrigger value="quarter" className={tabTriggerClass}>Quarter</TabsTrigger>
-                                    <TabsTrigger value="year" className={tabTriggerClass}>Year</TabsTrigger>
-                                    <TabsTrigger value="all-time" className={tabTriggerClass}>All Time</TabsTrigger>
-                                </TabsList>
-                                <DateRangePicker
-                                    from={dateRange?.from}
-                                    to={dateRange?.to}
-                                    onChange={(newRange) => setDateRange(newRange)}
-                                />
-                            </div>
-                            <div className="mt-4">
-                                <p>
-                                    Selected:{" "}
-                                    {dateRange?.from
-                                        ? `${dateRange.from.toDateString()} ${
-                                            dateRange.to ? `→ ${dateRange.to.toDateString()}` : ''
-                                        }`
-                                        : 'None'}
-                                </p>
-                            </div>
-
-                            <TabsContent value="all">
-                                <DataTable columns={columns} data={employees.data} />
-                            </TabsContent>
-
-                            <TabsContent value="week">
-                                <DataTable columns={columns} data={[]} />
-                            </TabsContent>
-
-                            <TabsContent value="month">
-                                <DataTable columns={columns} data={[]} />
-                            </TabsContent>
-
-                            <TabsContent value="quarter">
-                                <DataTable columns={columns} data={[]} />
-                            </TabsContent>
-
-                            <TabsContent value="year">
-                                <DataTable columns={columns} data={[]} />
-                            </TabsContent>
-
-                            <TabsContent value="all-time">
-                                <DataTable columns={columns} data={employees.data} />
-                            </TabsContent>
-                        </Tabs>
-
+                           
+                        <DataTable columns={columns} data={employees.data} />
+                           
                         <div className="w-full flex mt-5 sticky bottom-0 bg-white dark:bg-black py-3">
                             <div className="w-1/4 pl-2">
                                 Showing {employees.from} to {employees.to} of {employees.total}
@@ -269,14 +175,6 @@ export default function Index({ employees } : Props) {
                                 </Pagination>
                             </div>
                         </div>
-                    </TabsContent>
-
-                    <TabsContent value="returns">
-
-                    </TabsContent>
-
-                    <TabsContent value="refund-policy">
-
                     </TabsContent>
                 </Tabs>
             </div>
