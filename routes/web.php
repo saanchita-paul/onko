@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\ConsignmentController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Route;
