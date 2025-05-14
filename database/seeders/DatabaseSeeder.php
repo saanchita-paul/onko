@@ -6,6 +6,7 @@ use App\Models\Consignment;
 use App\Models\Expense;
 use App\Models\Employee;
 use App\Models\Order;
+use App\Models\Supplier;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -43,6 +44,10 @@ class DatabaseSeeder extends Seeder
         }
 
         Employee::factory()
+            ->count(10)
+            ->create();
+
+        Supplier::factory()
             ->count(10)
             ->create();
     }
