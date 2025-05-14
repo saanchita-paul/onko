@@ -33,7 +33,7 @@ class ProductFactory extends Factory
 
             $joined = $joined->map(fn($j) => collect($j)->flatten());
             $combined = $joined->map(fn ($v)  => $headers->combine($v));
-            
+
             $combined->map(function($c) use ($product) {
                 ProductVariant::factory()->create([
                     'product_id' => $product->id,
@@ -54,7 +54,7 @@ class ProductFactory extends Factory
             'name' => fake()->words(rand(3, 8), true),
             'description' => fake()->sentence(20),
             'price' => fake()->randomNumber(7),
-
+            'quantity' => fake()->randomNumber(1),
             'image_url' => 'https://api.dicebear.com/9.x/glass/svg?seed=' . Str::of(fake()->words(rand(3, 8), true))->replace(' ', '+')
         ];
     }
