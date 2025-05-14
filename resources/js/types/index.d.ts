@@ -56,6 +56,16 @@ export interface Product {
 
 }
 
+export interface Consignment {
+    id: string;
+    lc_num: string | null;
+    value: number | null;
+    currency: string;
+    exchange_rate: number;
+    created_at: string;
+    updated_at: string;
+}
+
 interface LaravelPaginationItem {
     active: boolean;
     label?: string;
