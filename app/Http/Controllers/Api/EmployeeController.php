@@ -9,7 +9,7 @@ class EmployeeController extends Controller
 {
     public function index(Request $request)
     {
-        $employees = Employee::paginate(5);
+        $employees = Employee::paginate(10);
 
         return $employees;
     }
