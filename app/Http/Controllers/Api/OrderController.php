@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 
 use App\Models\Order;
+use App\Models\Product;
 use Illuminate\Http\Request;
 
 class OrderController extends Controller
@@ -13,6 +14,15 @@ class OrderController extends Controller
         $orders = Order::withCount('orderItems')->paginate(5);
         return response()->json([
             'orders' => $orders
+        ]);
+    }
+
+    public function create(Request $request)
+    {
+        $products = Product::select('id', 'name', 'quantity', 'price')
+            ->paginate(10);
+        return response()->json([
+            'products' => $products
         ]);
     }
 

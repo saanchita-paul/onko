@@ -24,57 +24,80 @@ import {
 } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { Textarea } from "@/components/ui/textarea";
+import { PageProps } from '@inertiajs/core';
 interface Product {
+    id: string;
     name: string;
-    sku: string;
-    qty: number;
-}
-interface Item extends Product {
+    sku?: string;
+    quantity: number;
     price: number;
 }
-const initialProducts = [
-    { name: 'Felix 5 Kit', sku: 'MK-111', qty: 25 },
-    { name: 'Play dough (5 grams)', sku: 'BN-110', qty: 25 },
-    { name: 'Wireshark 5C', sku: 'JiNxTq', qty: 18 },
-    { name: 'Daniel Jay Park', sku: 'email@figma...', qty: 2 },
-    { name: 'Mark Rojas', sku: 'email@figma...', qty: 12 },
-];
-export default function CreateOrder() {
+interface InertiaProps extends PageProps {
+    products: {
+        data: Product[];
+        current_page: number;
+        last_page: number;
+        links: {
+            url: string | null;
+            label: string;
+            active: boolean;
+        }[];
+    };
+}
+interface Item extends Product {
+    qty: number;
+}
+export default function CreateOrder({ products }: InertiaProps) {
+    const [productList, setProductList] = useState<Product[]>(products.data);
     const [items, setItems] = useState<Item[]>([]);
-    const [products, setProducts] = useState<Product[]>(initialProducts);
     const addItem = (product: Product) => {
         setItems((prevItems) => {
-            const existingIndex = prevItems.findIndex(item => item.name === product.name);
+            const existingIndex = prevItems.findIndex(item => item.id === product.id);
             if (existingIndex !== -1) {
                 const updatedItems = [...prevItems];
                 updatedItems[existingIndex].qty += 1;
                 return updatedItems;
             } else {
-                return [...prevItems, { ...product, qty: 1, price: 2500 }];
+                return [...prevItems, { ...product, qty: 1 }];
             }
         });
-        setProducts((prev) =>
+
+        setProductList((prev) =>
             prev.map((p) =>
-                p.name === product.name ? { ...p, qty: p.qty - 1 } : p
+                p.id === product.id ? { ...p, quantity: p.quantity - 1 } : p
             )
         );
     };
+
     const updateQty = (index: number, newQty: number) => {
-        const delta = newQty - items[index].qty;
+        if (isNaN(newQty) || newQty < 1) return;
+
+        const item = items[index];
+        const product = productList.find(p => p.id === item.id);
+        if (!product) return;
+
+        const maxQty = product.quantity + item.qty;
+        if (newQty > maxQty) return;
+
+        const delta = newQty - item.qty;
+
         const updatedItems = [...items];
         updatedItems[index].qty = newQty;
         setItems(updatedItems);
-        setProducts((prev) =>
+
+        setProductList((prev) =>
             prev.map((p) =>
-                p.name === items[index].name ? { ...p, qty: p.qty - delta } : p
+                p.id === item.id ? { ...p, quantity: p.quantity - delta } : p
             )
         );
     };
+
+
     const removeItem = (index: number) => {
         const removed = items[index];
-        setProducts((prev) =>
+        setProductList((prev) =>
             prev.map((p) =>
-                p.name === removed.name ? { ...p, qty: p.qty + removed.qty } : p
+                p.id === removed.id ? { ...p, quantity: p.quantity + removed.qty } : p
             )
         );
         setItems((prev) => prev.filter((_, i) => i !== index));
@@ -86,6 +109,11 @@ export default function CreateOrder() {
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement | null>(null);
     const [drawerOpen, setDrawerOpen] = useState(false);
+    const [selectedTab, setSelectedTab] = useState("in-stock");
+
+    const handleTabChange = (tabValue: string) => {
+        setSelectedTab(tabValue);
+    };
     return (
         <AppLayout>
             <Head title="Create Order" />
@@ -197,7 +225,9 @@ export default function CreateOrder() {
                                     <span className="text-center">Total</span>
                                     <span></span>
                                 </div>
-                                {items.map((item, index) => (
+                                {items
+                                    .filter((item) => item.qty > 0)
+                                    .map((item, index) => (
                                     <div key={index} className="grid grid-cols-6 items-center gap-2 border-t py-2 p-4">
                                         <span>{index + 1}</span>
                                         <div className="text-left">{item.name}</div>
@@ -205,7 +235,14 @@ export default function CreateOrder() {
                                             <Input
                                                 type="number"
                                                 value={item.qty}
-                                                onChange={(e) => updateQty(index, parseInt(e.target.value))}
+                                                min={1}
+                                                max={
+                                                    (productList.find(p => p.id === item.id)?.quantity ?? 0) + item.qty
+                                                }
+                                                onChange={(e) => {
+                                                    const value = parseInt(e.target.value);
+                                                    updateQty(index, value);
+                                                }}
                                                 className="text-center w-16 border"
                                             />
                                         </div>
@@ -249,33 +286,79 @@ export default function CreateOrder() {
                             <CardContent className="space-y-4 p-4">
                                 <div className="flex items-center justify-between">
                                     <span className="font-bold">Products</span>
-                                    <Tabs defaultValue="in-stock">
+                                    <Tabs
+                                        value={selectedTab}
+                                        onValueChange={handleTabChange}
+                                    >
                                         <TabsList className="px-1 py-1">
-                                            <TabsTrigger value="in-stock" className={tabTriggerClass}>In Stock</TabsTrigger>
-                                            <TabsTrigger value="all" className={tabTriggerClass}>All</TabsTrigger>
+                                            <TabsTrigger value="in-stock" className={tabTriggerClass}>
+                                                In Stock
+                                            </TabsTrigger>
+                                            <TabsTrigger value="all" className={tabTriggerClass}>
+                                                All
+                                            </TabsTrigger>
                                         </TabsList>
-                                        <TabsContent value="in-stock"></TabsContent>
-                                        <TabsContent value="all"></TabsContent>
                                     </Tabs>
                                 </div>
                                 <div className="space-y-2">
-                                    {products.map((product, i) => (
-                                        <div key={i} className="flex items-center justify-between rounded-lg px-4 py-2">
-                                            <div>
-                                                <div className="font-medium">{product.name}</div>
-                                                <div className="text-muted-foreground text-sm">{product.sku}</div>
+                                    {productList
+                                        .filter((product) =>
+                                            selectedTab === "all" ? true : product.quantity > 0
+                                        )
+                                        .map((product) => (
+                                            <div
+                                                key={product.id}
+                                                className="flex items-center justify-between rounded-lg px-4 py-2"
+                                            >
+                                                <div>
+                                                    <div className="font-medium text-left leading-snug break-words">
+                                                      <span className="block">
+                                                        {product.name.split(" ").slice(0, 2).join(" ")}
+                                                      </span>
+                                                                                                            <span className="block">
+                                                        {product.name.split(" ").slice(2).join(" ")}
+                                                      </span>
+                                                    </div>
+
+                                                    <div className="text-muted-foreground text-sm">
+                                                        ৳ {product.price}
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex items-center justify-center gap-4 w-24">
+                                                    <span className="text-sm text-center w-4">{product.quantity}</span>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="icon"
+                                                        className="ml-3"
+                                                        onClick={() => product.quantity > 0 && addItem(product)}
+                                                    >
+                                                        <Plus className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
                                             </div>
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-sm">{product.qty}</span>
-                                                <Button variant="outline" size="icon" onClick={() => product.qty > 0 && addItem(product)}>
-                                                    <Plus className="h-4 w-4" />
-                                                </Button>
-                                            </div>
-                                        </div>
-                                    ))}
+                                        ))}
+                                </div>
+
+                                <div className="pt-4 border-t">
+                                    <div className="flex justify-center items-center gap-2 flex-wrap">
+                                        {products.links.map((link, idx) => (
+                                            <Button
+                                                key={idx}
+                                                variant={link.active ? "default" : "outline"}
+                                                size="sm"
+                                                disabled={!link.url}
+                                                onClick={() => {
+                                                    if (link.url) window.location.href = link.url;
+                                                }}
+                                                dangerouslySetInnerHTML={{ __html: link.label }}
+                                            />
+                                        ))}
+                                    </div>
                                 </div>
                             </CardContent>
                         </Card>
+
                     </div>
                 </div>
             </div>
