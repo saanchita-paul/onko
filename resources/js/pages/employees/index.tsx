@@ -45,6 +45,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 import { format } from 'date-fns';
 import { useEffect, useState } from 'react';
+import { AddEmployeeForm } from '@/pages/employees/create';
 
 export const columns: ColumnDef<Employee>[] = [
     {
@@ -72,7 +73,7 @@ export const columns: ColumnDef<Employee>[] = [
         accessorKey: "position",
         header: () => <div className="w-full">Position</div>,
         cell: ({ row }) => {
-           return row.getValue('position'); 
+           return row.getValue('position');
         },
     },
     {
@@ -124,6 +125,7 @@ export default function Index({ employees } : Props) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Employees" />
+            <AddEmployeeForm />
             <div className="flex flex-1 flex-col gap-4 rounded-xl p-4 relative">
                 <Tabs value={tab} onValueChange={handleTabChange} className="w-full">
                     <TabsList className="mb-4 px-1 py-1">
@@ -137,9 +139,9 @@ export default function Index({ employees } : Props) {
 
                     <TabsContent value="all-employees">
                         <h1 className="text-5xl font-bold">Employees</h1>
-                           
+
                         <DataTable columns={columns} data={employees.data} />
-                           
+
                         <div className="w-full flex mt-5 sticky bottom-0 bg-white dark:bg-black py-3">
                             <div className="w-1/4 pl-2">
                                 Showing {employees.from} to {employees.to} of {employees.total}
