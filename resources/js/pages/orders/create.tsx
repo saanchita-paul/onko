@@ -188,10 +188,10 @@ export default function CreateOrder({ products, companyDetails }: InertiaProps) 
                                                             const reader = new FileReader();
                                                             reader.onloadend = () => {
                                                                 if (typeof reader.result === "string") {
-                                                                    setImagePreview(reader.result); // show preview
+                                                                    setImagePreview(reader.result);
                                                                 }
                                                             };
-                                                            setData('logo', file); // for submission
+                                                            setData('logo', file);
                                                             reader.readAsDataURL(file);
                                                         }
                                                     }}
