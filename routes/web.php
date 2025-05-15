@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ConsignmentController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\OrderController;
@@ -22,6 +23,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/orders/create', [OrderController::class, 'create'])->name('orders.create');
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/employees', [EmployeeController::class, 'index'])->name('employees.index');
+    Route::get('/consignments', [ConsignmentController::class, 'index'])->name('consignments.index');
 });
 
 require __DIR__.'/settings.php';
