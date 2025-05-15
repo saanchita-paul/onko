@@ -9,11 +9,13 @@ import { InertiaResponse } from '@/types';
 import { useForm } from '@inertiajs/react';
 import { format } from 'date-fns';
 import { BadgeCheckIcon, CircleUserRoundIcon, LoaderCircle } from 'lucide-react';
-import { FormEvent } from 'react';
+import { FormEvent, useState } from 'react';
 import { toast } from 'sonner';
 import { Label } from '@/components/ui/label';
 
 export function AddEmployeeForm() {
+    const [sheetOpen, setSheetOpen] = useState(false);
+
     const { data, setData, post, processing, errors, reset } = useForm<{
         name: string;
         position: string;
@@ -31,6 +33,7 @@ export function AddEmployeeForm() {
             onSuccess: (data: InertiaResponse) => {
                 reset();
                 if (data.props.flash?.success) {
+                    setSheetOpen(false);
                     toast.custom(() => (
                         <div className="flex h-[100px] w-[350px] items-start gap-2 rounded-xl border border-blue-700 bg-white p-4 shadow-lg dark:border-gray-200 dark:bg-zinc-900">
                             <BadgeCheckIcon className="h-5 w-5 text-blue-600" />
@@ -55,7 +58,7 @@ export function AddEmployeeForm() {
     };
 
     return (
-        <Sheet>
+        <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
             <div className="flex justify-end p-4">
                 <SheetTrigger asChild>
                     <Button>Add New Employee</Button>

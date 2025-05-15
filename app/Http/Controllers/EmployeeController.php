@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Employee\StoreEmployeeRequest;
 use App\Models\Employee;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -30,9 +31,14 @@ class EmployeeController extends ApiController
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreEmployeeRequest $request)
     {
-        //
+        $result = parent::store($request);
+        if ($result) {
+            return redirect()->route('employees.index')->with('success', 'Employee Added Successfully');
+        }
+
+        return redirect()->route('employees.index')->with('error', 'Employee Not Added Successfully');
     }
 
     /**
