@@ -17,12 +17,12 @@ const mainNavGroups: NavGroup[] = [
             },
             {
                 title: 'Sales',
-                href: '/orders',
+                href: '/sales',
                 icon: ShoppingBag,
             },
             {
                 title: 'Payments',
-                href: '/sales',
+                href: '/payments',
                 icon: Banknote,
             },
             {
