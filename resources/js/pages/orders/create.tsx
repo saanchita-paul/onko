@@ -37,6 +37,13 @@ interface Product {
     quantity: number;
     price: number;
 }
+
+interface CompanyDetails {
+    company_name: string;
+    company_address: string;
+    invoice_date: string;
+    logo: string | null;
+}
 interface InertiaProps extends PageProps {
     products: {
         data: Product[];
@@ -44,11 +51,12 @@ interface InertiaProps extends PageProps {
         last_page: number;
         links: LaravelPaginationItem[];
     };
+    companyDetails?: CompanyDetails | null;
 }
 interface Item extends Product {
     qty: number;
 }
-export default function CreateOrder({ products }: InertiaProps) {
+export default function CreateOrder({ products, companyDetails }: InertiaProps) {
     const [productList, setProductList] = useState<Product[]>(products.data);
     const [items, setItems] = useState<Item[]>([]);
     const addItem = (product: Product) => {
@@ -107,7 +115,9 @@ export default function CreateOrder({ products }: InertiaProps) {
     const tabTriggerClass =
         "data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-md " +
         "dark:data-[state=active]:bg-black dark:data-[state=active]:text-white dark:data-[state=active]:shadow-lg";
-    const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [imagePreview, setImagePreview] = useState<string | null>(
+        companyDetails?.logo ? `/storage/${companyDetails.logo}` : null
+    );
     const fileInputRef = useRef<HTMLInputElement | null>(null);
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [selectedTab, setSelectedTab] = useState("in-stock");
@@ -117,19 +127,31 @@ export default function CreateOrder({ products }: InertiaProps) {
     };
 
 
-
     const { data, setData, post } = useForm({
-        company_name: '',
-        company_address: '',
-        invoice_date: new Date(),
+        company_name: companyDetails?.company_name ?? '',
+        company_address: companyDetails?.company_address ?? '',
+        invoice_date: companyDetails?.invoice_date ?? format(new Date(), 'yyyy-MM-dd'),
+        logo: companyDetails?.logo ?? null,
     });
 
     const submit = () => {
-        console.log('log', data);
-        if (!data.company_name ||!data.company_address || !data.invoice_date) return;
-        post(route('options.store'));
+        if (!data.company_name || !data.company_address || !data.invoice_date) return;
 
+        const formData = new FormData();
+        formData.append('company_name', data.company_name);
+        formData.append('company_address', data.company_address);
+        formData.append('invoice_date', data.invoice_date);
+        if (data.logo) {
+            formData.append('logo', data.logo);
+        }
+
+        post(route('options.store'), {
+            data: formData,
+            preserveScroll: true,
+            onSuccess: () => console.log('Saved successfully'),
+        });
     };
+
     return (
         <AppLayout>
             <Head title="Create Order" />
@@ -166,9 +188,10 @@ export default function CreateOrder({ products }: InertiaProps) {
                                                             const reader = new FileReader();
                                                             reader.onloadend = () => {
                                                                 if (typeof reader.result === "string") {
-                                                                    setImagePreview(reader.result);
+                                                                    setImagePreview(reader.result); // show preview
                                                                 }
                                                             };
+                                                            setData('logo', file); // for submission
                                                             reader.readAsDataURL(file);
                                                         }
                                                     }}
@@ -194,6 +217,7 @@ export default function CreateOrder({ products }: InertiaProps) {
                                                     <button
                                                         onClick={() => {
                                                             setImagePreview(null);
+                                                            setData('logo', null);
                                                             if (fileInputRef.current) {
                                                                 fileInputRef.current.value = '';
                                                             }
@@ -242,10 +266,9 @@ export default function CreateOrder({ products }: InertiaProps) {
                                                 <PopoverContent className="w-auto p-0">
                                                     <Calendar
                                                         mode="single"
-                                                        selected={data.invoice_date ?? new Date()}
                                                         onSelect={(date) => {
                                                             if (date) {
-                                                                setData('invoice_date', date);
+                                                                setData('invoice_date', format(date, 'yyyy-MM-dd'));
                                                                 setTimeout(submit, 150);
                                                             }
                                                         }}

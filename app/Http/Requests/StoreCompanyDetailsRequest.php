@@ -15,9 +15,12 @@ class StoreCompanyDetailsRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'company_name' => 'required|string|max:255',
+//            'key' => 'required|string|in:company_name,company_address,invoice_date,logo',
+//            'value' => 'required|string|in:company_name,company_address,invoice_date,logo',
+            'company_name' => 'nullable|string',
             'company_address' => 'nullable|string',
-            'invoice_date' => 'required|date',
+            'invoice_date' => 'nullable|date',
+            'logo' => 'nullable|image|max:2048',
         ];
     }
 }
