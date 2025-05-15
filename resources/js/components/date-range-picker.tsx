@@ -12,10 +12,11 @@ import { DateRange } from 'react-day-picker';
 type DateRangePickerProps = {
     from?: Date;
     to?: Date;
+    className?: string;
     onChange?: (range: DateRange | undefined) => void;
 };
 
-export function DateRangePicker({ from, to, onChange }: DateRangePickerProps) {
+export function DateRangePicker({ from, to, onChange, className }: DateRangePickerProps) {
     const [date, setDate] = React.useState<DateRange | undefined>({
         from,
         to,
@@ -33,7 +34,7 @@ export function DateRangePicker({ from, to, onChange }: DateRangePickerProps) {
                     <Button
                         id="date"
                         variant="outline"
-                        className={cn('w-[220px] justify-start text-left font-normal', !date?.from && 'text-muted-foreground')}
+                        className={cn('w-[220px] justify-start text-left font-normal', !date?.from && 'text-muted-foreground', className)}
                     >
                         <CalendarRangeIcon className="h-4" />
                         {date?.from ? (

@@ -47,6 +47,7 @@ import { format } from 'date-fns';
 import { useEffect, useState } from 'react';
 import { DateRangePicker } from '@/components/date-range-picker';
 import { DateRange } from 'react-day-picker';
+import { OrderFilterSheet } from '@/pages/orders/filter';
 
 export const columns: ColumnDef<Product>[] = [
     {
@@ -209,21 +210,25 @@ export default function Index({ orders } : Props) {
                     <TabsContent value="all-orders">
                         <h1 className="text-5xl font-bold">Orders</h1>
                         <Tabs value={range} onValueChange={handleRangeChange} className="w-full pt-4">
-                            <div className="flex gap-2">
-                                <TabsList className="mb-4 px-1 py-1">
-                                    <TabsTrigger value="all" className={tabTriggerClass}>All</TabsTrigger>
-                                    <TabsTrigger value="week" className={tabTriggerClass}>Week</TabsTrigger>
-                                    <TabsTrigger value="month" className={tabTriggerClass}>Month</TabsTrigger>
-                                    <TabsTrigger value="quarter" className={tabTriggerClass}>Quarter</TabsTrigger>
-                                    <TabsTrigger value="year" className={tabTriggerClass}>Year</TabsTrigger>
-                                    <TabsTrigger value="all-time" className={tabTriggerClass}>All Time</TabsTrigger>
-                                </TabsList>
-                                <DateRangePicker
-                                    from={dateRange?.from}
-                                    to={dateRange?.to}
-                                    onChange={(newRange) => setDateRange(newRange)}
-                                />
+                            <div className="flex justify-between">
+                                <div className="flex gap-2">
+                                    <TabsList className="mb-4 px-1 py-1">
+                                        <TabsTrigger value="all" className={tabTriggerClass}>All</TabsTrigger>
+                                        <TabsTrigger value="week" className={tabTriggerClass}>Week</TabsTrigger>
+                                        <TabsTrigger value="month" className={tabTriggerClass}>Month</TabsTrigger>
+                                        <TabsTrigger value="quarter" className={tabTriggerClass}>Quarter</TabsTrigger>
+                                        <TabsTrigger value="year" className={tabTriggerClass}>Year</TabsTrigger>
+                                        <TabsTrigger value="all-time" className={tabTriggerClass}>All Time</TabsTrigger>
+                                    </TabsList>
+                                    <DateRangePicker
+                                        from={dateRange?.from}
+                                        to={dateRange?.to}
+                                        onChange={(newRange) => setDateRange(newRange)}
+                                    />
+                                </div>
+                                <OrderFilterSheet />
                             </div>
+
                             <div className="mt-4">
                                 <p>
                                     Selected:{" "}
