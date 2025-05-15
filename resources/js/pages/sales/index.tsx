@@ -131,32 +131,74 @@ export default function Index() {
                                         <Button variant="outline"><ChevronLeftIcon />Yesterday</Button>
                                         <Button variant="outline">Tomorrow <ChevronRightIcon /></Button>
                                     </div>
-                                    <div className="w-full flex">
-                                        <div className="w-full flex gap-5">
-                                            <Card className="w-1/3">
+
+                                    <div className="w-full flex gap-3">
+                                        <div className="w-2/3 flex flex-col gap-3">
+                                           <div className="flex gap-3">
+                                                <Card className="w-1/2">
+                                                    <CardHeader>
+                                                        <CardTitle className="tracking-wide">Total Sales</CardTitle>
+                                                    </CardHeader>
+                                                    <CardContent>
+                                                        <span className="text-5xl text-green-600 mr-3 font-semibold">৳</span> 
+                                                        <span className="text-5xl tracking-wide font-semibold">45,678.90</span>
+                                                    </CardContent>
+                                                    <CardFooter>
+                                                        <span className="tracking-wide">+20% since yesterday</span>
+                                                    </CardFooter>
+                                                </Card>
+                                                <Card className="w-1/2">
+                                                    <CardHeader>
+                                                        <CardTitle className="tracking-wide">Number of orders</CardTitle>
+                                                    </CardHeader>
+                                                    <CardContent>
+                                                        <span className="text-5xl tracking-wide font-semibold">357</span>
+                                                    </CardContent>
+                                                    <CardFooter>
+                                                        <span className="tracking-wide">+33% since yesterday</span>
+                                                    </CardFooter>
+                                                </Card>
+                                           </div>
+                                           <Card className="w-full">
                                                 <CardHeader>
-                                                    <CardTitle className="tracking-wide">Total Sales</CardTitle>
+                                                    <CardTitle>Sales Chart</CardTitle>
                                                 </CardHeader>
                                                 <CardContent>
-                                                    <span className="text-5xl text-green-600 mr-3 font-semibold">৳</span> 
-                                                    <span className="text-5xl tracking-wide font-semibold">45,678.90</span>
+                                                    <ChartContainer config={chartConfig}>
+                                                    <LineChart
+                                                        accessibilityLayer
+                                                        data={chartData}
+                                                        margin={{
+                                                        left: 12,
+                                                        right: 12,
+                                                        }}
+                                                    >
+                                                        <CartesianGrid vertical={false} />
+                                                        <XAxis
+                                                        dataKey="month"
+                                                        tickLine={false}
+                                                        axisLine={false}
+                                                        tickMargin={8}
+                                                        tickFormatter={(value) => value.slice(0, 3)}
+                                                        />
+                                                        <ChartTooltip
+                                                        cursor={false}
+                                                        content={<ChartTooltipContent hideLabel />}
+                                                        />
+                                                        <Line
+                                                        dataKey="desktop"
+                                                        type="linear"
+                                                        stroke="var(--color-desktop)"
+                                                        strokeWidth={2}
+                                                        dot={false}
+                                                        />
+                                                    </LineChart>
+                                                    </ChartContainer>
                                                 </CardContent>
-                                                <CardFooter>
-                                                    <span className="tracking-wide">+20% since yesterday</span>
-                                                </CardFooter>
                                             </Card>
-                                            <Card className="w-1/3">
-                                                <CardHeader>
-                                                    <CardTitle className="tracking-wide">Number of orders</CardTitle>
-                                                </CardHeader>
-                                                <CardContent>
-                                                    <span className="text-5xl tracking-wide font-semibold">357</span>
-                                                </CardContent>
-                                                <CardFooter>
-                                                    <span className="tracking-wide">+33% since yesterday</span>
-                                                </CardFooter>
-                                            </Card>
-                                            <Card className="w-1/3">
+                                        </div>
+                                        <div className="w-1/3 flex flex-col gap-3">
+                                            <Card className="w-full">
                                                 <CardHeader>
                                                     <CardTitle className="tracking-wide">Average value per order</CardTitle>
                                                 </CardHeader>
@@ -168,59 +210,20 @@ export default function Index() {
                                                     <span className="tracking-wide">+33% since yesterday</span>
                                                 </CardFooter>
                                             </Card>
+
+                                            <Card className="w-full h-full">
+                                                <CardHeader>
+                                                    <CardTitle>Card Title</CardTitle>
+                                                    <CardDescription>Card Description</CardDescription>
+                                                </CardHeader>
+                                                <CardContent>
+                                                    <p>Card Content</p>
+                                                </CardContent>
+                                                <CardFooter>
+                                                    <p>Card Footer</p>
+                                                </CardFooter>
+                                            </Card>
                                         </div>
-                                    </div>
-                                    
-                                    <div className="w-full flex justify-between gap-3">
-                                        <Card className="basis-2/3 shrink w-full">
-                                            <CardHeader>
-                                                <CardTitle>Sales Chart</CardTitle>
-                                            </CardHeader>
-                                            <CardContent>
-                                                <ChartContainer config={chartConfig}>
-                                                <LineChart
-                                                    accessibilityLayer
-                                                    data={chartData}
-                                                    margin={{
-                                                    left: 12,
-                                                    right: 12,
-                                                    }}
-                                                >
-                                                    <CartesianGrid vertical={false} />
-                                                    <XAxis
-                                                    dataKey="month"
-                                                    tickLine={false}
-                                                    axisLine={false}
-                                                    tickMargin={8}
-                                                    tickFormatter={(value) => value.slice(0, 3)}
-                                                    />
-                                                    <ChartTooltip
-                                                    cursor={false}
-                                                    content={<ChartTooltipContent hideLabel />}
-                                                    />
-                                                    <Line
-                                                    dataKey="desktop"
-                                                    type="linear"
-                                                    stroke="var(--color-desktop)"
-                                                    strokeWidth={2}
-                                                    dot={false}
-                                                    />
-                                                </LineChart>
-                                                </ChartContainer>
-                                            </CardContent>
-                                        </Card>
-                                        <Card className="basis-1/3 grow w-full">
-                                            <CardHeader>
-                                                <CardTitle>Card Title</CardTitle>
-                                                <CardDescription>Card Description</CardDescription>
-                                            </CardHeader>
-                                            <CardContent>
-                                                <p>Card Content</p>
-                                            </CardContent>
-                                            <CardFooter>
-                                                <p>Card Footer</p>
-                                            </CardFooter>
-                                        </Card>
                                     </div>
                                 </div>
                                 
