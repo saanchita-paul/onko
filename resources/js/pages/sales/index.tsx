@@ -15,12 +15,11 @@ import {
     Card,
     CardHeader,
     CardTitle,
-    CardDescription,
     CardContent,
     CardFooter 
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ChevronLeftIcon, ChevronRightIcon, TrendingUp } from 'lucide-react';
+import { ChevronLeftIcon, ChevronRightIcon, StarIcon } from 'lucide-react';
 import {
   type ChartConfig,
   ChartContainer,
@@ -58,6 +57,13 @@ const breadcrumbs: BreadcrumbItem[] = [
 const tabTriggerClass =
     "data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-md " +
     "dark:data-[state=active]:bg-black dark:data-[state=active]:text-white dark:data-[state=active]:shadow-lg";
+
+const bestSellers = [
+    { name: "Lacoste Polo", amount: 5000 },
+    { name: "Calvin Klein Jeans", amount: 7000 },
+    { name: "CK T-shirt", amount: 7000 },
+    { name: "Armani Sport Code", amount: 12000 },
+];
 
 export default function Index() {
     const { url } = usePage();
@@ -182,8 +188,8 @@ export default function Index() {
                                                         tickFormatter={(value) => value.slice(0, 3)}
                                                         />
                                                         <ChartTooltip
-                                                        cursor={false}
-                                                        content={<ChartTooltipContent hideLabel />}
+                                                            cursor={false}
+                                                            content={<ChartTooltipContent hideLabel />}
                                                         />
                                                         <Line
                                                         dataKey="desktop"
@@ -212,16 +218,59 @@ export default function Index() {
                                             </Card>
 
                                             <Card className="w-full h-full">
-                                                <CardHeader>
-                                                    <CardTitle>Card Title</CardTitle>
-                                                    <CardDescription>Card Description</CardDescription>
-                                                </CardHeader>
-                                                <CardContent>
-                                                    <p>Card Content</p>
-                                                </CardContent>
-                                                <CardFooter>
-                                                    <p>Card Footer</p>
-                                                </CardFooter>
+                                                <Tabs defaultValue="price">
+                                                     <CardHeader>
+                                                        <div className="flex justify-between items-center">
+                                                            <div className="flex gap-2">
+                                                                <StarIcon />
+                                                                <span className="font-bold">Best sellers</span> 
+                                                            </div>
+                                                            <TabsList>
+                                                                <TabsTrigger className={tabTriggerClass} value="price">৳</TabsTrigger>
+                                                                <TabsTrigger className={tabTriggerClass} value="qty">#</TabsTrigger>
+                                                            </TabsList>
+                                                        </div>
+                                                    </CardHeader>
+                                                    <CardContent>
+                                                        <TabsContent value="price">
+                                                            <ol className="mt-5">
+                                                            {
+                                                                bestSellers.map((item, index) => (
+                                                                    <li className="mb-5">
+                                                                        <div className="flex">
+                                                                            
+                                                                            <span className="w-4/6 ">
+                                                                                <span className="mr-6">{index+1}</span>
+                                                                                {item.name}
+                                                                            </span>
+                                                                            <span className="w-2/6 text-right pr-1">৳ {item.amount}</span>
+                                                                        </div>
+                                                                    </li>
+                                                                ))
+                                                            }
+                                                            </ol>
+                                                        </TabsContent>
+                                                        <TabsContent value="qty">
+                                                            <ol className="mt-5">
+                                                            {
+                                                                bestSellers.map((item, index) => (
+                                                                    <li className="mb-5">
+                                                                        <div className="flex">
+                                                                            
+                                                                            <span className="w-4/6 ">
+                                                                                <span className="mr-6">{index+1}</span>
+                                                                                {item.name}
+                                                                            </span>
+                                                                            <span className="w-2/6 text-right pr-1">৳ {item.amount}</span>
+                                                                        </div>
+                                                                    </li>
+                                                                ))
+                                                            }
+                                                            </ol>
+                                                        </TabsContent>
+                                                    </CardContent>
+                                                </Tabs>
+                                               
                                             </Card>
                                         </div>
                                     </div>
@@ -249,14 +298,6 @@ export default function Index() {
                                 All-time
                             </TabsContent>
                         </Tabs>
-                    </TabsContent>
-
-                    <TabsContent value="returns">
-
-                    </TabsContent>
-
-                    <TabsContent value="refund-policy">
-
                     </TabsContent>
                 </Tabs>
             </div>
