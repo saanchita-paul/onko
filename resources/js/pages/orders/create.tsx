@@ -1,5 +1,5 @@
 import AppLayout from '@/layouts/app-layout';
-import { Head, useForm } from '@inertiajs/react';
+import { Head, router, useForm } from '@inertiajs/react';
 import { OrderForm } from '@/pages/orders/order-form';
 import {
     Card,
@@ -22,7 +22,7 @@ import {
     X,
     Search, ImageIcon, CalendarIcon
 } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Textarea } from "@/components/ui/textarea";
 import { PageProps } from '@inertiajs/core';
 import { LaravelPaginationItem } from '@/types';
@@ -127,30 +127,44 @@ export default function CreateOrder({ products, companyDetails }: InertiaProps) 
     };
 
 
-    const { data, setData, post } = useForm({
+    const { data, setData } = useForm<{
+        company_name: string;
+        company_address: string;
+        invoice_date: string | null;
+        logo: string | File | null;
+    }>({
         company_name: companyDetails?.company_name ?? '',
         company_address: companyDetails?.company_address ?? '',
-        invoice_date: companyDetails?.invoice_date ?? format(new Date(), 'yyyy-MM-dd'),
+        invoice_date: companyDetails?.invoice_date ?? null,
         logo: companyDetails?.logo ?? null,
     });
 
-    const submit = () => {
-        if (!data.company_name || !data.company_address || !data.invoice_date) return;
 
+    const submit = () => {
         const formData = new FormData();
         formData.append('company_name', data.company_name);
         formData.append('company_address', data.company_address);
-        formData.append('invoice_date', data.invoice_date);
-        if (data.logo) {
+        formData.append('invoice_date', data.invoice_date ?? '');
+
+        if (data.logo && typeof data.logo !== 'string') {
             formData.append('logo', data.logo);
         }
 
-        post(route('options.store'), {
-            data: formData,
+        router.post(route('options.store'), formData, {
+            forceFormData: true,
             preserveScroll: true,
             onSuccess: () => console.log('Saved successfully'),
         });
     };
+
+
+    useEffect(() => {
+        const isLogoFile = typeof data.logo !== 'string' && data.logo instanceof File;
+        if (isLogoFile || data.invoice_date) {
+            submit();
+        }
+    }, [data.logo, data.invoice_date]);
+
 
     return (
         <AppLayout>
@@ -182,7 +196,7 @@ export default function CreateOrder({ products, companyDetails }: InertiaProps) 
                                                     id="fileUpload"
                                                     className="hidden"
                                                     accept="image/*"
-                                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                                    onChange={(e) => {
                                                         const file = e.target.files?.[0];
                                                         if (file) {
                                                             const reader = new FileReader();
@@ -268,8 +282,8 @@ export default function CreateOrder({ products, companyDetails }: InertiaProps) 
                                                         mode="single"
                                                         onSelect={(date) => {
                                                             if (date) {
-                                                                setData('invoice_date', format(date, 'yyyy-MM-dd'));
-                                                                setTimeout(submit, 150);
+                                                                const formatted = format(date, 'yyyy-MM-dd');
+                                                                setData('invoice_date', formatted);
                                                             }
                                                         }}
                                                     />
