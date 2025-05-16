@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Search, Smile, ChevronRight } from 'lucide-react';
 import { Dispatch, SetStateAction } from "react"
+import { useForm } from '@inertiajs/react';
 
 interface OrderFormProps {
     open: boolean
@@ -17,6 +18,22 @@ interface OrderFormProps {
 }
 
 export function OrderForm({ open, onOpenChange }: OrderFormProps) {
+    const { data, setData, post, processing, errors, reset } = useForm({
+        // phone: '',
+        // email: '',
+        name: '',
+    })
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault()
+
+        post(route('customers.store'), {
+            onSuccess: () => {
+                reset()
+                onOpenChange(false)
+            },
+        })
+    }
     return (
         <Sheet open={open} onOpenChange={onOpenChange}>
             <SheetContent
@@ -44,24 +61,31 @@ export function OrderForm({ open, onOpenChange }: OrderFormProps) {
                         </SheetDescription>
                     </div>
                 </SheetHeader>
+                <form onSubmit={handleSubmit} >
+                    <div className="px-6 space-y-4 mt-4">
+                        <Input placeholder="Phone Number" />
+                        <Input placeholder="Email Address" />
+                        <Input
+                            placeholder="Customer Name"
+                            value={data.name}
+                            onChange={e => setData('name', e.target.value)}
+                        />
+                        {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
 
-                <div className="px-6 space-y-4 mt-4">
-                    <Input placeholder="Phone Number" />
-                    <Input placeholder="Email Address" />
-                    <Input placeholder="Customer Name" />
-
-                    <div className="relative">
-                        <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
-                        <Input placeholder="Search for customers" className="pl-10" />
+                        <div className="relative">
+                            <Search
+                                className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+                            <Input placeholder="Search for customers" className="pl-10" />
+                        </div>
                     </div>
-                </div>
 
-                <div className="px-6 mt-6">
-                    <Button variant="secondary" className="w-full">
-                        Add Customer
-                    </Button>
-                </div>
+                    <div className="px-6 mt-6">
+                        <Button variant="secondary" className="w-full" type="submit" disabled={processing}>
+                            {processing ? 'Adding...' : 'Add Customer'}
+                        </Button>
+                    </div>
+                </form>
             </SheetContent>
         </Sheet>
-    )
+)
 }

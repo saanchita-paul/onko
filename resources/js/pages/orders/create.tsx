@@ -403,9 +403,9 @@ export default function CreateOrder({ products, companyDetails }: InertiaProps) 
                                                       <span className="block">
                                                         {product.name.split(" ").slice(0, 2).join(" ")}
                                                       </span>
-                                                                                                            <span className="block">
-                                                        {product.name.split(" ").slice(2).join(" ")}
-                                                      </span>
+                                                        <span className="block">
+                                                            {product.name.split(" ").slice(2).join(" ")}
+                                                        </span>
                                                     </div>
 
                                                     <div className="text-muted-foreground text-sm">
