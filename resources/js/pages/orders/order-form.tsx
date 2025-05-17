@@ -137,14 +137,18 @@ export function OrderForm({ open, onOpenChange, customers }: OrderFormProps) {
                 </form>
 
                 <div className="px-6 mt-8 space-y-2">
-                    <ul className="divide-y text-sm">
-                        {customers.data.map(customer => (
-                            <li key={customer.id} className="py-2 flex justify-between">
-                                <span>{customer.name}</span>
-                                <span className="text-muted-foreground">#{customer.id}</span>
-                            </li>
-                        ))}
-                    </ul>
+                    {customers.data.map((customer) => (
+                        <div key={customer.id} className="flex justify-between items-start py-4 text-sm">
+                            <div>
+                                <p className="font-mono text-xs text-muted-foreground">{customer.id}</p>
+                                <p className="font-medium text-base text-black">{customer.name}</p>
+                                {/*<p className="text-muted-foreground text-sm">@ {customer.email}</p>*/}
+                                {/*<p className="text-muted-foreground text-sm">📞 {customer.phone}</p>*/}
+                            </div>
+                            <button className="bg-muted px-3 py-1 text-sm rounded text-black">Select</button>
+                        </div>
+                    ))}
+
 
                     <div className="flex flex-wrap gap-2 mt-4">
                         {customers.links.map((link, index) => (
