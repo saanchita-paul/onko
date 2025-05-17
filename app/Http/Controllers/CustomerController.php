@@ -16,22 +16,6 @@ class CustomerController extends Controller
         ]);
     }
 
-    public function create(Request $request)
-    {
-        $customers = Customer::query()
-            ->when($request->search, fn($q) =>
-            $q->where('name', 'like', '%' . $request->search . '%')
-            )
-            ->paginate(3)
-            ->withQueryString();
-
-        return Inertia::render('orders/order-form', [
-            'customers' => $customers,
-            'filters' => $request->only('search'),
-        ]);
-    }
-
-
     public function store(SaveCustomerDetailsRequest $request)
     {
         $validated = $request->validated();

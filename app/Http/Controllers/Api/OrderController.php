@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 
+use App\Models\Customer;
 use App\Models\Option;
 use App\Models\Order;
 use App\Models\Product;
@@ -29,9 +30,16 @@ class OrderController extends Controller
             'logo'
         ])->pluck('value', 'key');
 
+        $customers = Customer::query()
+            ->when($request->search, fn($q) =>
+            $q->where('name', 'like', '%' . $request->search . '%')
+            )
+            ->paginate(3)
+            ->withQueryString();
         return [
             'products' => $products,
             'companyDetails' => $companyDetails,
+            'customers' => $customers
         ];
     }
 

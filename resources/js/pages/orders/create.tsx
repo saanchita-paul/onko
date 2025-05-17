@@ -44,6 +44,10 @@ interface CompanyDetails {
     invoice_date: string;
     logo: string | null;
 }
+interface Customer {
+    id: number;
+    name: string;
+}
 interface InertiaProps extends PageProps {
     products: {
         data: Product[];
@@ -52,11 +56,12 @@ interface InertiaProps extends PageProps {
         links: LaravelPaginationItem[];
     };
     companyDetails?: CompanyDetails | null;
+    customers: Customer[];
 }
 interface Item extends Product {
     qty: number;
 }
-export default function CreateOrder({ products, companyDetails }: InertiaProps) {
+export default function CreateOrder({ products, companyDetails, customers }: InertiaProps) {
     const [productList, setProductList] = useState<Product[]>(products.data);
     const [items, setItems] = useState<Item[]>([]);
     const addItem = (product: Product) => {
@@ -450,7 +455,7 @@ export default function CreateOrder({ products, companyDetails }: InertiaProps) 
                     </div>
                 </div>
             </div>
-            <OrderForm open={drawerOpen} onOpenChange={setDrawerOpen} />
+            <OrderForm open={drawerOpen} onOpenChange={setDrawerOpen} customers={customers} />
         </AppLayout>
     );
 }

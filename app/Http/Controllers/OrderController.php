@@ -25,6 +25,7 @@ class OrderController extends ApiOrderController
         return Inertia::render('orders/create', [
             'products' => $response['products'],
             'companyDetails' => $response['companyDetails'],
+            'customers' => $response['customers'],
         ]);
     }
 }
