@@ -453,6 +453,11 @@ export default function CreateOrder({ products, companyDetails, customers }: Ine
                                                     }
                                                 }}
                                                 dangerouslySetInnerHTML={{ __html: link.label ?? '' }}
+                                                className={`px-3 py-1 text-sm border rounded transition
+                                                     ${link.active
+                                                    ? 'bg-black text-white dark:bg-white dark:text-black'
+                                                    : 'bg-transparent text-black dark:text-white border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800'}
+                                                    `}
                                             />
                                         ))}
                                     </div>
