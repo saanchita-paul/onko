@@ -15,7 +15,7 @@ class OptionController extends Controller
     {
         $validated = $request->validated();
         if ($request->hasFile('logo') && $request->file('logo')->isValid()) {
-            $logoPath = Storage::disk('public')->putFile('company_logo', $request->file('logo'));
+            $logoPath = Storage::disk(config('filesystems.upload'))->putFile('company_logo', $request->file('logo'));
             $validated['logo'] = Storage::url($logoPath);
         }
 
