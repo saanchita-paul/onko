@@ -470,7 +470,8 @@ export default function CreateOrder({ products, companyDetails, customers, order
                     </div>
                 </div>
             </div>
-            <OrderForm open={drawerOpen} onOpenChange={setDrawerOpen} customers={customers} orderItems={orderItems} />
+            // todo i need to pass selected items to orderform component
+            <OrderForm open={drawerOpen} onOpenChange={setDrawerOpen} customers={customers} orderItems={items} />
         </AppLayout>
     );
 }

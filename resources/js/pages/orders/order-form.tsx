@@ -35,10 +35,11 @@ interface OrderFormProps {
     open: boolean
     onOpenChange: Dispatch<SetStateAction<boolean>>
     customers: PaginatedCustomers,
-    orderItems: []
+    orderItems: unknown
 }
 
 export function OrderForm({ open, onOpenChange, customers, orderItems }: OrderFormProps) {
+    console.log({orderItems});
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
         email: '',
@@ -101,20 +102,19 @@ export function OrderForm({ open, onOpenChange, customers, orderItems }: OrderFo
         setSearchTimeout(timeout)
     }
 
+
+    // todo i need to pass data to confirm-order page
     const handleSelectCustomer = (customer: Customer) => {
         onOpenChange(false);
-        router.visit(route('orders.confirm'), {
-            data: {
-                customer_id: customer.id,
-                customer_name: customer.name,
-                customer_email: customer.email,
-                customer_phone: customer.phone,
-                items: orderItems,
-            },
-            method: 'get',
+
+        router.get(route('orders.confirm'), {
+            customer,
+            items: orderItems,
+        }, {
             preserveState: true,
         });
     };
+
 
 
 
