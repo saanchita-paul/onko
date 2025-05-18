@@ -7,13 +7,17 @@ import {
 } from "@/components/ui/custom-sheet"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Search, Smile, ChevronRight } from 'lucide-react'
+import { Search, Smile, ChevronRight, BadgeCheckIcon } from 'lucide-react';
 import { Dispatch, SetStateAction, useState } from "react"
 import { useForm, router } from '@inertiajs/react'
+import { toast } from 'sonner';
+import { InertiaResponse } from '@/types';
 
 interface Customer {
     id: number
     name: string
+    email: string
+    phone: string
 }
 
 export interface PaginatedCustomers {
@@ -36,6 +40,8 @@ interface OrderFormProps {
 export function OrderForm({ open, onOpenChange, customers }: OrderFormProps) {
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
+        email: '',
+        phone: ''
     })
 
     const [search, setSearch] = useState('')
@@ -45,11 +51,31 @@ export function OrderForm({ open, onOpenChange, customers }: OrderFormProps) {
         e.preventDefault()
 
         post(route('customers.store'), {
-            onSuccess: () => {
-                reset()
-                onOpenChange(false)
+            onSuccess: (data: InertiaResponse) => {
+                reset();
+                if (data.props.flash?.success) {
+                    toast.custom(() => (
+                        <div className="flex h-[100px] w-[350px] items-start gap-2 rounded-xl border border-blue-700 bg-white p-4 shadow-lg dark:border-gray-200 dark:bg-zinc-900">
+                            <BadgeCheckIcon className="h-5 w-5 text-blue-600" />
+                            <div>
+                                <p className="text-sm font-semibold text-blue-600">Customer Created</p>
+                                <p className="text-sm text-zinc-700 dark:text-zinc-300">
+                                    {data.props.flash?.success}
+                                </p>
+                                <div className="mt-3 flex justify-start gap-4 text-sm text-blue-600">
+                                </div>
+                            </div>
+                        </div>
+                    ));
+                } else if (data.props.flash?.error) {
+                    toast.error(data.props.flash.error);
+                }
             },
-        })
+            onError: (error) => {
+                toast.error(Object.values(error)[0]);
+            },
+        });
+
     }
 
     const handlePaginationClick = (url: string | null) => {
@@ -104,8 +130,16 @@ export function OrderForm({ open, onOpenChange, customers }: OrderFormProps) {
 
                 <form onSubmit={handleSubmit}>
                     <div className="px-6 space-y-4 mt-4">
-                        <Input placeholder="Phone Number" />
-                        <Input placeholder="Email Address" />
+                        <Input placeholder="Phone Number"
+                               value={data.phone}
+                               onChange={e => setData('phone', e.target.value)}
+                        />
+                        {errors.phone && <p className="text-sm text-red-500">{errors.phone}</p>}
+                        <Input placeholder="Email Address"
+                               value={data.email}
+                               onChange={e => setData('email', e.target.value)}
+                        />
+                        {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
                         <Input
                             placeholder="Customer Name"
                             value={data.name}
@@ -145,8 +179,8 @@ export function OrderForm({ open, onOpenChange, customers }: OrderFormProps) {
                             <div>
                                 <p className="font-mono text-xs text-muted-foreground">{customer.id}</p>
                                 <p className="font-medium text-base text-black dark:text-white">{customer.name}</p>
-                                {/*<p className="text-muted-foreground text-sm">@ {customer.email}</p>*/}
-                                {/*<p className="text-muted-foreground text-sm">📞 {customer.phone}</p>*/}
+                                <p className="text-muted-foreground text-sm">@ {customer.email}</p>
+                                <p className="text-muted-foreground text-sm">📞 {customer.phone}</p>
                             </div>
                             <button
                                 className="bg-muted hover:bg-muted/80 px-3 py-1 text-sm rounded text-black dark:text-white transition"

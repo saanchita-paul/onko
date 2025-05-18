@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\SaveCustomerDetailsRequest;
 use App\Models\Customer;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class CustomerController extends Controller

@@ -20,6 +20,8 @@ class CustomerFactory extends Factory
         return [
             'id' => (string) Str::uuid(),
             'name' => $this->faker->name(),
+            'email' => $this->faker->unique()->safeEmail(),
+            'phone' => $this->faker->phoneNumber(),
             'lifetime_value' => $this->faker->randomFloat(2, 100, 20000),
             'number_of_orders' => $this->faker->numberBetween(1, 100),
             'number_of_items' => $this->faker->numberBetween(1, 300),

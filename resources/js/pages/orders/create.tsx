@@ -119,7 +119,7 @@ export default function CreateOrder({ products, companyDetails, customers }: Ine
         "data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-md " +
         "dark:data-[state=active]:bg-black dark:data-[state=active]:text-white dark:data-[state=active]:shadow-lg";
     const [imagePreview, setImagePreview] = useState<string | null>(
-        companyDetails?.logo ? `/storage/${companyDetails.logo}` : null
+        companyDetails?.logo ? `${companyDetails.logo}` : null
     );
     const fileInputRef = useRef<HTMLInputElement | null>(null);
     const [drawerOpen, setDrawerOpen] = useState(false);

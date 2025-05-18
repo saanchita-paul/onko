@@ -34,7 +34,7 @@ class OrderController extends Controller
             ->when($request->search, fn($q) =>
             $q->where('name', 'like', '%' . $request->search . '%')
             )
-            ->paginate(3)
+            ->paginate(2)
             ->withQueryString();
         return [
             'products' => $products,
