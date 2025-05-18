@@ -1,5 +1,5 @@
 import AppLayout from '@/layouts/app-layout';
-import { Head } from '@inertiajs/react';
+import { Head, router, useForm } from '@inertiajs/react';
 import { OrderForm } from '@/pages/orders/order-form';
 import {
     Card,
@@ -20,12 +20,17 @@ import {
 import {
     Plus,
     X,
-    Search, ImageIcon
+    Search, ImageIcon, CalendarIcon
 } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Textarea } from "@/components/ui/textarea";
 import { PageProps } from '@inertiajs/core';
 import { LaravelPaginationItem } from '@/types';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
+import type {  PaginatedCustomers } from '@/pages/orders/order-form';
 interface Product {
     id: string;
     name: string;
@@ -33,6 +38,14 @@ interface Product {
     quantity: number;
     price: number;
 }
+
+interface CompanyDetails {
+    company_name: string;
+    company_address: string;
+    invoice_date: string;
+    logo: string | null;
+}
+
 interface InertiaProps extends PageProps {
     products: {
         data: Product[];
@@ -40,11 +53,13 @@ interface InertiaProps extends PageProps {
         last_page: number;
         links: LaravelPaginationItem[];
     };
+    companyDetails?: CompanyDetails | null;
+    customers: PaginatedCustomers;
 }
 interface Item extends Product {
     qty: number;
 }
-export default function CreateOrder({ products }: InertiaProps) {
+export default function CreateOrder({ products, companyDetails, customers }: InertiaProps) {
     const [productList, setProductList] = useState<Product[]>(products.data);
     const [items, setItems] = useState<Item[]>([]);
     const addItem = (product: Product) => {
@@ -103,7 +118,9 @@ export default function CreateOrder({ products }: InertiaProps) {
     const tabTriggerClass =
         "data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-md " +
         "dark:data-[state=active]:bg-black dark:data-[state=active]:text-white dark:data-[state=active]:shadow-lg";
-    const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [imagePreview, setImagePreview] = useState<string | null>(
+        companyDetails?.logo ? `${companyDetails.logo}` : null
+    );
     const fileInputRef = useRef<HTMLInputElement | null>(null);
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [selectedTab, setSelectedTab] = useState("in-stock");
@@ -111,11 +128,52 @@ export default function CreateOrder({ products }: InertiaProps) {
     const handleTabChange = (tabValue: string) => {
         setSelectedTab(tabValue);
     };
+
+
+    const { data, setData } = useForm<{
+        company_name: string;
+        company_address: string;
+        invoice_date: string | null;
+        logo: string | File | null;
+    }>({
+        company_name: companyDetails?.company_name ?? '',
+        company_address: companyDetails?.company_address ?? '',
+        invoice_date: companyDetails?.invoice_date ?? null,
+        logo: companyDetails?.logo ?? null,
+    });
+
+
+    const submit = () => {
+        const formData = new FormData();
+        formData.append('company_name', data.company_name);
+        formData.append('company_address', data.company_address);
+        formData.append('invoice_date', data.invoice_date ?? '');
+
+        if (data.logo && typeof data.logo !== 'string') {
+            formData.append('logo', data.logo);
+        }
+
+        router.post(route('options.store'), formData, {
+            forceFormData: true,
+            preserveScroll: true,
+            onSuccess: () => console.log('Saved successfully'),
+        });
+    };
+
+
+    useEffect(() => {
+        const isLogoFile = typeof data.logo !== 'string' && data.logo instanceof File;
+        if (isLogoFile || data.invoice_date) {
+            submit();
+        }
+    }, [data.logo, data.invoice_date]);
+
+
     return (
         <AppLayout>
             <Head title="Create Order" />
-            <div className="p-6">
-                <div className="flex justify-between items-center mb-4">
+            <div className="p-6 sm:p-6">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
                     <Tabs defaultValue="new-invoice">
                         <TabsList className="px-1 py-1">
                             <TabsTrigger value="new-invoice" className={tabTriggerClass}>New Invoice</TabsTrigger>
@@ -124,14 +182,14 @@ export default function CreateOrder({ products }: InertiaProps) {
                         <TabsContent value="new-invoice"></TabsContent>
                         <TabsContent value="all-orders"></TabsContent>
                     </Tabs>
-                    <Button className="cursor-pointer">Edit Invoice Format</Button>
+                    <Button className="cursor-pointer sm:w-auto">Edit Invoice Format</Button>
                 </div>
                 <h1 className="text-2xl font-bold">New Invoice</h1>
                 <p className="text-muted-foreground mb-4">Create a new Invoice or Sales Receipt</p>
-                <div className="flex items-start gap-6">
-                    <div className="flex-1 space-y-4">
+                <div className="flex flex-col lg:flex-row gap-6">
+                    <div className="w-full lg:flex-1 space-y-4">
                         <Card>
-                            <CardContent className="space-y-4 p-6">
+                            <CardContent className="space-y-4 p-6 sm:p-6">
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
                                         <div className="flex items-center gap-2">
@@ -141,7 +199,7 @@ export default function CreateOrder({ products }: InertiaProps) {
                                                     id="fileUpload"
                                                     className="hidden"
                                                     accept="image/*"
-                                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                                                    onChange={(e) => {
                                                         const file = e.target.files?.[0];
                                                         if (file) {
                                                             const reader = new FileReader();
@@ -150,6 +208,7 @@ export default function CreateOrder({ products }: InertiaProps) {
                                                                     setImagePreview(reader.result);
                                                                 }
                                                             };
+                                                            setData('logo', file);
                                                             reader.readAsDataURL(file);
                                                         }
                                                     }}
@@ -175,6 +234,7 @@ export default function CreateOrder({ products }: InertiaProps) {
                                                     <button
                                                         onClick={() => {
                                                             setImagePreview(null);
+                                                            setData('logo', null);
                                                             if (fileInputRef.current) {
                                                                 fileInputRef.current.value = '';
                                                             }
@@ -186,21 +246,55 @@ export default function CreateOrder({ products }: InertiaProps) {
                                                     </button>
                                                 )}
                                             </div>
-                                            <Input placeholder="Company Name" className="flex-1" />
+                                            <Input
+                                                placeholder="Company Name"
+                                                className="flex-1"
+                                                value={data.company_name}
+                                                onChange={(e) => setData('company_name', e.target.value)}
+                                                onBlur={submit}
+                                                onKeyDown={(e) => e.key === 'Enter' && submit()}
+                                            />
                                         </div>
-                                        <Textarea placeholder="Company Address
-(optional)" />
+                                        <Textarea
+                                            placeholder="Company Address
+(optional)"
+                                            value={data.company_address}
+                                            onChange={(e) => setData('company_address', e.target.value)}
+                                            onBlur={submit}
+                                            onKeyDown={(e) => e.key === 'Enter' && submit()}
+                                        />
                                     </div>
                                     <div className="space-y-2">
                                         <div className="flex items-center gap-2">
                                             <label className="text-sm font-medium w-20">Date:</label>
-                                            <Input
-                                                placeholder="dd-mm-yyyy"
-                                                className="flex-1 w-full cursor-pointer"
-                                            />
+                                            <Popover>
+                                                <PopoverTrigger asChild>
+                                                    <button
+                                                        type="button"
+                                                        className={cn(
+                                                            'flex justify-between items-center w-full border rounded-md px-3 py-2 text-left text-sm',
+                                                            !data.invoice_date && 'text-muted-foreground'
+                                                        )}
+                                                    >
+                                                        {data.invoice_date ? format(data.invoice_date, 'dd-MM-yyyy') : 'Pick a date'}
+                                                        <CalendarIcon className="ml-2 h-4 w-4 text-muted-foreground" />
+                                                    </button>
+                                                </PopoverTrigger>
+                                                <PopoverContent className="w-auto p-0">
+                                                    <Calendar
+                                                        mode="single"
+                                                        onSelect={(date) => {
+                                                            if (date) {
+                                                                const formatted = format(date, 'yyyy-MM-dd');
+                                                                setData('invoice_date', formatted);
+                                                            }
+                                                        }}
+                                                    />
+                                                </PopoverContent>
+                                            </Popover>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            <label className="text-sm font-medium w-20">Order #</label>
+                                            <label className="text-sm font-medium w-14">Order #</label>
                                             <Input
                                                 placeholder="auto generates"
                                                 readOnly
@@ -265,7 +359,7 @@ export default function CreateOrder({ products }: InertiaProps) {
                                 <span className="pr-27">{subtotal} /-</span>
                             </div>
                         </Card>
-                        <div className="flex justify-end gap-2">
+                        <div className="flex flex-wrap justify-end gap-2">
                             <Button variant="outline" className="cursor-pointer">Add a fee or charge</Button>
                             <Button variant="outline" className="cursor-pointer">Add discount</Button>
                             <Button variant="outline" className="cursor-pointer">Add tax</Button>
@@ -312,9 +406,9 @@ export default function CreateOrder({ products }: InertiaProps) {
                                                       <span className="block">
                                                         {product.name.split(" ").slice(0, 2).join(" ")}
                                                       </span>
-                                                                                                            <span className="block">
-                                                        {product.name.split(" ").slice(2).join(" ")}
-                                                      </span>
+                                                        <span className="block">
+                                                            {product.name.split(" ").slice(2).join(" ")}
+                                                        </span>
                                                     </div>
 
                                                     <div className="text-muted-foreground text-sm">
@@ -359,7 +453,7 @@ export default function CreateOrder({ products }: InertiaProps) {
                     </div>
                 </div>
             </div>
-            <OrderForm open={drawerOpen} onOpenChange={setDrawerOpen} />
+            <OrderForm open={drawerOpen} onOpenChange={setDrawerOpen} customers={customers} />
         </AppLayout>
     );
 }
