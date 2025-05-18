@@ -22,7 +22,6 @@ class OrderController extends Controller
     public function create(Request $request)
     {
         $products = Product::select('id', 'name', 'quantity', 'price')
-            ->latest()
             ->paginate(5);
 
         $companyDetails = Option::whereIn('key', [
