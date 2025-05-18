@@ -1,5 +1,5 @@
 import AppLayout from '@/layouts/app-layout';
-import { Head, router, useForm } from '@inertiajs/react';
+import { Head, router, useForm, useRemember } from '@inertiajs/react';
 import { OrderForm } from '@/pages/orders/order-form';
 import {
     Card,
@@ -61,7 +61,11 @@ interface Item extends Product {
 }
 export default function CreateOrder({ products, companyDetails, customers }: InertiaProps) {
     const [productList, setProductList] = useState<Product[]>(products.data);
-    const [items, setItems] = useState<Item[]>([]);
+
+    useEffect(() => {
+        setProductList(products.data);
+    }, [products.data]);
+    const [items, setItems] = useRemember<Item[]>([], 'order_items');
     const addItem = (product: Product) => {
         setItems((prevItems) => {
             const existingIndex = prevItems.findIndex(item => item.id === product.id);
@@ -440,7 +444,13 @@ export default function CreateOrder({ products, companyDetails, customers }: Ine
                                                 size="sm"
                                                 disabled={!link.url}
                                                 onClick={() => {
-                                                    if (link.url) window.location.href = link.url;
+                                                    if (link.url) {
+                                                        router.visit(link.url, {
+                                                            preserveState: true,
+                                                            preserveScroll: true,
+                                                            only: ['products'],
+                                                        });
+                                                    }
                                                 }}
                                                 dangerouslySetInnerHTML={{ __html: link.label ?? '' }}
                                             />

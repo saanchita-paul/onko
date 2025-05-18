@@ -22,7 +22,9 @@ class OrderController extends Controller
     public function create(Request $request)
     {
         $products = Product::select('id', 'name', 'quantity', 'price')
-            ->paginate(10);
+            ->latest()
+            ->paginate(5);
+
         $companyDetails = Option::whereIn('key', [
             'company_name',
             'company_address',
