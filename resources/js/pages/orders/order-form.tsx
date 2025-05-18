@@ -53,6 +53,7 @@ export function OrderForm({ open, onOpenChange, customers }: OrderFormProps) {
         post(route('customers.store'), {
             onSuccess: (data: InertiaResponse) => {
                 reset();
+                onOpenChange(false);
                 if (data.props.flash?.success) {
                     toast.custom(() => (
                         <div className="flex h-[100px] w-[350px] items-start gap-2 rounded-xl border border-blue-700 bg-white p-4 shadow-lg dark:border-gray-200 dark:bg-zinc-900">
@@ -160,12 +161,11 @@ export function OrderForm({ open, onOpenChange, customers }: OrderFormProps) {
 
                     <div className="px-6 mt-6">
                         <Button
-                            variant="secondary"
                             className="w-full"
                             type="submit"
                             disabled={processing}
                         >
-                            {processing ? 'Adding...' : 'Add Customer'}
+                            {processing ? 'Adding...' : 'Add New Customer'}
                         </Button>
                     </div>
                 </form>
