@@ -16,7 +16,7 @@ interface Customer {
     name: string
 }
 
-interface PaginatedCustomers {
+export interface PaginatedCustomers {
     data: Customer[]
     current_page: number
     last_page: number
@@ -138,17 +138,23 @@ export function OrderForm({ open, onOpenChange, customers }: OrderFormProps) {
 
                 <div className="px-6 mt-8 space-y-2">
                     {customers.data.map((customer) => (
-                        <div key={customer.id} className="flex justify-between items-start py-4 text-sm">
+                        <div
+                            key={customer.id}
+                            className="flex justify-between items-start py-4 text-sm border-b border-border"
+                        >
                             <div>
                                 <p className="font-mono text-xs text-muted-foreground">{customer.id}</p>
-                                <p className="font-medium text-base text-black">{customer.name}</p>
+                                <p className="font-medium text-base text-black dark:text-white">{customer.name}</p>
                                 {/*<p className="text-muted-foreground text-sm">@ {customer.email}</p>*/}
                                 {/*<p className="text-muted-foreground text-sm">📞 {customer.phone}</p>*/}
                             </div>
-                            <button className="bg-muted px-3 py-1 text-sm rounded text-black">Select</button>
+                            <button
+                                className="bg-muted hover:bg-muted/80 px-3 py-1 text-sm rounded text-black dark:text-white transition"
+                            >
+                                Select
+                            </button>
                         </div>
                     ))}
-
 
                     <div className="flex flex-wrap gap-2 mt-4">
                         {customers.links.map((link, index) => (
@@ -157,11 +163,11 @@ export function OrderForm({ open, onOpenChange, customers }: OrderFormProps) {
                                 dangerouslySetInnerHTML={{ __html: link.label }}
                                 disabled={!link.url}
                                 onClick={() => handlePaginationClick(link.url)}
-                                className={`px-3 py-1 text-sm border rounded ${
-                                    link.active
-                                        ? 'bg-primary text-white'
-                                        : 'bg-white text-gray-700 hover:bg-gray-100'
-                                }`}
+                                className={`px-3 py-1 text-sm border rounded transition
+                                    ${link.active
+                                    ? 'bg-black text-white dark:bg-white dark:text-black'
+                                    : 'bg-transparent text-black dark:text-white border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800'}
+                                    `}
                             />
                         ))}
                     </div>

@@ -30,6 +30,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
+import type {  PaginatedCustomers } from '@/pages/orders/order-form';
 interface Product {
     id: string;
     name: string;
@@ -44,10 +45,7 @@ interface CompanyDetails {
     invoice_date: string;
     logo: string | null;
 }
-interface Customer {
-    id: number;
-    name: string;
-}
+
 interface InertiaProps extends PageProps {
     products: {
         data: Product[];
@@ -56,7 +54,7 @@ interface InertiaProps extends PageProps {
         links: LaravelPaginationItem[];
     };
     companyDetails?: CompanyDetails | null;
-    customers: Customer[];
+    customers: PaginatedCustomers;
 }
 interface Item extends Product {
     qty: number;
