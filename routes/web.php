@@ -30,6 +30,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/sales', [SalesController::class, 'index'])->name('sales.index');
     Route::post('/customers', [CustomerController::class, 'store'])->name('customers.store');
     Route::post('/options', [OptionController::class, 'store'])->name('options.store');
+    Route::get('/orders/confirm', function () {
+        return Inertia::render('orders/confirm-order', [
+            'customer' => request()->input('customer'),
+            'items' => request()->input('items'),
+        ]);
+    })->name('orders.confirm');
+
 });
 
 require __DIR__.'/settings.php';

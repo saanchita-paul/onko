@@ -55,11 +55,12 @@ interface InertiaProps extends PageProps {
     };
     companyDetails?: CompanyDetails | null;
     customers: PaginatedCustomers;
+    orderItems: []
 }
 interface Item extends Product {
     qty: number;
 }
-export default function CreateOrder({ products, companyDetails, customers }: InertiaProps) {
+export default function CreateOrder({ products, companyDetails, customers, orderItems }: InertiaProps) {
     const [productList, setProductList] = useState<Product[]>(products.data);
 
     useEffect(() => {
@@ -370,6 +371,7 @@ export default function CreateOrder({ products, companyDetails, customers }: Ine
                             <Button className="cursor-pointer" onClick={() => setDrawerOpen(true)}>
                                 Create order
                             </Button>
+
                         </div>
                     </div>
                     <div className="w-[350px] space-y-4">
@@ -468,7 +470,7 @@ export default function CreateOrder({ products, companyDetails, customers }: Ine
                     </div>
                 </div>
             </div>
-            <OrderForm open={drawerOpen} onOpenChange={setDrawerOpen} customers={customers} />
+            <OrderForm open={drawerOpen} onOpenChange={setDrawerOpen} customers={customers} orderItems={orderItems} />
         </AppLayout>
     );
 }

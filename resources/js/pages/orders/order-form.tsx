@@ -34,10 +34,11 @@ export interface PaginatedCustomers {
 interface OrderFormProps {
     open: boolean
     onOpenChange: Dispatch<SetStateAction<boolean>>
-    customers: PaginatedCustomers
+    customers: PaginatedCustomers,
+    orderItems: []
 }
 
-export function OrderForm({ open, onOpenChange, customers }: OrderFormProps) {
+export function OrderForm({ open, onOpenChange, customers, orderItems }: OrderFormProps) {
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
         email: '',
@@ -99,6 +100,24 @@ export function OrderForm({ open, onOpenChange, customers }: OrderFormProps) {
 
         setSearchTimeout(timeout)
     }
+
+    const handleSelectCustomer = (customer: Customer) => {
+        onOpenChange(false);
+        router.visit(route('orders.confirm'), {
+            data: {
+                customer_id: customer.id,
+                customer_name: customer.name,
+                customer_email: customer.email,
+                customer_phone: customer.phone,
+                items: orderItems,
+            },
+            method: 'get',
+            preserveState: true,
+        });
+    };
+
+
+
 
     return (
         <Sheet open={open} onOpenChange={onOpenChange}>
@@ -183,6 +202,7 @@ export function OrderForm({ open, onOpenChange, customers }: OrderFormProps) {
                                 <p className="text-muted-foreground text-sm">📞 {customer.phone}</p>
                             </div>
                             <button
+                                onClick={() => handleSelectCustomer(customer)}
                                 className="bg-muted hover:bg-muted/80 px-3 py-1 text-sm rounded text-black dark:text-white transition"
                             >
                                 Select
