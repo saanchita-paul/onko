@@ -1,10 +1,12 @@
 <?php
 
+use App\Http\Controllers\ConsignmentController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\OptionController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\SalesController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -20,10 +22,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/products', [ProductController::class, 'index'])->name('products.index');
     Route::post('/products', [ProductController::class, 'store'])->name('products.store');
     Route::get('/customers', [CustomerController::class, 'index'])->name('customers.index');
-    Route::post('/customers', [CustomerController::class, 'store'])->name('customers.store');
     Route::get('/orders/create', [OrderController::class, 'create'])->name('orders.create');
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/employees', [EmployeeController::class, 'index'])->name('employees.index');
+    Route::post('/employees', [EmployeeController::class, 'store'])->name('employees.store');
+    Route::get('/consignments', [ConsignmentController::class, 'index'])->name('consignments.index');
+    Route::get('/sales', [SalesController::class, 'index'])->name('sales.index');
+    Route::post('/customers', [CustomerController::class, 'store'])->name('customers.store');
     Route::post('/options', [OptionController::class, 'store'])->name('options.store');
 });
 
