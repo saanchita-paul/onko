@@ -14,47 +14,17 @@ class SalesControllerTest extends TestCase
 
     protected User $user;
 
-    protected function setUp(): void
+    /** @test */
+    public function it_returns_sales_data_for_all_range()
     {
-        parent::setUp();
-
         $this->user = User::factory()->create();
         $this->actingAs($this->user);
 
-        // Current month: 5 orders
-        Order::factory()->count(5)->create([
+        Order::factory()->count(15)->create([
             'created_at' => Carbon::now(),
             'grand_total' => 1000
         ]);
 
-        // Current week: 3 orders
-        Order::factory()->count(3)->create([
-            'created_at' => Carbon::now()->startOfWeek()->addDays(1),
-            'grand_total' => 2000
-        ]);
-
-        // Last week: 2 orders
-        Order::factory()->count(2)->create([
-            'created_at' => Carbon::now()->subWeek()->startOfWeek()->addDays(2),
-            'grand_total' => 3000
-        ]);
-
-        // Last month: 2 orders
-        Order::factory()->count(2)->create([
-            'created_at' => Carbon::now()->subMonth()->startOfMonth()->addDays(3),
-            'grand_total' => 4000
-        ]);
-
-        // 2nd last month: 3 orders
-        Order::factory()->count(3)->create([
-            'created_at' => Carbon::now()->subMonths(2)->startOfMonth()->addDays(3),
-            'grand_total' => 5000
-        ]);
-    }
-
-    /** @test */
-    public function it_returns_sales_data_for_all_range()
-    {
         $response = $this->get('/sales?range=all');
 
         $response->assertStatus(200);
@@ -68,13 +38,28 @@ class SalesControllerTest extends TestCase
     /** @test */
     public function it_returns_sales_data_for_week_range()
     {
+        $this->user = User::factory()->create();
+        $this->actingAs($this->user);
+
+        // Current week: 3 orders
+        Order::factory()->count(3)->create([
+            'created_at' => Carbon::now()->startOfWeek()->addDays(1),
+            'grand_total' => 2000
+        ]);
+
+        // Last week: 2 orders
+        Order::factory()->count(2)->create([
+            'created_at' => Carbon::now()->subWeek()->startOfWeek()->addDays(2),
+            'grand_total' => 3000
+        ]);
+
         $response = $this->get('/sales?range=week');
 
         $response->assertStatus(200);
         $response->assertInertia(fn ($page) =>
         $page->component('sales/index')
-            ->where('total_order', 8)
-            ->has('orders', 8)
+            ->where('total_order', 3)
+            ->has('orders', 3)
             ->where('comparison.total_order', fn ($val) => str_contains($val, 'Since Last Week'))
         );
     }
@@ -82,13 +67,29 @@ class SalesControllerTest extends TestCase
     /** @test */
     public function it_returns_sales_data_for_month_range()
     {
+        $this->user = User::factory()->create();
+        $this->actingAs($this->user);
+
+        // Current month: 5 orders
+        Order::factory()->count(5)->create([
+            'created_at' => Carbon::now(),
+            'grand_total' => 1000
+        ]);
+
+        // Last month: 2 orders
+        Order::factory()->count(2)->create([
+            'created_at' => Carbon::now()->subMonth()->startOfMonth()->addDays(3),
+            'grand_total' => 4000
+        ]);
+
+
         $response = $this->get('/sales?range=month');
 
         $response->assertStatus(200);
         $response->assertInertia(fn ($page) =>
         $page->component('sales/index')
-            ->where('total_order', 10)
-            ->has('orders', 10)
+            ->where('total_order', 5)
+            ->has('orders', 5)
             ->where('comparison.total_order', fn ($val) => str_contains($val, 'Since Last Month'))
         );
     }
@@ -96,13 +97,26 @@ class SalesControllerTest extends TestCase
     /** @test */
     public function it_returns_sales_data_for_quarter_range()
     {
+        $this->user = User::factory()->create();
+        $this->actingAs($this->user);
+
+        Order::factory()->count(5)->create([
+            'created_at' => Carbon::now()->startOfQuarter(),
+            'grand_total' => 2000,
+        ]);
+
+        Order::factory()->count(6)->create([
+            'created_at' => Carbon::now()->subQuarter()->startOfQuarter()->addDays(15),
+            'grand_total' => 2000,
+        ]);
+
         $response = $this->get('/sales?range=quarter');
 
         $response->assertStatus(200);
         $response->assertInertia(fn ($page) =>
         $page->component('sales/index')
-            ->where('total_order', 12)
-            ->has('orders', 12)
+            ->where('total_order', 5)
+            ->has('orders', 5)
             ->where('comparison.total_order', fn ($val) => str_contains($val, 'Since Last Quarter'))
         );
     }
@@ -110,13 +124,26 @@ class SalesControllerTest extends TestCase
     /** @test */
     public function it_returns_sales_data_for_year_range()
     {
+        $this->user = User::factory()->create();
+        $this->actingAs($this->user);
+
+        Order::factory()->count(4)->create([
+            'created_at' => Carbon::now()->startOfYear(),
+            'grand_total' => 3000,
+        ]);
+
+        Order::factory()->count(3)->create([
+            'created_at' => Carbon::now()->subYear()->startOfYear()->addMonths(6),
+            'grand_total' => 3000,
+        ]);
+
         $response = $this->get('/sales?range=year');
 
         $response->assertStatus(200);
         $response->assertInertia(fn ($page) =>
         $page->component('sales/index')
-            ->where('total_order', 15)
-            ->has('orders', 15)
+            ->where('total_order', 4)
+            ->has('orders', 4)
             ->where('comparison.total_order', fn ($val) => str_contains($val, 'Since Last Year'))
         );
     }
@@ -124,6 +151,14 @@ class SalesControllerTest extends TestCase
     /** @test */
     public function it_returns_sales_data_for_custom_range()
     {
+        $this->user = User::factory()->create();
+        $this->actingAs($this->user);
+
+        Order::factory()->count(5)->create([
+            'created_at' => Carbon::now(),
+            'grand_total' => 1000
+        ]);
+
         $from = Carbon::now()->startOfMonth()->format('Y-m-d');
         $to = Carbon::now()->endOfMonth()->format('Y-m-d');
 
@@ -132,8 +167,8 @@ class SalesControllerTest extends TestCase
         $response->assertStatus(200);
         $response->assertInertia(fn ($page) =>
         $page->component('sales/index')
-            ->where('total_order', 10)
-            ->has('orders', 10)
+            ->where('total_order', 5)
+            ->has('orders', 5)
             ->where('comparison.total_order', '')
         );
     }
