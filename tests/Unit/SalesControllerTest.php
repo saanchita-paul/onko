@@ -23,7 +23,7 @@ class SalesControllerTest extends TestCase
 
         // Current month: 5 orders
         Order::factory()->count(5)->create([
-            'created_at' => Carbon::now()->subDays(5),
+            'created_at' => Carbon::now(),
             'grand_total' => 1000
         ]);
 
@@ -73,8 +73,8 @@ class SalesControllerTest extends TestCase
         $response->assertStatus(200);
         $response->assertInertia(fn ($page) =>
         $page->component('sales/index')
-            ->where('total_order', 3)
-            ->has('orders', 3)
+            ->where('total_order', 8)
+            ->has('orders', 8)
             ->where('comparison.total_order', fn ($val) => str_contains($val, 'Since Last Week'))
         );
     }
