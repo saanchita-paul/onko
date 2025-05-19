@@ -12,6 +12,7 @@ import { Dispatch, SetStateAction, useState } from "react"
 import { useForm, router } from '@inertiajs/react'
 import { toast } from 'sonner';
 import { InertiaResponse } from '@/types';
+import type { CompanyDetails } from '@/pages/orders/create';
 
 interface Customer {
     id: number
@@ -31,15 +32,23 @@ export interface PaginatedCustomers {
     }[]
 }
 
+interface OrderItem {
+    id: string
+    name: string
+    qty: number
+    price: number
+}
+
 interface OrderFormProps {
     open: boolean
     onOpenChange: Dispatch<SetStateAction<boolean>>
     customers: PaginatedCustomers,
-    orderItems: unknown
+    orderItems: OrderItem[],
+    companyDetails: CompanyDetails | null
 }
 
-export function OrderForm({ open, onOpenChange, customers, orderItems }: OrderFormProps) {
-    console.log({orderItems});
+export function OrderForm({ open, onOpenChange, customers, orderItems, companyDetails }: OrderFormProps) {
+    console.log({companyDetails});
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
         email: '',
@@ -90,6 +99,7 @@ export function OrderForm({ open, onOpenChange, customers, orderItems }: OrderFo
         }
     }
 
+
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value
         setSearch(value)
@@ -104,20 +114,18 @@ export function OrderForm({ open, onOpenChange, customers, orderItems }: OrderFo
 
 
     // todo i need to pass data to confirm-order page
-    const handleSelectCustomer = (customer: Customer) => {
+    const handleSelectCustomer = (customer: Customer ) => {
+        console.log('Order Items:', orderItems);
         onOpenChange(false);
 
         router.get(route('orders.confirm'), {
             customer,
             items: orderItems,
+            companyDetails: companyDetails,
         }, {
             preserveState: true,
         });
     };
-
-
-
-
 
     return (
         <Sheet open={open} onOpenChange={onOpenChange}>

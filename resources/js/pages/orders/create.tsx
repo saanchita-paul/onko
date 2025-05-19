@@ -39,7 +39,7 @@ interface Product {
     price: number;
 }
 
-interface CompanyDetails {
+export interface CompanyDetails {
     company_name: string;
     company_address: string;
     invoice_date: string;
@@ -60,7 +60,7 @@ interface InertiaProps extends PageProps {
 interface Item extends Product {
     qty: number;
 }
-export default function CreateOrder({ products, companyDetails, customers, orderItems }: InertiaProps) {
+export default function CreateOrder({ products, companyDetails, customers }: InertiaProps) {
     const [productList, setProductList] = useState<Product[]>(products.data);
 
     useEffect(() => {
@@ -470,8 +470,8 @@ export default function CreateOrder({ products, companyDetails, customers, order
                     </div>
                 </div>
             </div>
-            // todo i need to pass selected items to orderform component
-            <OrderForm open={drawerOpen} onOpenChange={setDrawerOpen} customers={customers} orderItems={items} />
+
+            <OrderForm open={drawerOpen} onOpenChange={setDrawerOpen} customers={customers} orderItems={items} companyDetails={companyDetails ?? null} />
         </AppLayout>
     );
 }

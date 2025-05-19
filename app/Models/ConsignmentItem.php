@@ -10,8 +10,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class ConsignmentItem extends Model
 {
     use HasFactory, HasUuids;
-    
+
     protected $fillable = [
+        'consignment_id',
         'product_id',
         'product_variant_id',
         'cost_price',
