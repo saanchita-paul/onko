@@ -58,6 +58,8 @@ export function OrderForm({ open, onOpenChange, customers, orderItems, companyDe
     const [search, setSearch] = useState('')
     const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null)
 
+    const isFormEmpty = !data.name.trim() && !data.email.trim() && !data.phone.trim();
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
 
@@ -190,7 +192,7 @@ export function OrderForm({ open, onOpenChange, customers, orderItems, companyDe
                         <Button
                             className="w-full"
                             type="submit"
-                            disabled={processing}
+                            disabled={processing || isFormEmpty}
                         >
                             {processing ? 'Adding...' : 'Add New Customer'}
                         </Button>
