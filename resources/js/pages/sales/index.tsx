@@ -7,17 +7,6 @@ import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, Order } from '@/types';
 import { Inertia } from '@inertiajs/inertia';
 import { Head, router, usePage } from '@inertiajs/react';
-import {
-    endOfMonth,
-    endOfQuarter,
-    endOfWeek,
-    endOfYear,
-    startOfMonth,
-    startOfQuarter,
-    startOfWeek,
-    startOfYear, subMonths, subQuarters,
-    subWeeks, subYears
-} from 'date-fns';
 import { ChevronLeftIcon, ChevronRightIcon, StarIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { DateRange } from 'react-day-picker';
@@ -28,6 +17,11 @@ interface Props {
     grand_total: number;
     total_order: number;
     average_value: number;
+    comparison: {
+        grand_total: string,
+        total_order: string,
+        average_value: string
+    }
 }
 
 const chartData = [
@@ -68,17 +62,13 @@ const bestSellers = [
     { name: 'Armani Sport Code', amount: 12000 },
 ];
 
-export default function Index({ orders, grand_total, total_order, average_value }: Props) {
+export default function Index({ orders, grand_total, total_order, average_value, comparison }: Props) {
     const { url } = usePage();
     const searchParams = new URLSearchParams(url.split('?')[1]);
 
     const [tab, setTab] = useState(searchParams.get('tab') || 'all-orders');
     const [range, setRange] = useState(searchParams.get('range') || 'all');
     const [dateRange, setDateRange] = useState<DateRange | undefined>({
-        from: undefined,
-        to: undefined,
-    });
-    const [previousDateRange, setPreviousDateRange] = useState<DateRange | undefined>({
         from: undefined,
         to: undefined,
     });
@@ -124,7 +114,7 @@ export default function Index({ orders, grand_total, total_order, average_value 
                                     <span className="text-5xl font-semibold tracking-wide">{grand_total}</span>
                                 </CardContent>
                                 <CardFooter>
-                                    <span className="tracking-wide">+20% since yesterday</span>
+                                    <span className="tracking-wide">{comparison.grand_total}</span>
                                 </CardFooter>
                             </Card>
                             <Card className="w-1/2">
@@ -135,7 +125,7 @@ export default function Index({ orders, grand_total, total_order, average_value 
                                     <span className="text-5xl font-semibold tracking-wide">{total_order}</span>
                                 </CardContent>
                                 <CardFooter>
-                                    <span className="tracking-wide">+33% since yesterday</span>
+                                    <span className="tracking-wide">{comparison.total_order}</span>
                                 </CardFooter>
                             </Card>
                         </div>
@@ -178,7 +168,7 @@ export default function Index({ orders, grand_total, total_order, average_value 
                                 <span className="text-5xl font-semibold tracking-wide">{average_value}</span>
                             </CardContent>
                             <CardFooter>
-                                <span className="tracking-wide">+33% since yesterday</span>
+                                <span className="tracking-wide">{comparison.average_value}</span>
                             </CardFooter>
                         </Card>
 
@@ -240,33 +230,23 @@ export default function Index({ orders, grand_total, total_order, average_value 
         );
     };
 
-    const handleRangeChange = (value: string) => {
-        const today = new Date();
-        setRange(value);
-
-        const params = new URLSearchParams(window.location.search);
-        params.set('range', value);
-        Inertia.visit(`${window.location.pathname}?${params.toString()}`, {
-            preserveScroll: true,
-            preserveState: true,
-        });
-    };
-
-    useEffect(() => {
-        // if ((!dateRange?.from || !dateRange?.to) && range !=='all') return;
-
+    const handleRangeChange = (value: string, dateRange?: DateRange) => {
         router.get(
             route('sales.index'),
             {
                 date_range: dateRange,
-                range: range,
+                range: value,
             },
             {
                 preserveState: true,
                 replace: true,
             },
         );
-    }, [range]);
+        setRange(value);
+        const params = new URLSearchParams(window.location.search);
+        params.set('range', value);
+    };
+
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -313,6 +293,7 @@ export default function Index({ orders, grand_total, total_order, average_value 
                                 </TabsList>
                                 <DateRangePicker from={dateRange?.from} to={dateRange?.to} onChange={(newRange) => {
                                     setRange('custom')
+                                    handleRangeChange('custom', newRange)
                                     setDateRange(newRange)
                                 }
                                 }/>
