@@ -3,7 +3,25 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { NavGroup } from '@/types';
 import { Link } from '@inertiajs/react';
-import { Banknote, Boxes, CalendarClock, ChartColumn, HandHelping, IdCard, Landmark, Package, ReceiptText, Shapes, ShoppingBag, Smile, TreePalm, Truck, Wallet, Warehouse } from 'lucide-react';
+import {
+    Banknote,
+    Boxes,
+    CalendarClock,
+    ChartColumn,
+    HandHelping,
+    IdCard,
+    Landmark,
+    Package,
+    ReceiptText,
+    Shapes,
+    ShoppingBag,
+    ShoppingCartIcon,
+    Smile,
+    TreePalm,
+    Truck,
+    Wallet,
+    Warehouse
+} from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavGroups: NavGroup[] = [
@@ -19,6 +37,11 @@ const mainNavGroups: NavGroup[] = [
                 title: 'Sales',
                 href: '/sales',
                 icon: ShoppingBag,
+            },
+            {
+                title: 'Orders',
+                href: '/orders',
+                icon: ShoppingCartIcon,
             },
             {
                 title: 'Payments',
