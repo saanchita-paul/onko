@@ -62,7 +62,7 @@ const bestSellers = [
     { name: 'Armani Sport Code', amount: 12000 },
 ];
 
-export default function Index({ orders, grand_total, total_order, average_value, comparison }: Props) {
+export default function Index({ grand_total, total_order, average_value, comparison }: Props) {
     const { url } = usePage();
     const searchParams = new URLSearchParams(url.split('?')[1]);
 
