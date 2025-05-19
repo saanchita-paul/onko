@@ -75,6 +75,17 @@ export interface Consignment {
     updated_at: string;
 }
 
+export interface Order {
+    id: string;
+    order_id: string;
+    consignment_item_id?: string | null;
+    unit_price: number;
+    qty: number;
+    status: string;
+    created_at: string;
+    updated_at: string;
+}
+
 interface LaravelPaginationItem {
     active: boolean;
     label?: string;
