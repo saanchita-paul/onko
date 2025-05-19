@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Consignment;
 use App\Models\ConsignmentItem;
 use App\Models\Customer;
 use App\Models\Order;
@@ -17,30 +18,47 @@ class OrderFactory extends Factory
     public function configure()
     {
         return $this->afterCreating(function (Order $order) {
+            
             $count = rand(1, 5);
-
+            $items = collect([]);
+            
             for ($i = 0; $i < $count; $i++) {
-                DB::transaction(function () use ($order) {
+                DB::transaction(function () use ($order, &$items) {
                     $availableItems = ConsignmentItem::whereColumn('qty', '>', 'qty_sold')->get();
 
                     if ($availableItems->isEmpty()) {
-                        return; // Skip this iteration if no items available
+                        Consignment::factory()->create();
+                        $availableItems = ConsignmentItem::whereColumn('qty', '>', 'qty_sold')->get();
                     }
 
                     $consignmentItem = $availableItems->random();
                     $maxQty = $consignmentItem->qty - $consignmentItem->qty_sold;
                     $randQty = rand(1, $maxQty);
 
-                    OrderItem::factory()->create([
+                    $item = OrderItem::factory()->create([
                         'order_id' => $order->id,
                         'consignment_item_id' => $consignmentItem->id,
-                        'qty' => $randQty,
+                        'qty' => function( array $attr ) use ($randQty) {
+                                return $randQty;
+                            }
                     ]);
+                    
+                    $items->push($item);
 
                     $consignmentItem->refresh();
                     $consignmentItem->qty_sold += $randQty;
                     $consignmentItem->save();
                 });
+
+                $order->sub_total = $items->reduce(fn($carry, $item) => $carry + ($item->qty * $item->unit_price), 0);
+                $order->sub_total = $items->reduce(fn($carry, $item) => $carry + ($item->qty * $item->unit_price), 0);
+                $order->discount_total = $order->sub_total / 20;
+                $order->tax_total = $order->sub_total / 10;
+                $order->grand_total = $order->sub_total - $order->discount_total + $order->tax_total;
+                $order->payments_total = $order->grand_total;
+                $order->status = 'paid';
+
+                $order->save();
             }
         });
     }
