@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Models\OrderItem;
+use App\Models\Product;
+use Illuminate\Database\Query\JoinClause;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class SalesController extends Controller
 {
@@ -17,7 +20,30 @@ class SalesController extends Controller
         $query = Order::query();
         $prevQuery = Order::query();
         $range = $request->input('range');
+        $time_frame = Carbon::now()->startOfMonth();
         $pevRangeName = "";
+
+        $sub = OrderItem::join('consignment_items', 'order_items.consignment_item_id', '=', 'consignment_items.id')
+            ->whereIn('order_items.order_id', Order::where('created_at', '>', $time_frame)->select(['id']))
+            ->select([
+                'consignment_items.product_id', 
+                DB::raw('SUM(order_items.qty) AS sum_qty'), 
+                DB::raw('SUM(order_items.qty * order_items.unit_price) AS subtotal')
+            ])
+            ->groupBy('consignment_items.product_id')
+            ->orderByDesc('sum_qty')
+            ->limit(10);
+
+        $subQuantity = (clone $sub)->orderByDesc('sum_qty')->limit(10);
+        $subSubTotal = (clone $sub)->orderByDesc('subtotal')->limit(10);
+
+        $quantity = Product::joinSub($subQuantity, 'X', function(JoinClause $join) {
+            $join->on('products.id', '=', 'X.product_id');
+        })->select(['id', 'name', 'product_id', 'sum_qty', 'subtotal'])->get();
+
+        $subtotal = Product::joinSub($subSubTotal, 'X', function(JoinClause $join) {
+            $join->on('products.id', '=', 'X.product_id');
+        })->select(['id', 'name', 'product_id', 'sum_qty', 'subtotal'])->get();
 
         if ($range && $range !== 'all') {
             $today = Carbon::today();
@@ -129,7 +155,9 @@ class SalesController extends Controller
                 'grand_total' => !in_array($range, ['all', 'custom']) ? $compare($grandTotal, $prevGrandTotal, $pevRangeName) : '',
                 'total_order' => !in_array($range, ['all', 'custom']) ? $compare($totalOrder, $prevTotalOrder, $pevRangeName) : '',
                 'average_value' => !in_array($range, ['all', 'custom']) ? $compare($averageValue, $prevAverageValue, $pevRangeName) : '',
-            ]
+            ],
+            'bQuantity' => $quantity,
+            'bSubTotal' => $subtotal,
         ];
     }
 
