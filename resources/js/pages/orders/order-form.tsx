@@ -115,12 +115,11 @@ export function OrderForm({ open, onOpenChange, customers, orderItems, companyDe
     }
 
 
-    // todo i need to pass data to confirm-order page
     const handleSelectCustomer = (customer: Customer ) => {
         console.log('Order Items:', orderItems);
         onOpenChange(false);
 
-        router.get(route('orders.confirm'), {
+        router.post(route('orders.confirm'), {
             customer,
             items: orderItems,
             companyDetails: companyDetails,
@@ -213,7 +212,7 @@ export function OrderForm({ open, onOpenChange, customers, orderItems, companyDe
                             </div>
                             <button
                                 onClick={() => handleSelectCustomer(customer)}
-                                className="bg-muted hover:bg-muted/80 px-3 py-1 text-sm rounded text-black dark:text-white transition"
+                                className="cursor-pointer bg-muted hover:bg-muted/80 px-3 py-1 text-sm rounded text-black dark:text-white transition"
                             >
                                 Select
                             </button>

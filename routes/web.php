@@ -30,7 +30,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/sales', [SalesController::class, 'index'])->name('sales.index');
     Route::post('/customers', [CustomerController::class, 'store'])->name('customers.store');
     Route::post('/options', [OptionController::class, 'store'])->name('options.store');
-    Route::get('/orders/confirm', function () {
+    Route::post('/orders/confirm', function () {
 
         $options = \App\Models\Option::whereIn('key', [
             'company_name',
@@ -49,6 +49,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             'customer' => request()->input('customer'),
             'items' => request()->input('items'),
             'companyDetails' => $companyDetails,
+            'orderId' => 'Order Preview'
         ]);
     })->name('orders.confirm');
 

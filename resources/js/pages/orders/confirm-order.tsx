@@ -27,12 +27,19 @@ interface CompanyDetails {
     logo: string | null;
 }
 
-export default function ConfirmOrder({ customer, items, companyDetails}: PageProps<{ customer: Customer; items: OrderItem[];  companyDetails: CompanyDetails }>) {
 
-    console.log({items});
+export default function ConfirmOrder({ customer, items, companyDetails, orderId}: PageProps<{ customer: Customer; items: OrderItem[];  companyDetails: CompanyDetails, orderId: string }>) {
+
+    // console.log({items});
+    console.log('kakakakaakak', items);
+    router.on('start', () => {
+        console.log('items', items);
+
+    })
 
     const [isConfirmed, setIsConfirmed] = useState(false);
     const [orderNumber, setOrderNumber] = useState<string | null>(null);
+
 
     const normalizedItems: OrderItem[] = useMemo(() => {
         const normalized: OrderItem[] = [];
@@ -60,11 +67,11 @@ export default function ConfirmOrder({ customer, items, companyDetails}: PagePro
 
 
 
-    const subtotal = useMemo(() => {
-        return normalizedItems.reduce((total, item) => {
+    const subtotal = (() => {
+        return items.reduce((total, item) => {
             return total + item.qty * item.price;
         }, 0);
-    }, [normalizedItems]);
+    })();
 
 
     const handleConfirm = () => {
@@ -72,14 +79,14 @@ export default function ConfirmOrder({ customer, items, companyDetails}: PagePro
             route('orders.store'),
             {
                 customer_id: customer.id,
-                items: normalizedItems,
+                items: items,
                 sub_total: subtotal,
                 grand_total: subtotal,
             },
             {
                 onSuccess: (page) => {
                     setIsConfirmed(true);
-                    const newOrderNumber = page.props?.order_number ?? 'N/A';
+                    const newOrderNumber = orderId ?? 'N/A';
                     setOrderNumber(newOrderNumber);
                 }
             }
@@ -94,6 +101,7 @@ export default function ConfirmOrder({ customer, items, companyDetails}: PagePro
             targetStyles: ['*'],
         });
     };
+
 
     return (
         <AppLayout>
@@ -128,9 +136,7 @@ export default function ConfirmOrder({ customer, items, companyDetails}: PagePro
                         )}
                     </h1>
                     <p className="text-sm text-black-500">
-                        {isConfirmed
-                        ? ` #: ${orderNumber}`
-                        : 'Order Preview'}
+                        # {orderId}
                     </p>
                 </div>
 
@@ -138,7 +144,7 @@ export default function ConfirmOrder({ customer, items, companyDetails}: PagePro
                     <style>{`
                       @media print {
                         body {
-                          margin: 0;
+                          margin: auto;
                           padding: 0;
                           font-size: 12px;
                           color: #000;
@@ -206,8 +212,7 @@ export default function ConfirmOrder({ customer, items, companyDetails}: PagePro
                         </thead>
                         <tbody>
 
-                        {normalizedItems.map((item, i) => {
-                            console.log(item);
+                        {items.map((item, i) => {
                             const total = item.qty * item.price;
                             return (
                                 <tr key={i} className="border-b">

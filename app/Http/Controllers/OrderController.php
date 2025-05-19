@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\ConsignmentItem;
+use App\Models\Customer;
+use App\Models\Option;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
@@ -52,7 +54,9 @@ class OrderController extends ApiOrderController
         $data = $validator->validated();
 
         try {
-            DB::transaction(function () use ($data) {
+            $order = null;
+
+            DB::transaction(function () use ($data, &$order) {
                 $order = Order::create([
                     'customer_id' => $data['customer_id'],
                     'sub_total' => $data['sub_total'],
@@ -81,7 +85,29 @@ class OrderController extends ApiOrderController
                 }
             });
 
-            return redirect()->back()->with('success', 'Order confirmed successfully!');
+
+//            return redirect()->back()->with('success', 'Order confirmed successfully!');
+            $customer = Customer::find($data['customer_id']);
+            $options = \App\Models\Option::whereIn('key', [
+                'company_name',
+                'company_address',
+                'invoice_date',
+                'logo',
+            ])->pluck('value', 'key');
+
+            $companyDetails = [
+                'company_name' => $options['company_name'] ?? null,
+                'company_address' => $options['company_address'] ?? null,
+                'invoice_date' => $options['invoice_date'] ?? null,
+                'logo' => $options['logo'] ?? null,
+            ];
+
+            return Inertia::render('orders/confirm-order', [
+                'customer' => $customer,
+                'items' => $data['items'],
+                'companyDetails' => $companyDetails,
+                'orderId' => $order->id,
+            ]);
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Failed to save order: ' . $e->getMessage())->withInput();
         }
