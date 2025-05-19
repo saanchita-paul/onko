@@ -1,0 +1,31 @@
+<?php
+
+namespace Tests\Unit;
+
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
+class SaveCustomerDetailsTest extends TestCase
+{
+    use RefreshDatabase;
+
+    public function test_store_saves_customer_details()
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $payload = [
+            'name' => 'Customer Name',
+        ];
+
+        $response = $this->post(route('customers.store'), $payload);
+
+        $response->assertRedirect();
+
+        $this->assertDatabaseHas('customers', [
+            'name' => 'Customer Name',
+        ]);
+
+    }
+}

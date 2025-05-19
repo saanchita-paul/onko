@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\SaveCustomerDetailsRequest;
 use App\Models\Customer;
 use Inertia\Inertia;
 
@@ -12,5 +13,13 @@ class CustomerController extends Controller
         return Inertia::render('customers/index', [
             'customers' => Customer::paginate(25)
         ]);
+    }
+
+    public function store(SaveCustomerDetailsRequest $request)
+    {
+        $validated = $request->validated();
+        Customer::create($validated);
+
+        return redirect()->back()->with('success', 'Customer created successfully');
     }
 }

@@ -25,7 +25,7 @@ class OrderControllerTest extends TestCase
         $response->assertStatus(200);
         $response->assertInertia(fn ($page) =>
         $page->component('orders/create')
-            ->has('products.data', 10)
+            ->has('products.data', 5)
             ->where('products.current_page', 1)
         );
     }

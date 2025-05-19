@@ -3,6 +3,7 @@
 use App\Http\Controllers\ConsignmentController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\OptionController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SalesController;
@@ -27,6 +28,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/employees', [EmployeeController::class, 'store'])->name('employees.store');
     Route::get('/consignments', [ConsignmentController::class, 'index'])->name('consignments.index');
     Route::get('/sales', [SalesController::class, 'index'])->name('sales.index');
+    Route::post('/customers', [CustomerController::class, 'store'])->name('customers.store');
+    Route::post('/options', [OptionController::class, 'store'])->name('options.store');
 });
 
 require __DIR__.'/settings.php';
