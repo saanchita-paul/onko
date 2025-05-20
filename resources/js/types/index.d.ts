@@ -95,14 +95,14 @@ export interface CompanyDetails {
     logo: string | null;
 }
 
-interface Customer {
+export interface Customer {
     id?: number
     name: string
     email: string
     phone: string
 }
 
-interface OrderItem {
+export interface OrderItem {
     id: string;
     name: string;
     qty: number;
