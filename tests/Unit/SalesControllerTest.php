@@ -32,6 +32,10 @@ class SalesControllerTest extends TestCase
         $page->component('sales/index')
             ->where('total_order', 15)
             ->has('orders', 15)
+            ->has('chartData')
+            ->where('chartData.0', fn ($chartEntry) =>
+                isset($chartEntry['date']) && isset($chartEntry['sales'])
+            )
         );
     }
 
@@ -57,6 +61,10 @@ class SalesControllerTest extends TestCase
             ->where('total_order', 4)
             ->has('orders', 4)
             ->where('comparison.total_order', fn ($val) => str_contains($val, 'Since Yesterday'))
+            ->has('chartData')
+            ->where('chartData.0', fn ($chartEntry) =>
+                isset($chartEntry['date']) && isset($chartEntry['sales'])
+            )
         );
 
     }
@@ -87,6 +95,10 @@ class SalesControllerTest extends TestCase
             ->where('total_order', 3)
             ->has('orders', 3)
             ->where('comparison.total_order', fn ($val) => str_contains($val, 'Since Last Week'))
+            ->has('chartData')
+            ->where('chartData.0', fn ($chartEntry) =>
+                isset($chartEntry['date']) && isset($chartEntry['sales'])
+            )
         );
     }
 
@@ -117,6 +129,10 @@ class SalesControllerTest extends TestCase
             ->where('total_order', 5)
             ->has('orders', 5)
             ->where('comparison.total_order', fn ($val) => str_contains($val, 'Since Last Month'))
+            ->has('chartData')
+            ->where('chartData.0', fn ($chartEntry) =>
+                isset($chartEntry['date']) && isset($chartEntry['sales'])
+            )
         );
     }
 
@@ -144,6 +160,10 @@ class SalesControllerTest extends TestCase
             ->where('total_order', 5)
             ->has('orders', 5)
             ->where('comparison.total_order', fn ($val) => str_contains($val, 'Since Last Quarter'))
+            ->has('chartData')
+            ->where('chartData.0', fn ($chartEntry) =>
+                isset($chartEntry['date']) && isset($chartEntry['sales'])
+            )
         );
     }
 
@@ -171,6 +191,10 @@ class SalesControllerTest extends TestCase
             ->where('total_order', 4)
             ->has('orders', 4)
             ->where('comparison.total_order', fn ($val) => str_contains($val, 'Since Last Year'))
+            ->has('chartData')
+            ->where('chartData.0', fn ($chartEntry) =>
+                isset($chartEntry['date']) && isset($chartEntry['sales'])
+            )
         );
     }
 
@@ -196,6 +220,10 @@ class SalesControllerTest extends TestCase
             ->where('total_order', 5)
             ->has('orders', 5)
             ->where('comparison.total_order', '')
+            ->has('chartData')
+            ->where('chartData.0', fn ($chartEntry) =>
+                isset($chartEntry['date']) && isset($chartEntry['sales'])
+            )
         );
     }
 
