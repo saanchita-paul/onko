@@ -2,10 +2,14 @@
 
 namespace Tests\Feature;
 
+use App\Models\Consignment;
 use App\Models\Order;
+use App\Models\Product;
 use App\Models\User;
+use Database\Factories\ConsignmentFactory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log;
 use Tests\TestCase;
 
 class SalesControllerTest extends TestCase
@@ -171,6 +175,40 @@ class SalesControllerTest extends TestCase
             ->has('orders', 5)
             ->where('comparison.total_order', '')
         );
+    }
+
+    public function test_something_random()
+    {   
+        $consignment = Consignment::factory()->create();
+        Log::info('consignment');
+        Log::info($consignment);
+
+        $consignment->load('consignmentItems');
+        Log::info('consignment items');
+        Log::info($consignment->consignmentItems);
+        
+        $orders = Order::factory()
+            ->count(10)
+            // ->state([
+                
+            // ])
+            ->create();
+        $orders->load('orderItems.consignmentItem');
+        // $flatOrders = $orders->map(function($order) {
+        //     //$order->order_items->product_id = $order->order_items->consignment_item->product_id;
+        //     //unset($order->order_items->consignment_item);
+
+        //     $order->order_items = $order->order_items->map(function($orderItem) {
+
+        //     });
+        // });
+        Log::info('consignments with items :');
+        Log::info(Consignment::with('consignmentItems')->get());
+        Log::info('------------------------');
+        Log::info('orders with orderItems.consignmentItem: ');
+        Log::info($orders);
+        $this->assertTrue(true);
+        //$consignment = ConsignmentFactory::factory(5)->create();
     }
 
 }

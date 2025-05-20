@@ -33,20 +33,19 @@ class OrderFactory extends Factory
 
                     $consignmentItem = $availableItems->random();
                     $maxQty = $consignmentItem->qty - $consignmentItem->qty_sold;
+                    
                     $randQty = rand(1, $maxQty);
 
                     $item = OrderItem::factory()->create([
                         'order_id' => $order->id,
                         'consignment_item_id' => $consignmentItem->id,
-                        'qty' => function( array $attr ) use ($randQty) {
-                                return $randQty;
-                            }
+                        'qty' => $randQty,
                     ]);
-                    
+
                     $items->push($item);
 
                     $consignmentItem->refresh();
-                    $consignmentItem->qty_sold += $randQty;
+                    $consignmentItem->qty_sold = $consignmentItem->qty_sold + $randQty;
                     $consignmentItem->save();
                 });
 
