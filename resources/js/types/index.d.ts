@@ -95,6 +95,21 @@ export interface CompanyDetails {
     logo: string | null;
 }
 
+interface Customer {
+    id?: number
+    name: string
+    email: string
+    phone: string
+}
+
+interface OrderItem {
+    id: string;
+    name: string;
+    qty: number;
+    price: number;
+    consignment_item_id?: string;
+}
+
 export type InertiaResponse<T = Record<string, unknown>> = Page<PageProps & {
     flash?: FlashMessages;
 } & T>;

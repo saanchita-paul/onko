@@ -11,15 +11,7 @@ import { Search, Smile, ChevronRight, BadgeCheckIcon } from 'lucide-react';
 import { Dispatch, SetStateAction, useState } from "react"
 import { useForm, router } from '@inertiajs/react'
 import { toast } from 'sonner';
-import { CompanyDetails, InertiaResponse } from '@/types';
-
-
-interface Customer {
-    id: number
-    name: string
-    email: string
-    phone: string
-}
+import { CompanyDetails, Customer, InertiaResponse, OrderItem } from '@/types';
 
 export interface PaginatedCustomers {
     data: Customer[]
@@ -30,13 +22,6 @@ export interface PaginatedCustomers {
         label: string
         active: boolean
     }[]
-}
-
-interface OrderItem {
-    id: string
-    name: string
-    qty: number
-    price: number
 }
 
 interface OrderFormProps {

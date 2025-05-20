@@ -1,23 +1,10 @@
-import { PageProps } from '@/types';
+import { CompanyDetails, Customer, OrderItem, PageProps } from '@/types';
 import AppLayout from '@/layouts/app-layout';
 import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import printJS from 'print-js';
 
-interface OrderItem {
-    id: string;
-    name: string;
-    qty: number;
-    price: number;
-    consignment_item_id: string;
-}
-
-interface Customer {
-    name: string;
-    email: string;
-    phone: string;
-}
 
 
 export default function ConfirmOrder({ customer, items, companyDetails, orderId}: PageProps<{ customer: Customer; items: OrderItem[];  companyDetails: CompanyDetails, orderId: string }>) {
