@@ -110,16 +110,6 @@ export default function ConfirmOrder({ customer, items, companyDetails, orderId}
                           padding: 0;
                         }
 
-                        // #printable-invoice {
-                        //   padding: 0 !important;
-                        //   box-shadow: none !important;
-                        //   border: none !important;
-                        //   max-width: 100% !important;
-                        //   background: none !important;
-                        //   margin: 0 auto !important;
-                        //   width: 80% !important;
-                        // }
-
                         .no-print {
                           display: none !important;
                         }
@@ -175,9 +165,9 @@ export default function ConfirmOrder({ customer, items, companyDetails, orderId}
                                 {companyDetails?.company_address}
                             </p>
                         </div>
-                        <div className="text-sm text-black-600 min-w-[280px] space-y-1 print:text-xs">
+                        <div className="text-sm text-black-600 min-w-[280px] space-y-1 print:text-xs mr-5">
                             {/*    /!*<p><strong>Date:</strong> {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</p>*!/*/}
-                            <div className="grid grid-cols-[auto_1fr] gap-2">
+                            <div className="grid grid-cols-[auto_1fr] gap-2 mb-3">
                                 <span className="font-medium">Date:</span>
                                 <span className="text-right">{companyDetails?.invoice_date &&
                                     new Date(companyDetails.invoice_date).toLocaleDateString('en-GB', {
@@ -186,13 +176,13 @@ export default function ConfirmOrder({ customer, items, companyDetails, orderId}
                                         year: 'numeric',
                                     })}</span>
                             </div>
-                            <div className="grid grid-cols-[auto_1fr] gap-5 text-gray-600 order-id mb-15">
-                                <span className="font-medium">Order #</span>
+                            <div className="grid grid-cols-[auto_1fr] gap-5 text-gray-600 order-id mb-38">
+                                <span className="font-medium">Order</span>
                                 <span className="text-right break-all">
                                   {orderId ? orderId : 'confirm to generate'}
                                 </span>
                             </div>
-                            <div className="grid grid-cols-[auto_1fr] gap-2 customer-id mb-15">
+                            <div className="grid grid-cols-[auto_1fr] gap-2 customer-id mb-30">
                                 <span className="font-medium">Customer ID</span>
                                 <span className="text-right break-all">{customer.id}</span>
                             </div>
