@@ -20,12 +20,12 @@ class SalesController extends Controller
         $query = Order::query();
         $prevQuery = Order::query();
         $range = $request->input('range');
-        $pevRangeName = "";
+        $prevRangeName = "";
 
         $bestSellerSubQuery = OrderItem::join('consignment_items', 'order_items.consignment_item_id', '=', 'consignment_items.id')
             ->select([
-                'consignment_items.product_id', 
-                DB::raw('SUM(order_items.qty) AS sum_qty'), 
+                'consignment_items.product_id',
+                DB::raw('SUM(order_items.qty) AS sum_qty'),
                 DB::raw('SUM(order_items.qty * order_items.unit_price) AS subtotal')
             ])
             ->groupBy('consignment_items.product_id');
@@ -38,6 +38,15 @@ class SalesController extends Controller
                 $end = $request->input('date_range.to');
             }
             switch ($range) {
+                case 'today':
+                    $currentFrom = Carbon::today()->startOfDay();
+                    $currentTo = Carbon::today()->endOfDay();
+
+                    $previousFrom = Carbon::today()->subDays(1);
+                    $previousTo = Carbon::today()->subDays(1);
+
+                    $prevRangeName = 'Yesterday';
+                    break;
                 case 'week':
                     $currentFrom = $today->copy()->startOfWeek(Carbon::SATURDAY);
                     $currentTo = $today->copy()->endOfWeek(Carbon::SATURDAY);
@@ -45,7 +54,7 @@ class SalesController extends Controller
                     $previousFrom = $currentFrom->copy()->subWeek();
                     $previousTo = $currentTo->copy()->subWeek();
 
-                    $pevRangeName = 'Last Week';
+                    $prevRangeName = 'Last Week';
                     break;
 
                 case 'month':
@@ -55,7 +64,7 @@ class SalesController extends Controller
                     $previousFrom = $currentFrom->copy()->subMonth();
                     $previousTo = $currentTo->copy()->subMonth();
 
-                    $pevRangeName = 'Last Month';
+                    $prevRangeName = 'Last Month';
                     break;
 
                 case 'quarter':
@@ -65,7 +74,7 @@ class SalesController extends Controller
                     $previousFrom = $currentFrom->copy()->subQuarter();
                     $previousTo = $currentTo->copy()->subQuarter();
 
-                    $pevRangeName = 'Last Quarter';
+                    $prevRangeName = 'Last Quarter';
                     break;
 
                 case 'year':
@@ -75,7 +84,7 @@ class SalesController extends Controller
                     $previousFrom = $currentFrom->copy()->subYear();
                     $previousTo = $currentTo->copy()->subYear();
 
-                    $pevRangeName = 'Last Year';
+                    $prevRangeName = 'Last Year';
                     break;
 
                 case 'custom':
@@ -114,7 +123,7 @@ class SalesController extends Controller
 
         $subQuantity = (clone $bestSellerSubQuery)->orderByDesc('sum_qty')->limit(10);
         $subSubTotal = (clone $bestSellerSubQuery)->orderByDesc('subtotal')->limit(10);
-        
+
         $quantity = Product::joinSub($subQuantity, 'X', function(JoinClause $join) {
             $join->on('products.id', '=', 'X.product_id');
         })->select(['id', 'name', 'product_id', 'sum_qty', 'subtotal'])->get();
@@ -132,19 +141,19 @@ class SalesController extends Controller
         $prevTotalOrder = $prevQuery->count();
         $prevAverageValue = round($prevQuery->avg('grand_total') / 100, 2);
 
-        $compare = function ($current, $previous, $pevRangeName) {
+        $compare = function ($current, $previous, $prevRangeName) {
             if ($previous == 0) {
-                return $current == 0 ? 'No change' : '+ 100% Since ' . $pevRangeName;
+                return $current == 0 ? 'No change' : '+ 100% Since ' . $prevRangeName;
             }
 
             $diff = $current - $previous;
             $percent = round(($diff / $previous) * 100, 1);
 
             if ($percent == 0) {
-                return 'No change' . " Since " . $pevRangeName;
+                return 'No change' . " Since " . $prevRangeName;
             }
 
-            return $percent > 0 ? "+ {$percent}%     Since " . $pevRangeName : "- " . abs($percent) . "% Since " . $pevRangeName;
+            return $percent > 0 ? "+ {$percent}%     Since " . $prevRangeName : "- " . abs($percent) . "% Since " . $prevRangeName;
         };
 
         return [
@@ -153,9 +162,9 @@ class SalesController extends Controller
             'total_order' => $totalOrder,
             'average_value' => $averageValue,
             'comparison' => [
-                'grand_total' => !in_array($range, ['all', 'custom']) ? $compare($grandTotal, $prevGrandTotal, $pevRangeName) : '',
-                'total_order' => !in_array($range, ['all', 'custom']) ? $compare($totalOrder, $prevTotalOrder, $pevRangeName) : '',
-                'average_value' => !in_array($range, ['all', 'custom']) ? $compare($averageValue, $prevAverageValue, $pevRangeName) : '',
+                'grand_total' => !in_array($range, ['all', 'custom']) ? $compare($grandTotal, $prevGrandTotal, $prevRangeName) : '',
+                'total_order' => !in_array($range, ['all', 'custom']) ? $compare($totalOrder, $prevTotalOrder, $prevRangeName) : '',
+                'average_value' => !in_array($range, ['all', 'custom']) ? $compare($averageValue, $prevAverageValue, $prevRangeName) : '',
             ],
             'bQuantity' => $quantity,
             'bSubTotal' => $subtotal,

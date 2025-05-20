@@ -281,6 +281,9 @@ export default function Index({ grand_total, total_order, average_value, compari
                                     <TabsTrigger value="all" className={tabTriggerClass}>
                                         All
                                     </TabsTrigger>
+                                    <TabsTrigger value="today" className={tabTriggerClass}>
+                                        Today
+                                    </TabsTrigger>
                                     <TabsTrigger value="week" className={tabTriggerClass}>
                                         Week
                                     </TabsTrigger>
