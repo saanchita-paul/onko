@@ -36,6 +36,32 @@ class SalesControllerTest extends TestCase
     }
 
     /** @test */
+    public function it_returns_sales_data_for_today()
+    {
+        $this->user = User::factory()->create();
+        $this->actingAs($this->user);
+        Order::factory()->count(4)->create([
+            'created_at' => Carbon::now(),
+            'grand_total' => 2000
+        ]);
+
+        Order::factory()->count(3)->create([
+            'created_at' => Carbon::now()->subDays(1),
+            'grand_total' => 2100
+        ]);
+
+        $response = $this->get('/sales?range=today');
+        $response->assertStatus(200);
+        $response->assertInertia(fn ($page) =>
+        $page->component('sales/index')
+            ->where('total_order', 4)
+            ->has('orders', 4)
+            ->where('comparison.total_order', fn ($val) => str_contains($val, 'Since Yesterday'))
+        );
+
+    }
+
+    /** @test */
     public function it_returns_sales_data_for_week_range()
     {
         $this->user = User::factory()->create();
