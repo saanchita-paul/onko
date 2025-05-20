@@ -177,6 +177,7 @@ export default function CreateOrder({ products, companyDetails, customers }: Ine
         setProductList(adjustedProducts);
     }, [products.data, items]);
 
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     return (
         <AppLayout>
@@ -211,10 +212,16 @@ export default function CreateOrder({ products, companyDetails, customers }: Ine
                                                     onChange={(e) => {
                                                         const file = e.target.files?.[0];
                                                         if (file) {
+                                                            if (file.size > 2 * 1024 * 1024) {
+                                                                setErrorMessage("Image must not exceed 2MB.");
+                                                                return;
+                                                            }
+
                                                             const reader = new FileReader();
                                                             reader.onloadend = () => {
                                                                 if (typeof reader.result === "string") {
                                                                     setImagePreview(reader.result);
+                                                                    setErrorMessage(null);
                                                                 }
                                                             };
                                                             setData('logo', file);
@@ -223,6 +230,7 @@ export default function CreateOrder({ products, companyDetails, customers }: Ine
                                                     }}
                                                     ref={fileInputRef}
                                                 />
+
                                                 <label
                                                     htmlFor="fileUpload"
                                                     className={`flex items-center justify-center h-full w-full rounded-md ${imagePreview ? 'border-0' : 'border border-input'} bg-white-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 cursor-pointer hover:bg-white-200 dark:hover:bg-neutral-700 overflow-hidden relative group`}
@@ -254,7 +262,9 @@ export default function CreateOrder({ products, companyDetails, customers }: Ine
                                                         <X className="h-3 w-3" />
                                                     </button>
                                                 )}
+
                                             </div>
+
                                             <Input
                                                 placeholder="Company Name"
                                                 className="flex-1"
@@ -263,7 +273,11 @@ export default function CreateOrder({ products, companyDetails, customers }: Ine
                                                 onBlur={submit}
                                                 onKeyDown={(e) => e.key === 'Enter' && submit()}
                                             />
+
                                         </div>
+                                        {errorMessage && (
+                                            <p className="text-sm text-red-600 mt-1">{errorMessage}</p>
+                                        )}
                                         <Textarea
                                             placeholder="Company Address
 (optional)"
