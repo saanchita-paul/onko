@@ -24,8 +24,8 @@ class SalesController extends Controller
 
         $bestSellerSubQuery = OrderItem::join('consignment_items', 'order_items.consignment_item_id', '=', 'consignment_items.id')
             ->select([
-                'consignment_items.product_id', 
-                DB::raw('SUM(order_items.qty) AS sum_qty'), 
+                'consignment_items.product_id',
+                DB::raw('SUM(order_items.qty) AS sum_qty'),
                 DB::raw('SUM(order_items.qty * order_items.unit_price) AS subtotal')
             ])
             ->groupBy('consignment_items.product_id');
@@ -38,6 +38,15 @@ class SalesController extends Controller
                 $end = $request->input('date_range.to');
             }
             switch ($range) {
+                case 'today':
+                    $currentFrom = Carbon::today()->startOfDay();
+                    $currentTo = Carbon::today()->endOfDay();
+
+                    $previousFrom = Carbon::today()->subDays(1);
+                    $previousTo = Carbon::today()->subDays(1);
+
+                    $prevRangeName = 'Yesterday';
+                    break;
                 case 'week':
                     $currentFrom = $today->copy()->startOfWeek(Carbon::SATURDAY);
                     $currentTo = $today->copy()->endOfWeek(Carbon::SATURDAY);
@@ -114,7 +123,7 @@ class SalesController extends Controller
 
         $subQuantity = (clone $bestSellerSubQuery)->orderByDesc('sum_qty')->limit(10);
         $subSubTotal = (clone $bestSellerSubQuery)->orderByDesc('subtotal')->limit(10);
-        
+
         $quantity = Product::joinSub($subQuantity, 'X', function(JoinClause $join) {
             $join->on('products.id', '=', 'X.product_id');
         })->select(['id', 'name', 'product_id', 'sum_qty', 'subtotal'])->get();
