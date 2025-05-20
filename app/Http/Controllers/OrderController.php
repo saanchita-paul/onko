@@ -54,7 +54,7 @@ class OrderController extends ApiOrderController
             'customer' => request()->input('customer'),
             'items' => request()->input('items'),
             'companyDetails' => $companyDetails,
-            'orderId' => 'Order Preview'
+            'orderId' => ''
         ]);
     }
 

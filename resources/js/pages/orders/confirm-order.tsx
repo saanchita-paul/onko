@@ -6,11 +6,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import printJS from 'print-js';
 
 
-
 export default function ConfirmOrder({ customer, items, companyDetails, orderId}: PageProps<{ customer: Customer; items: OrderItem[];  companyDetails: CompanyDetails, orderId: string }>) {
 
     const [isConfirmed, setIsConfirmed] = useState(false);
-
 
     const subtotal = (() => {
         return items.reduce((total: number, item: OrderItem) => {
@@ -50,9 +48,8 @@ export default function ConfirmOrder({ customer, items, companyDetails, orderId}
     };
 
     const handleReset = () => {
-        router.post(route('orders.confirm'), {
-            customer,
-            items,
+        router.visit(route('orders.create'), {
+            preserveState: false,
         });
     };
     return (
@@ -70,7 +67,10 @@ export default function ConfirmOrder({ customer, items, companyDetails, orderId}
                             <TabsContent value="all-orders"></TabsContent>
                         </Tabs>
                     </div>
-                    <button className="cursor-pointer px-4 py-2 bg-black text-white rounded text-sm hover:bg-gray-800" onClick={handleReset}>
+                    <button
+                        className="cursor-pointer px-4 py-2 bg-black text-white rounded text-sm hover:bg-gray-800"
+                        onClick={isConfirmed ? passCreateOrder : handleReset}
+                    >
                         {isConfirmed ? 'Create Another Order' : 'Reset'}
                     </button>
                 </div>
@@ -88,12 +88,19 @@ export default function ConfirmOrder({ customer, items, companyDetails, orderId}
                         )}
                     </h1>
                     <p className="text-sm text-black-500">
-                        # {orderId}
+                        # {orderId ? orderId : 'Order Preview'}
                     </p>
                 </div>
 
                 <div id="printable-invoice" className="border rounded-md shadow-sm bg-white p-6 max-w-4xl mx-auto">
                     <style>{`
+                    .order-id {
+                        margin-bottom: 10px!important;
+                      }
+
+                      .customer-id {
+                        margin-bottom: 10px!important;
+                      }
                       @media print {
                         body {
                           font-size: 12px;
@@ -103,15 +110,15 @@ export default function ConfirmOrder({ customer, items, companyDetails, orderId}
                           padding: 0;
                         }
 
-                        #printable-invoice {
-                          padding: 0 !important;
-                          box-shadow: none !important;
-                          border: none !important;
-                          max-width: 100% !important;
-                          background: none !important;
-                          margin: 0 auto !important;
-                          width: 80% !important;
-                        }
+                        // #printable-invoice {
+                        //   padding: 0 !important;
+                        //   box-shadow: none !important;
+                        //   border: none !important;
+                        //   max-width: 100% !important;
+                        //   background: none !important;
+                        //   margin: 0 auto !important;
+                        //   width: 80% !important;
+                        // }
 
                         .no-print {
                           display: none !important;
@@ -133,6 +140,24 @@ export default function ConfirmOrder({ customer, items, companyDetails, orderId}
                       .break-all {
                         word-break: break-all;
                       }
+                      #printable-invoice {
+                        padding: 20px !important;
+                        box-shadow: none !important;
+                        border: none !important;
+                        max-width: 600px !important;
+                        width: 100% !important;
+                        margin: 0 auto !important;
+                        background: none !important;
+                        page-break-inside: avoid;
+                      }
+
+                      .grid-cols-[auto_1fr] {
+                        display: flex !important;
+                        flex-direction: column !important;
+                        gap: 4px !important;
+                        min-width: unset !important;
+                      }
+
                       }
                     `}</style>
 
@@ -161,11 +186,13 @@ export default function ConfirmOrder({ customer, items, companyDetails, orderId}
                                         year: 'numeric',
                                     })}</span>
                             </div>
-                            <div className="grid grid-cols-[auto_1fr] gap-2 text-gray-600">
+                            <div className="grid grid-cols-[auto_1fr] gap-5 text-gray-600 order-id mb-15">
                                 <span className="font-medium">Order #</span>
-                                <span className="text-right break-all">{orderId || 'confirm to generate'}</span>
+                                <span className="text-right break-all">
+                                  {orderId ? orderId : 'confirm to generate'}
+                                </span>
                             </div>
-                            <div className="grid grid-cols-[auto_1fr] gap-2">
+                            <div className="grid grid-cols-[auto_1fr] gap-2 customer-id mb-15">
                                 <span className="font-medium">Customer ID</span>
                                 <span className="text-right break-all">{customer.id}</span>
                             </div>
@@ -216,7 +243,12 @@ export default function ConfirmOrder({ customer, items, companyDetails, orderId}
                         {!isConfirmed ? (
                             <>
                                 <button className="cursor-pointer px-4 py-2 border border-gray-400 rounded text-sm text-black hover:bg-gray-100"
-                                  onClick={passCreateOrder}>
+                                        onClick={() =>
+                                            router.visit(route('orders.create'), {
+                                                preserveState: true,
+                                            })
+                                        }
+                                >
                                     Edit
                                 </button>
                                 <button
