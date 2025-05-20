@@ -179,36 +179,51 @@ class SalesControllerTest extends TestCase
 
     public function test_something_random()
     {   
-        $consignment = Consignment::factory()->create();
-        Log::info('consignment');
-        Log::info($consignment);
+        Consignment::factory()->create();
 
-        $consignment->load('consignmentItems');
-        Log::info('consignment items');
-        Log::info($consignment->consignmentItems);
-        
         $orders = Order::factory()
-            ->count(10)
-            // ->state([
-                
-            // ])
+            ->count(100)
             ->create();
+
+
         $orders->load('orderItems.consignmentItem');
-        // $flatOrders = $orders->map(function($order) {
-        //     //$order->order_items->product_id = $order->order_items->consignment_item->product_id;
-        //     //unset($order->order_items->consignment_item);
 
-        //     $order->order_items = $order->order_items->map(function($orderItem) {
+        $orders = $orders->map(fn($order) => $order->orderItems);
+        $grouped  = $orders->collapse()->map(function($item) {
 
-        //     });
-        // });
-        Log::info('consignments with items :');
-        Log::info(Consignment::with('consignmentItems')->get());
-        Log::info('------------------------');
-        Log::info('orders with orderItems.consignmentItem: ');
-        Log::info($orders);
+            return [
+                'id' => $item->id,
+                'product_id' => $item->consignmentItem->product_id,
+                'qty' => $item->qty,
+                'unit_price' => intdiv($item->unit_price,100),
+                'subtotal' => $item->qty * intdiv($item->unit_price,100),
+            ];
+        })->groupBy('product_id');
+        $bestSellers = collect([]);
+
+        $grouped->each(function($item) use (&$bestSellers) {
+            $val = [
+                'product_id' => $item->first()['product_id'],
+                'total_qty' => $item->reduce(fn($carry, $value) => $carry + $value['qty'], 0),
+                'total_value' => $item->reduce(fn($carry, $value) => $carry + $value['subtotal'], 0)
+            ];
+
+            $bestSellers->push($val);
+
+        });
+
+        $bestSellerByQty = $bestSellers->sortByDesc('total_qty')->values()->all();
+        $bestSellerByValue = $bestSellers->sortByDesc('total_value')->values()->all(); 
+        Log::info('bestSellers');
+        Log::info($bestSellers);
+
+        Log::info('by qty');
+        Log::info($bestSellerByQty);
+
+        Log::info('by price');
+        Log::info($bestSellerByValue);
+
         $this->assertTrue(true);
-        //$consignment = ConsignmentFactory::factory(5)->create();
     }
 
 }

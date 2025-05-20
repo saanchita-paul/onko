@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Order>
@@ -33,8 +34,8 @@ class OrderFactory extends Factory
 
                     $consignmentItem = $availableItems->random();
                     $maxQty = $consignmentItem->qty - $consignmentItem->qty_sold;
-                    
-                    $randQty = rand(1, $maxQty);
+                    $thresh = rand(1, 5);
+                    $randQty = rand(1, min($thresh, $maxQty));
 
                     $item = OrderItem::factory()->create([
                         'order_id' => $order->id,
