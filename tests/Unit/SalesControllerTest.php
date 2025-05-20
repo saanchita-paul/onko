@@ -177,9 +177,11 @@ class SalesControllerTest extends TestCase
         );
     }
 
-    public function test_something_random()
+    public function test_best_sellers()
     {   
-        Consignment::factory()->create();
+        $this->actingAs(User::factory()->create());
+
+        Consignment::factory()->count(2)->create();
 
         $orders = Order::factory()
             ->count(100)
@@ -213,15 +215,18 @@ class SalesControllerTest extends TestCase
         });
 
         $bestSellerByQty = $bestSellers->sortByDesc('total_qty')->values()->all();
-        $bestSellerByValue = $bestSellers->sortByDesc('total_value')->values()->all(); 
-        Log::info('bestSellers');
-        Log::info($bestSellers);
+        $bestSellerByValue = $bestSellers->sortByDesc('total_value')->values()->all();
+        $response = $this->get(route('sales.index'));
 
-        Log::info('by qty');
-        Log::info($bestSellerByQty);
-
-        Log::info('by price');
-        Log::info($bestSellerByValue);
+        $response->assertStatus(200);
+        $response->assertInertia(function($page) use ($bestSellerByQty, $bestSellerByValue){
+            $page->component('sales/index')
+                ->has('bQuantity', 10)
+                ->where('bQuantity.0.sum_qty', $bestSellerByQty[0]['total_qty'])
+                ->where('bQuantity.0.id', $bestSellerByQty[0]['product_id'])
+                ->has('bSubTotal', 10)
+                ->where('bSubTotal.0.id', $bestSellerByValue[0]['product_id']);
+        }); 
 
         $this->assertTrue(true);
     }
