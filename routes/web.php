@@ -30,31 +30,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/sales', [SalesController::class, 'index'])->name('sales.index');
     Route::post('/customers', [CustomerController::class, 'store'])->name('customers.store');
     Route::post('/options', [OptionController::class, 'store'])->name('options.store');
-    Route::post('/orders/confirm', function () {
-
-        $options = \App\Models\Option::whereIn('key', [
-            'company_name',
-            'company_address',
-            'invoice_date',
-            'logo',
-        ])->pluck('value', 'key');
-
-        $companyDetails = [
-            'company_name' => $options['company_name'] ?? null,
-            'company_address' => $options['company_address'] ?? null,
-            'invoice_date' => $options['invoice_date'] ?? null,
-            'logo' => $options['logo'] ?? null,
-        ];
-        return Inertia::render('orders/confirm-order', [
-            'customer' => request()->input('customer'),
-            'items' => request()->input('items'),
-            'companyDetails' => $companyDetails,
-            'orderId' => 'Order Preview'
-        ]);
-    })->name('orders.confirm');
+    Route::post('/orders/confirm', [OrderController::class, 'confirm'])->name('orders.confirm');
+    Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
 
 });
-Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
+
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

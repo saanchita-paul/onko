@@ -368,7 +368,7 @@ export default function CreateOrder({ products, companyDetails, customers }: Ine
                             <Button variant="outline" className="cursor-pointer">Add a fee or charge</Button>
                             <Button variant="outline" className="cursor-pointer">Add discount</Button>
                             <Button variant="outline" className="cursor-pointer">Add tax</Button>
-                            <Button className="cursor-pointer" onClick={() => setDrawerOpen(true)}>
+                            <Button className="cursor-pointer" disabled={items.length === 0}  onClick={() => setDrawerOpen(true)}>
                                 Create order
                             </Button>
 
@@ -471,7 +471,7 @@ export default function CreateOrder({ products, companyDetails, customers }: Ine
                 </div>
             </div>
 
-            <OrderForm open={drawerOpen} onOpenChange={setDrawerOpen} customers={customers} orderItems={items} companyDetails={companyDetails ?? null} />
+            <OrderForm open={drawerOpen} onOpenChange={setDrawerOpen} customers={customers} orderItems={items} companyDetails={companyDetails ?? null}/>
         </AppLayout>
     );
 }

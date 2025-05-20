@@ -48,7 +48,6 @@ interface OrderFormProps {
 }
 
 export function OrderForm({ open, onOpenChange, customers, orderItems, companyDetails }: OrderFormProps) {
-    console.log({companyDetails});
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
         email: '',

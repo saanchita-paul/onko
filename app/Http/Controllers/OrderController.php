@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreOrderRequest;
 use App\Models\ConsignmentItem;
 use App\Models\Customer;
 use App\Models\Option;
 use App\Models\Order;
 use App\Models\OrderItem;
-use App\Models\Product;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use App\Http\Controllers\Api\OrderController as ApiOrderController;
@@ -35,23 +35,33 @@ class OrderController extends ApiOrderController
         ]);
     }
 
-    public function store(Request $request)
+    public function confirm()
     {
-        $validator = validator($request->all(), [
-            'customer_id' => 'required|uuid|exists:customers,id',
-            'items' => 'required|array|min:1',
-            'items.*.id' => 'required|uuid|exists:products,id',
-            'items.*.qty' => 'required|integer|min:1',
-            'items.*.price' => 'required|numeric|min:0',
-            'sub_total' => 'required|numeric|min:0',
-            'grand_total' => 'required|numeric|min:0',
+        $options = Option::whereIn('key', [
+            'company_name',
+            'company_address',
+            'invoice_date',
+            'logo',
+        ])->pluck('value', 'key');
+
+        $companyDetails = [
+            'company_name' => $options['company_name'] ?? null,
+            'company_address' => $options['company_address'] ?? null,
+            'invoice_date' => $options['invoice_date'] ?? null,
+            'logo' => $options['logo'] ?? null,
+        ];
+        return Inertia::render('orders/confirm-order', [
+            'customer' => request()->input('customer'),
+            'items' => request()->input('items'),
+            'companyDetails' => $companyDetails,
+            'orderId' => 'Order Preview'
         ]);
+    }
 
-        if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator)->withInput();
-        }
+    public function store(StoreOrderRequest $request)
+    {
 
-        $data = $validator->validated();
+        $data = $request->validated();
 
         try {
             $order = null;
@@ -85,10 +95,8 @@ class OrderController extends ApiOrderController
                 }
             });
 
-
-//            return redirect()->back()->with('success', 'Order confirmed successfully!');
             $customer = Customer::find($data['customer_id']);
-            $options = \App\Models\Option::whereIn('key', [
+            $options = Option::whereIn('key', [
                 'company_name',
                 'company_address',
                 'invoice_date',
@@ -107,6 +115,7 @@ class OrderController extends ApiOrderController
                 'items' => $data['items'],
                 'companyDetails' => $companyDetails,
                 'orderId' => $order->id,
+                'success' => 'Order successfully created!',
             ]);
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Failed to save order: ' . $e->getMessage())->withInput();

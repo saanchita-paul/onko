@@ -1,7 +1,7 @@
 import { PageProps } from '@/types';
 import AppLayout from '@/layouts/app-layout';
 import { Head, router } from '@inertiajs/react';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import printJS from 'print-js';
 
@@ -30,45 +30,11 @@ interface CompanyDetails {
 
 export default function ConfirmOrder({ customer, items, companyDetails, orderId}: PageProps<{ customer: Customer; items: OrderItem[];  companyDetails: CompanyDetails, orderId: string }>) {
 
-    // console.log({items});
-    console.log('kakakakaakak', items);
-    router.on('start', () => {
-        console.log('items', items);
-
-    })
-
     const [isConfirmed, setIsConfirmed] = useState(false);
-    const [orderNumber, setOrderNumber] = useState<string | null>(null);
-
-
-    const normalizedItems: OrderItem[] = useMemo(() => {
-        const normalized: OrderItem[] = [];
-
-        for (let i = 0; i < items.length; i += 6) {
-            const group = items.slice(i, i + 6);
-            const mergedItem: any = {};
-
-            group.forEach(entry => {
-                Object.assign(mergedItem, entry);
-            });
-
-            normalized.push({
-                id: mergedItem.id,
-                name: mergedItem.name || '',
-                qty: Number(mergedItem.qty || 0),
-                price: Number(mergedItem.price || 0),
-                consignment_item_id: mergedItem.consignment_item_id || '',
-            });
-        }
-
-        return normalized;
-    }, [items]);
-
-
 
 
     const subtotal = (() => {
-        return items.reduce((total, item) => {
+        return items.reduce((total: number, item: OrderItem) => {
             return total + item.qty * item.price;
         }, 0);
     })();
@@ -84,10 +50,8 @@ export default function ConfirmOrder({ customer, items, companyDetails, orderId}
                 grand_total: subtotal,
             },
             {
-                onSuccess: (page) => {
+                onSuccess: () => {
                     setIsConfirmed(true);
-                    const newOrderNumber = orderId ?? 'N/A';
-                    setOrderNumber(newOrderNumber);
                 }
             }
         );
@@ -102,7 +66,16 @@ export default function ConfirmOrder({ customer, items, companyDetails, orderId}
         });
     };
 
+    const passCreateOrder = () => {
+        router.visit(route('orders.create'));
+    };
 
+    const handleReset = () => {
+        router.post(route('orders.confirm'), {
+            customer,
+            items,
+        });
+    };
     return (
         <AppLayout>
             <Head title="Confirm Order" />
@@ -118,7 +91,7 @@ export default function ConfirmOrder({ customer, items, companyDetails, orderId}
                             <TabsContent value="all-orders"></TabsContent>
                         </Tabs>
                     </div>
-                    <button className="cursor-pointer px-4 py-2 bg-black text-white rounded text-sm hover:bg-gray-800">
+                    <button className="cursor-pointer px-4 py-2 bg-black text-white rounded text-sm hover:bg-gray-800" onClick={handleReset}>
                         {isConfirmed ? 'Create Another Order' : 'Reset'}
                     </button>
                 </div>
@@ -144,10 +117,11 @@ export default function ConfirmOrder({ customer, items, companyDetails, orderId}
                     <style>{`
                       @media print {
                         body {
-                          margin: auto;
-                          padding: 0;
                           font-size: 12px;
                           color: #000;
+                          width: 100%;
+                          margin: 0;
+                          padding: 0;
                         }
 
                         #printable-invoice {
@@ -156,6 +130,8 @@ export default function ConfirmOrder({ customer, items, companyDetails, orderId}
                           border: none !important;
                           max-width: 100% !important;
                           background: none !important;
+                          margin: 0 auto !important;
+                          width: 80% !important;
                         }
 
                         .no-print {
@@ -172,6 +148,12 @@ export default function ConfirmOrder({ customer, items, companyDetails, orderId}
                           padding: 6px;
                           text-align: left;
                         }
+                        .text-right {
+                            text-align: right !important;
+                          }
+                      .break-all {
+                        word-break: break-all;
+                      }
                       }
                     `}</style>
 
@@ -189,12 +171,25 @@ export default function ConfirmOrder({ customer, items, companyDetails, orderId}
                                 {companyDetails?.company_address}
                             </p>
                         </div>
-
-                        <div className="text-sm text-right text-black-600">
-                            {/*<p><strong>Date:</strong> {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</p>*/}
-                            <p className="pb-2"><strong>Date:</strong> {companyDetails?.invoice_date}</p>
-                            <p className="text-gray-600 pb-2"><strong>Order #</strong> confirm to generate</p>
-                            <p className="pb-2"><strong>Customer ID</strong> {customer.id}</p>
+                        <div className="text-sm text-black-600 min-w-[280px] space-y-1 print:text-xs">
+                            {/*    /!*<p><strong>Date:</strong> {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</p>*!/*/}
+                            <div className="grid grid-cols-[auto_1fr] gap-2">
+                                <span className="font-medium">Date:</span>
+                                <span className="text-right">{companyDetails?.invoice_date &&
+                                    new Date(companyDetails.invoice_date).toLocaleDateString('en-GB', {
+                                        day: 'numeric',
+                                        month: 'short',
+                                        year: 'numeric',
+                                    })}</span>
+                            </div>
+                            <div className="grid grid-cols-[auto_1fr] gap-2 text-gray-600">
+                                <span className="font-medium">Order #</span>
+                                <span className="text-right break-all">{orderId || 'confirm to generate'}</span>
+                            </div>
+                            <div className="grid grid-cols-[auto_1fr] gap-2">
+                                <span className="font-medium">Customer ID</span>
+                                <span className="text-right break-all">{customer.id}</span>
+                            </div>
                         </div>
                     </div>
 
@@ -212,13 +207,13 @@ export default function ConfirmOrder({ customer, items, companyDetails, orderId}
                         </thead>
                         <tbody>
 
-                        {items.map((item, i) => {
+                        {items.map((item: { name: string; qty: number; price: number }, i: number) => {
                             const total = item.qty * item.price;
                             return (
                                 <tr key={i} className="border-b">
                                     <td className="py-2 px-2">{i + 1}</td>
                                     <td className="py-2 px-2">{item.name}</td>
-                                    <td className="py-2 px-2 ">{item.qty}</td>
+                                    <td className="py-2 px-2">{item.qty}</td>
                                     <td className="py-2 px-2">{item.price.toFixed(2)}/-</td>
                                     <td className="py-2 px-2 text-right">{total.toFixed(2)}/-</td>
                                 </tr>
@@ -241,7 +236,8 @@ export default function ConfirmOrder({ customer, items, companyDetails, orderId}
                     <div className="flex justify-end mt-8 gap-2">
                         {!isConfirmed ? (
                             <>
-                                <button className="cursor-pointer px-4 py-2 border border-gray-400 rounded text-sm text-black hover:bg-gray-100">
+                                <button className="cursor-pointer px-4 py-2 border border-gray-400 rounded text-sm text-black hover:bg-gray-100"
+                                  onClick={passCreateOrder}>
                                     Edit
                                 </button>
                                 <button
@@ -253,9 +249,13 @@ export default function ConfirmOrder({ customer, items, companyDetails, orderId}
                             </>
                         ) : (
                             <>
-                                <button className="no-print cursor-pointer px-4 py-2 border border-gray-400 rounded text-sm text-black hover:bg-gray-100">
+                                <button
+                                    className="no-print cursor-pointer px-4 py-2 border border-gray-400 rounded text-sm text-black hover:bg-gray-100"
+                                    onClick={passCreateOrder}
+                                >
                                     Create Another Order
                                 </button>
+
                                 <button className="no-print cursor-pointer px-4 py-2 border border-gray-400 rounded text-sm text-black hover:bg-gray-100">
                                     Schedule Delivery
                                 </button>
