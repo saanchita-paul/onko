@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Models\OrderItem;
+use App\Models\Product;
+use Illuminate\Database\Query\JoinClause;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class SalesController extends Controller
 {
@@ -18,6 +21,14 @@ class SalesController extends Controller
         $prevQuery = Order::query();
         $range = $request->input('range');
         $pevRangeName = "";
+
+        $bestSellerSubQuery = OrderItem::join('consignment_items', 'order_items.consignment_item_id', '=', 'consignment_items.id')
+            ->select([
+                'consignment_items.product_id', 
+                DB::raw('SUM(order_items.qty) AS sum_qty'), 
+                DB::raw('SUM(order_items.qty * order_items.unit_price) AS subtotal')
+            ])
+            ->groupBy('consignment_items.product_id');
 
         if ($range && $range !== 'all') {
             $today = Carbon::today();
@@ -86,6 +97,11 @@ class SalesController extends Controller
                     $currentFrom->startOfDay(),
                     $currentTo->endOfDay()
                 ]);
+
+                $bestSellerSubQuery->whereIn('order_items.order_id', Order::whereBetween('created_at',  [
+                    $currentFrom->startOfDay(),
+                    $currentTo->endOfDay()
+                ])->select(['id']));
             }
 
             if ($range !== 'custom' && $previousFrom && $previousTo) {
@@ -95,6 +111,17 @@ class SalesController extends Controller
                 ]);
             }
         }
+
+        $subQuantity = (clone $bestSellerSubQuery)->orderByDesc('sum_qty')->limit(10);
+        $subSubTotal = (clone $bestSellerSubQuery)->orderByDesc('subtotal')->limit(10);
+        
+        $quantity = Product::joinSub($subQuantity, 'X', function(JoinClause $join) {
+            $join->on('products.id', '=', 'X.product_id');
+        })->select(['id', 'name', 'product_id', 'sum_qty', 'subtotal'])->get();
+
+        $subtotal = Product::joinSub($subSubTotal, 'X', function(JoinClause $join) {
+            $join->on('products.id', '=', 'X.product_id');
+        })->select(['id', 'name', 'product_id', 'sum_qty', 'subtotal'])->get();
 
         $grandTotal = round($query->sum('grand_total') / 100, 2);
         $orders = $query->get();
@@ -129,7 +156,9 @@ class SalesController extends Controller
                 'grand_total' => !in_array($range, ['all', 'custom']) ? $compare($grandTotal, $prevGrandTotal, $pevRangeName) : '',
                 'total_order' => !in_array($range, ['all', 'custom']) ? $compare($totalOrder, $prevTotalOrder, $pevRangeName) : '',
                 'average_value' => !in_array($range, ['all', 'custom']) ? $compare($averageValue, $prevAverageValue, $pevRangeName) : '',
-            ]
+            ],
+            'bQuantity' => $quantity,
+            'bSubTotal' => $subtotal,
         ];
     }
 

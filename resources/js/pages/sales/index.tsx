@@ -12,6 +12,14 @@ import { useEffect, useState } from 'react';
 import { DateRange } from 'react-day-picker';
 import { CartesianGrid, Line, LineChart, XAxis } from 'recharts';
 
+interface BestSellers {
+    id: string;
+    name: string;
+    product_id: string;
+    short_id: string;
+    subtotal: string;
+    sum_qty: string;
+}
 interface Props {
     orders: Order[];
     grand_total: number;
@@ -22,6 +30,8 @@ interface Props {
         total_order: string,
         average_value: string
     }
+    bQuantity: BestSellers[];
+    bSubTotal: BestSellers[];
 }
 
 const chartData = [
@@ -55,14 +65,7 @@ const tabTriggerClass =
     'data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-md ' +
     'dark:data-[state=active]:bg-black dark:data-[state=active]:text-white dark:data-[state=active]:shadow-lg';
 
-const bestSellers = [
-    { name: 'Lacoste Polo', amount: 5000 },
-    { name: 'Calvin Klein Jeans', amount: 7000 },
-    { name: 'CK T-shirt', amount: 7000 },
-    { name: 'Armani Sport Code', amount: 12000 },
-];
-
-export default function Index({ grand_total, total_order, average_value, comparison }: Props) {
+export default function Index({ grand_total, total_order, average_value, comparison, bQuantity, bSubTotal }: Props) {
     const { url } = usePage();
     const searchParams = new URLSearchParams(url.split('?')[1]);
 
@@ -193,14 +196,14 @@ export default function Index({ grand_total, total_order, average_value, compari
                                 <CardContent>
                                     <TabsContent value="price">
                                         <ol className="mt-5">
-                                            {bestSellers.map((item, index) => (
+                                            {bSubTotal.map((item, index) => (
                                                 <li className="mb-5">
                                                     <div className="flex">
                                                         <span className="w-4/6">
                                                             <span className="mr-6">{index + 1}</span>
                                                             {item.name}
                                                         </span>
-                                                        <span className="w-2/6 pr-1 text-right">৳ {item.amount}</span>
+                                                        <span className="w-2/6 pr-1 text-right">৳ {item.subtotal}</span>
                                                     </div>
                                                 </li>
                                             ))}
@@ -208,14 +211,14 @@ export default function Index({ grand_total, total_order, average_value, compari
                                     </TabsContent>
                                     <TabsContent value="qty">
                                         <ol className="mt-5">
-                                            {bestSellers.map((item, index) => (
+                                            {bQuantity.map((item, index) => (
                                                 <li className="mb-5">
                                                     <div className="flex">
                                                         <span className="w-4/6">
                                                             <span className="mr-6">{index + 1}</span>
                                                             {item.name}
                                                         </span>
-                                                        <span className="w-2/6 pr-1 text-right">৳ {item.amount}</span>
+                                                        <span className="w-2/6 pr-1 text-right">{item.sum_qty}</span>
                                                     </div>
                                                 </li>
                                             ))}
