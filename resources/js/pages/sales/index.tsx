@@ -10,7 +10,7 @@ import { Head, router, usePage } from '@inertiajs/react';
 import { ChevronLeftIcon, ChevronRightIcon, StarIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { DateRange } from 'react-day-picker';
-import { CartesianGrid, Line, LineChart, XAxis } from 'recharts';
+import { CartesianGrid, Line, LineChart, XAxis, YAxis } from 'recharts';
 
 interface BestSellers {
     id: string;
@@ -32,16 +32,11 @@ interface Props {
     }
     bQuantity: BestSellers[];
     bSubTotal: BestSellers[];
+    chartData: {
+        date: string;
+        sales: string
+    }[]
 }
-
-const chartData = [
-    { month: 'January', desktop: 186, mobile: 80 },
-    { month: 'February', desktop: 305, mobile: 200 },
-    { month: 'March', desktop: 237, mobile: 120 },
-    { month: 'April', desktop: 73, mobile: 190 },
-    { month: 'May', desktop: 209, mobile: 130 },
-    { month: 'June', desktop: 214, mobile: 140 },
-];
 
 const chartConfig = {
     desktop: {
@@ -65,7 +60,7 @@ const tabTriggerClass =
     'data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-md ' +
     'dark:data-[state=active]:bg-black dark:data-[state=active]:text-white dark:data-[state=active]:shadow-lg';
 
-export default function Index({ grand_total, total_order, average_value, comparison, bQuantity, bSubTotal }: Props) {
+export default function Index({ grand_total, total_order, average_value, comparison, bQuantity, bSubTotal, chartData }: Props) {
     const { url } = usePage();
     const searchParams = new URLSearchParams(url.split('?')[1]);
 
@@ -139,25 +134,58 @@ export default function Index({ grand_total, total_order, average_value, compari
                             <CardContent>
                                 <ChartContainer config={chartConfig}>
                                     <LineChart
-                                        accessibilityLayer
                                         data={chartData}
-                                        margin={{
-                                            left: 12,
-                                            right: 12,
-                                        }}
+                                        margin={{ left: 12, right: 12, top: 20, bottom: 20 }}
                                     >
-                                        <CartesianGrid vertical={false} />
+                                        {/* Only horizontal grid lines */}
+                                        <CartesianGrid vertical={false} strokeDasharray="3 3" />
+
                                         <XAxis
-                                            dataKey="month"
+                                            dataKey="date"
                                             tickLine={false}
                                             axisLine={false}
                                             tickMargin={8}
-                                            tickFormatter={(value) => value.slice(0, 3)}
                                         />
-                                        <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
-                                        <Line dataKey="desktop" type="linear" stroke="var(--color-desktop)" strokeWidth={2} dot={false} />
+
+                                        <YAxis
+                                            tickLine={false}
+                                            axisLine={false}
+                                            tickMargin={8}
+                                            tickCount={7}
+                                            tickFormatter={(value) => `$${value.toLocaleString()}`}
+                                        />
+
+                                        {/* Optional Tooltip */}
+                                        <ChartTooltip
+                                            cursor={false}
+                                            content={<ChartTooltipContent hideLabel />}
+                                        />
+
+                                        {/* Line series */}
+                                        <Line
+                                            dataKey="sales"
+                                            stroke="#000"
+                                            strokeWidth={2}
+                                            type="linear"
+                                            dot={(props) => {
+                                                const { cx, cy, index } = props;
+                                                const isLast = index === chartData.length - 1;
+
+                                                return (
+                                                    <g>
+                                                        {isLast && (
+                                                            <>
+                                                                <circle cx={cx} cy={cy} r={10} fill="#e5e5e5" />
+                                                                <circle cx={cx} cy={cy} r={4} fill="#000" />
+                                                            </>
+                                                        )}
+                                                    </g>
+                                                );
+                                            }}
+                                        />
                                     </LineChart>
                                 </ChartContainer>
+
                             </CardContent>
                         </Card>
                     </div>

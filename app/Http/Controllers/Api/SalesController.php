@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
+use Carbon\CarbonPeriod;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -21,6 +22,14 @@ class SalesController extends Controller
         $prevQuery = Order::query();
         $range = $request->input('range');
         $prevRangeName = "";
+        $interval = '1 month';
+
+        $today = Carbon::today();
+
+        $currentFrom = $today->copy()->startOfYear();
+        $currentTo = $today->copy()->endOfYear();
+
+        $period = CarbonPeriod::create($currentFrom->startOfDay(), $interval, $currentTo->endOfDay());
 
         $bestSellerSubQuery = OrderItem::join('consignment_items', 'order_items.consignment_item_id', '=', 'consignment_items.id')
             ->select([
@@ -31,7 +40,6 @@ class SalesController extends Controller
             ->groupBy('consignment_items.product_id');
 
         if ($range && $range !== 'all') {
-            $today = Carbon::today();
 
             if ($request->has('date_range')) {
                 $start = $request->input('date_range.from');
@@ -44,15 +52,18 @@ class SalesController extends Controller
 
                     $previousFrom = Carbon::today()->subDays(1);
                     $previousTo = Carbon::today()->subDays(1);
+                    $interval = '2 hours';
 
                     $prevRangeName = 'Yesterday';
                     break;
                 case 'week':
                     $currentFrom = $today->copy()->startOfWeek(Carbon::SATURDAY);
-                    $currentTo = $today->copy()->endOfWeek(Carbon::SATURDAY);
+                    $currentTo = $today->copy()->endOfWeek(Carbon::FRIDAY);
 
                     $previousFrom = $currentFrom->copy()->subWeek();
                     $previousTo = $currentTo->copy()->subWeek();
+
+                    $interval = '1 day';
 
                     $prevRangeName = 'Last Week';
                     break;
@@ -64,6 +75,8 @@ class SalesController extends Controller
                     $previousFrom = $currentFrom->copy()->subMonth();
                     $previousTo = $currentTo->copy()->subMonth();
 
+                    $interval = '5 days';
+
                     $prevRangeName = 'Last Month';
                     break;
 
@@ -73,6 +86,8 @@ class SalesController extends Controller
 
                     $previousFrom = $currentFrom->copy()->subQuarter();
                     $previousTo = $currentTo->copy()->subQuarter();
+
+                    $interval = '10 days';
 
                     $prevRangeName = 'Last Quarter';
                     break;
@@ -119,7 +134,13 @@ class SalesController extends Controller
                     $previousTo->endOfDay()
                 ]);
             }
+
+            if($range !== 'custom'){
+                $period = CarbonPeriod::create($currentFrom->startOfDay(), $interval, $currentTo->endOfDay());
+            }
         }
+
+        $chartData = $this->findChart($period, $currentFrom->startOfDay(), $range);
 
         $subQuantity = (clone $bestSellerSubQuery)->orderByDesc('sum_qty')->limit(10);
         $subSubTotal = (clone $bestSellerSubQuery)->orderByDesc('subtotal')->limit(10);
@@ -168,7 +189,26 @@ class SalesController extends Controller
             ],
             'bQuantity' => $quantity,
             'bSubTotal' => $subtotal,
+            'chartData' => $chartData,
         ];
+    }
+
+    private function findChart($period, $startDate, $range)
+    {
+        $chart = [];
+
+        foreach ($period as $index => $date) {
+            $query = Order::query()->whereBetween('created_at', [$startDate, $date]);
+            $totalSales = round($query->sum('grand_total') / 100, 2);
+
+            $dateString = $range == 'week' ? $date->format('l') : ($range == 'today' ? $date->format('g A') : $date->format('Y-m-d'));
+            $chart[$index] = [
+                'date' => $dateString,
+                'sales' => $totalSales,
+            ];
+        }
+
+        return $chart;
     }
 
     /**
