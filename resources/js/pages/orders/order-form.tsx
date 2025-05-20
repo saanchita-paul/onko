@@ -11,8 +11,8 @@ import { Search, Smile, ChevronRight, BadgeCheckIcon } from 'lucide-react';
 import { Dispatch, SetStateAction, useState } from "react"
 import { useForm, router } from '@inertiajs/react'
 import { toast } from 'sonner';
-import { InertiaResponse } from '@/types';
-import type { CompanyDetails } from '@/pages/orders/create';
+import { CompanyDetails, InertiaResponse } from '@/types';
+
 
 interface Customer {
     id: number

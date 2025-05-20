@@ -25,7 +25,7 @@ import {
 import { useEffect, useRef, useState } from 'react';
 import { Textarea } from "@/components/ui/textarea";
 import { PageProps } from '@inertiajs/core';
-import { LaravelPaginationItem } from '@/types';
+import { CompanyDetails, LaravelPaginationItem } from '@/types';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
@@ -37,13 +37,6 @@ interface Product {
     sku?: string;
     quantity: number;
     price: number;
-}
-
-export interface CompanyDetails {
-    company_name: string;
-    company_address: string;
-    invoice_date: string;
-    logo: string | null;
 }
 
 interface InertiaProps extends PageProps {

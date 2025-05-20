@@ -10,7 +10,6 @@ interface OrderItem {
     name: string;
     qty: number;
     price: number;
-    // quantity?: number;
     consignment_item_id: string;
 }
 
@@ -18,13 +17,6 @@ interface Customer {
     name: string;
     email: string;
     phone: string;
-}
-
-interface CompanyDetails {
-    company_name: string;
-    company_address: string;
-    invoice_date: string;
-    logo: string | null;
 }
 
 

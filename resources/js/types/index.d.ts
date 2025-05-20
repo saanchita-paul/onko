@@ -88,7 +88,15 @@ type FlashMessages = {
     [key: string]: unknown;
 };
 
+export interface CompanyDetails {
+    company_name: string;
+    company_address: string;
+    invoice_date: string;
+    logo: string | null;
+}
+
 export type InertiaResponse<T = Record<string, unknown>> = Page<PageProps & {
     flash?: FlashMessages;
 } & T>;
+
 
