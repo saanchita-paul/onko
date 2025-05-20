@@ -173,6 +173,17 @@ export default function CreateOrder({ products, companyDetails, customers }: Ine
         }
     }, [data.logo, data.invoice_date]);
 
+    useEffect(() => {
+        const adjustedProducts = products.data.map(product => {
+            const reservedQty = items.find(item => item.id === product.id)?.qty ?? 0;
+            return {
+                ...product,
+                quantity: Math.max(product.quantity - reservedQty, 0),
+            };
+        });
+        setProductList(adjustedProducts);
+    }, [products.data, items]);
+
 
     return (
         <AppLayout>
