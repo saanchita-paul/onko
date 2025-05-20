@@ -11,14 +11,7 @@ import { Search, Smile, ChevronRight, BadgeCheckIcon } from 'lucide-react';
 import { Dispatch, SetStateAction, useState } from "react"
 import { useForm, router } from '@inertiajs/react'
 import { toast } from 'sonner';
-import { InertiaResponse } from '@/types';
-
-interface Customer {
-    id: number
-    name: string
-    email: string
-    phone: string
-}
+import { CompanyDetails, Customer, InertiaResponse, OrderItem } from '@/types';
 
 export interface PaginatedCustomers {
     data: Customer[]
@@ -34,10 +27,12 @@ export interface PaginatedCustomers {
 interface OrderFormProps {
     open: boolean
     onOpenChange: Dispatch<SetStateAction<boolean>>
-    customers: PaginatedCustomers
+    customers: PaginatedCustomers,
+    orderItems: OrderItem[],
+    companyDetails: CompanyDetails | null
 }
 
-export function OrderForm({ open, onOpenChange, customers }: OrderFormProps) {
+export function OrderForm({ open, onOpenChange, customers, orderItems, companyDetails }: OrderFormProps) {
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
         email: '',
@@ -47,12 +42,15 @@ export function OrderForm({ open, onOpenChange, customers }: OrderFormProps) {
     const [search, setSearch] = useState('')
     const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null)
 
+    const isFormEmpty = !data.name.trim() && !data.email.trim() && !data.phone.trim();
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
 
         post(route('customers.store'), {
             onSuccess: (data: InertiaResponse) => {
                 reset();
+                onOpenChange(false);
                 if (data.props.flash?.success) {
                     toast.custom(() => (
                         <div className="flex h-[100px] w-[350px] items-start gap-2 rounded-xl border border-blue-700 bg-white p-4 shadow-lg dark:border-gray-200 dark:bg-zinc-900">
@@ -87,6 +85,7 @@ export function OrderForm({ open, onOpenChange, customers }: OrderFormProps) {
         }
     }
 
+
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value
         setSearch(value)
@@ -98,6 +97,20 @@ export function OrderForm({ open, onOpenChange, customers }: OrderFormProps) {
 
         setSearchTimeout(timeout)
     }
+
+
+    const handleSelectCustomer = (customer: Customer ) => {
+        console.log('Order Items:', orderItems);
+        onOpenChange(false);
+
+        router.post(route('orders.confirm'), {
+            customer,
+            items: orderItems,
+            companyDetails: companyDetails,
+        }, {
+            preserveState: true,
+        });
+    };
 
     return (
         <Sheet open={open} onOpenChange={onOpenChange}>
@@ -160,12 +173,11 @@ export function OrderForm({ open, onOpenChange, customers }: OrderFormProps) {
 
                     <div className="px-6 mt-6">
                         <Button
-                            variant="secondary"
                             className="w-full"
                             type="submit"
-                            disabled={processing}
+                            disabled={processing || isFormEmpty}
                         >
-                            {processing ? 'Adding...' : 'Add Customer'}
+                            {processing ? 'Adding...' : 'Add New Customer'}
                         </Button>
                     </div>
                 </form>
@@ -183,7 +195,8 @@ export function OrderForm({ open, onOpenChange, customers }: OrderFormProps) {
                                 <p className="text-muted-foreground text-sm">📞 {customer.phone}</p>
                             </div>
                             <button
-                                className="bg-muted hover:bg-muted/80 px-3 py-1 text-sm rounded text-black dark:text-white transition"
+                                onClick={() => handleSelectCustomer(customer)}
+                                className="cursor-pointer bg-muted hover:bg-muted/80 px-3 py-1 text-sm rounded text-black dark:text-white transition"
                             >
                                 Select
                             </button>

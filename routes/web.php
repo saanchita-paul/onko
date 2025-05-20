@@ -30,7 +30,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/sales', [SalesController::class, 'index'])->name('sales.index');
     Route::post('/customers', [CustomerController::class, 'store'])->name('customers.store');
     Route::post('/options', [OptionController::class, 'store'])->name('options.store');
+    Route::post('/orders/confirm', [OrderController::class, 'confirm'])->name('orders.confirm');
+    Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
+
 });
+
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';

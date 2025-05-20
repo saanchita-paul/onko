@@ -25,7 +25,7 @@ import {
 import { useEffect, useRef, useState } from 'react';
 import { Textarea } from "@/components/ui/textarea";
 import { PageProps } from '@inertiajs/core';
-import { LaravelPaginationItem } from '@/types';
+import { CompanyDetails, LaravelPaginationItem } from '@/types';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
@@ -39,13 +39,6 @@ interface Product {
     price: number;
 }
 
-interface CompanyDetails {
-    company_name: string;
-    company_address: string;
-    invoice_date: string;
-    logo: string | null;
-}
-
 interface InertiaProps extends PageProps {
     products: {
         data: Product[];
@@ -55,6 +48,7 @@ interface InertiaProps extends PageProps {
     };
     companyDetails?: CompanyDetails | null;
     customers: PaginatedCustomers;
+    orderItems: []
 }
 interface Item extends Product {
     qty: number;
@@ -171,6 +165,17 @@ export default function CreateOrder({ products, companyDetails, customers }: Ine
             submit();
         }
     }, [data.logo, data.invoice_date]);
+
+    useEffect(() => {
+        const adjustedProducts = products.data.map(product => {
+            const reservedQty = items.find(item => item.id === product.id)?.qty ?? 0;
+            return {
+                ...product,
+                quantity: Math.max(product.quantity - reservedQty, 0),
+            };
+        });
+        setProductList(adjustedProducts);
+    }, [products.data, items]);
 
 
     return (
@@ -367,9 +372,10 @@ export default function CreateOrder({ products, companyDetails, customers }: Ine
                             <Button variant="outline" className="cursor-pointer">Add a fee or charge</Button>
                             <Button variant="outline" className="cursor-pointer">Add discount</Button>
                             <Button variant="outline" className="cursor-pointer">Add tax</Button>
-                            <Button className="cursor-pointer" onClick={() => setDrawerOpen(true)}>
+                            <Button className="cursor-pointer" disabled={items.length === 0}  onClick={() => setDrawerOpen(true)}>
                                 Create order
                             </Button>
+
                         </div>
                     </div>
                     <div className="w-[350px] space-y-4">
@@ -468,7 +474,8 @@ export default function CreateOrder({ products, companyDetails, customers }: Ine
                     </div>
                 </div>
             </div>
-            <OrderForm open={drawerOpen} onOpenChange={setDrawerOpen} customers={customers} />
+
+            <OrderForm open={drawerOpen} onOpenChange={setDrawerOpen} customers={customers} orderItems={items} companyDetails={companyDetails ?? null}/>
         </AppLayout>
     );
 }
