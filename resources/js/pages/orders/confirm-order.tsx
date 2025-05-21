@@ -9,9 +9,9 @@ import printJS from 'print-js';
 export default function ConfirmOrder({ customer, items, companyDetails, orderId}: PageProps<{ customer: Customer; items: OrderItem[];  companyDetails: CompanyDetails, orderId: string }>) {
 
     const [isConfirmed, setIsConfirmed] = useState(false);
-
+    const [orderItems, setOrderItems] = useState<OrderItem[]>(items);
     const subtotal = (() => {
-        return items.reduce((total: number, item: OrderItem) => {
+        return orderItems.reduce((total: number, item: OrderItem) => {
             return total + item.qty * item.price;
         }, 0);
     })();
@@ -47,11 +47,35 @@ export default function ConfirmOrder({ customer, items, companyDetails, orderId}
         router.visit(route('orders.create'));
     };
 
+
     const handleReset = () => {
+        localStorage.removeItem('temp_items');
+        setOrderItems([]);
         router.visit(route('orders.create'), {
             preserveState: false,
         });
     };
+
+
+    const handleEdit = () => {
+        const storedItems = localStorage.getItem('temp_items');
+        let itemsFromStorage = [];
+
+        if (storedItems) {
+                itemsFromStorage = JSON.parse(storedItems);
+
+        } else {
+            console.log('No temp_items found in localStorage');
+        }
+
+        router.visit(route('orders.create'), {
+            data: {
+                items: itemsFromStorage
+            },
+        });
+
+    };
+
     return (
         <AppLayout>
             <Head title="Confirm Order" />
@@ -203,7 +227,7 @@ export default function ConfirmOrder({ customer, items, companyDetails, orderId}
                         </thead>
                         <tbody>
 
-                        {items.map((item: { name: string; qty: number; price: number }, i: number) => {
+                        {orderItems.map((item: { name: string; qty: number; price: number }, i: number) => {
                             const total = item.qty * item.price;
                             return (
                                 <tr key={i} className="border-b">
@@ -233,11 +257,7 @@ export default function ConfirmOrder({ customer, items, companyDetails, orderId}
                         {!isConfirmed ? (
                             <>
                                 <button className="cursor-pointer px-4 py-2 border border-gray-400 rounded text-sm text-black hover:bg-gray-100"
-                                        onClick={() =>
-                                            router.visit(route('orders.create'), {
-                                                preserveState: true,
-                                            })
-                                        }
+                                        onClick={handleEdit}
                                 >
                                     Edit
                                 </button>

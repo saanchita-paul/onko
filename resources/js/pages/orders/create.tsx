@@ -179,6 +179,27 @@ export default function CreateOrder({ products, companyDetails, customers }: Ine
 
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+    useEffect(() => {
+        if (items.length > 0) {
+            localStorage.setItem('temp_items', JSON.stringify(items));
+        }
+    }, [items]);
+
+    useEffect(() => {
+        const storedItems = localStorage.getItem('temp_items');
+        if (storedItems && items.length === 0) {
+            try {
+                const parsedItems = JSON.parse(storedItems);
+                if (Array.isArray(parsedItems)) {
+                    setItems(parsedItems);
+                }
+            } catch (error) {
+                console.error('Failed to parse temp_items from localStorage:', error);
+            }
+        }
+    }, []);
+
+
     return (
         <AppLayout>
             <Head title="Create Order" />
@@ -317,7 +338,7 @@ export default function CreateOrder({ products, companyDetails, customers }: Ine
                                             </Popover>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            <label className="text-sm font-medium w-14">Order #</label>
+                                            <label className="text-sm font-medium w-14">Order</label>
                                             <Input
                                                 placeholder="auto generates"
                                                 readOnly
