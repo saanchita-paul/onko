@@ -175,7 +175,7 @@ class SalesControllerTest extends TestCase
         );
     }
 
-    public function test_best_sellers()
+    public function test_best_sellers_for_all_time()
     {   
         $this->actingAs(User::factory()->create());
 
