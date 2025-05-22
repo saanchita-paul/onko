@@ -413,7 +413,7 @@ export default function CreateOrder({ products, companyDetails, customers }: Ine
                                     <Button variant="outline">Add custom product</Button>
                                 </div>
                             </div>
-                            <div className="mt-2 flex justify-between items-center border-t border-b pt-4 font-bold p-4 text-sm sm:text-base">
+                            <div className="mt-2 flex justify-between items-center border-t pt-4 font-bold p-4 text-sm sm:text-base">
                                 <span className="text-left">Grand Total</span>
                                 <span className="text-right ml-auto">{subtotal} /-</span>
                             </div>
