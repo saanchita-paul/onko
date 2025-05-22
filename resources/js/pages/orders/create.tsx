@@ -224,66 +224,67 @@ export default function CreateOrder({ products, companyDetails, customers }: Ine
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
                                         <div className="flex items-center gap-2">
-                                            <div className={`relative group ${imagePreview ? 'w-14 h-11' : 'w-12 h-9'}`}>
-                                                <input
-                                                    type="file"
-                                                    id="fileUpload"
-                                                    className="hidden"
-                                                    accept="image/*"
-                                                    onChange={(e) => {
-                                                        const file = e.target.files?.[0];
-                                                        if (file) {
-                                                            if (file.size > 2 * 1024 * 1024) {
-                                                                setErrorMessage("Image must not exceed 2MB.");
-                                                                return;
-                                                            }
-
-                                                            const reader = new FileReader();
-                                                            reader.onloadend = () => {
-                                                                if (typeof reader.result === "string") {
-                                                                    setImagePreview(reader.result);
-                                                                    setErrorMessage(null);
-                                                                }
-                                                            };
-                                                            setData('logo', file);
-                                                            reader.readAsDataURL(file);
-                                                        }
-                                                    }}
-                                                    ref={fileInputRef}
-                                                />
-
-                                                <label
-                                                    htmlFor="fileUpload"
-                                                    className={`flex items-center justify-center h-full w-full rounded-md ${imagePreview ? 'border-0' : 'border border-input'} bg-white-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 cursor-pointer hover:bg-white-200 dark:hover:bg-neutral-700 overflow-hidden relative group`}
-                                                    title="Choose File"
-                                                >
-                                                    {imagePreview ? (
+                                            <div className="flex items-center gap-4">
+                                                {imagePreview && (
+                                                    <div className="relative w-14 h-11 rounded-md overflow-hidden border border-input bg-white">
                                                         <img
                                                             src={imagePreview}
                                                             alt="Preview"
-                                                            className="absolute top-0 left-0 w-full h-full object-cover"
+                                                            className="w-full h-full object-cover"
                                                         />
-                                                    ) : (
-                                                        <ImageIcon className="w-4 h-4" />
-                                                    )}
-                                                </label>
-
-                                                {imagePreview && (
-                                                    <button
-                                                        onClick={() => {
-                                                            setImagePreview(null);
-                                                            setData('logo', null);
-                                                            if (fileInputRef.current) {
-                                                                fileInputRef.current.value = '';
-                                                            }
-                                                        }}
-                                                        className="absolute top-0 right-0 m-1 p-1 rounded-full bg-white text-black opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
-                                                        title="Remove"
-                                                    >
-                                                        <X className="h-3 w-3" />
-                                                    </button>
+                                                        <button
+                                                            onClick={() => {
+                                                                setImagePreview(null);
+                                                                setData('logo', null);
+                                                                if (fileInputRef.current) {
+                                                                    fileInputRef.current.value = '';
+                                                                }
+                                                            }}
+                                                            className="absolute top-1 right-1 p-1 rounded-full bg-white text-black hover:bg-neutral-200 transition"
+                                                            title="Remove"
+                                                        >
+                                                            <X className="h-3 w-3" />
+                                                        </button>
+                                                    </div>
                                                 )}
+                                                {!imagePreview && (
+                                                    <div className="relative group w-12 h-9">
+                                                        <input
+                                                            type="file"
+                                                            id="fileUpload"
+                                                            className="hidden"
+                                                            accept="image/*"
+                                                            onChange={(e) => {
+                                                                const file = e.target.files?.[0];
+                                                                if (file) {
+                                                                    if (file.size > 2 * 1024 * 1024) {
+                                                                        setErrorMessage("Image must not exceed 2MB.");
+                                                                        return;
+                                                                    }
 
+                                                                    const reader = new FileReader();
+                                                                    reader.onloadend = () => {
+                                                                        if (typeof reader.result === "string") {
+                                                                            setImagePreview(reader.result);
+                                                                            setErrorMessage(null);
+                                                                        }
+                                                                    };
+                                                                    setData('logo', file);
+                                                                    reader.readAsDataURL(file);
+                                                                }
+                                                            }}
+                                                            ref={fileInputRef}
+                                                        />
+
+                                                        <label
+                                                            htmlFor="fileUpload"
+                                                            className="flex items-center justify-center h-full w-full rounded-md border border-input bg-white-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 cursor-pointer hover:bg-white-200 dark:hover:bg-neutral-700"
+                                                            title="Choose File"
+                                                        >
+                                                            <ImageIcon className="w-4 h-4" />
+                                                        </label>
+                                                    </div>
+                                                )}
                                             </div>
 
                                             <Input
