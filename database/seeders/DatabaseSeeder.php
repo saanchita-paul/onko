@@ -7,6 +7,7 @@ use App\Models\Expense;
 use App\Models\Employee;
 use App\Models\Order;
 use App\Models\Supplier;
+use Illuminate\Database\Eloquent\Factories\Sequence;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -19,11 +20,14 @@ class DatabaseSeeder extends Seeder
     {
 
         $consignments = Consignment::factory()
-            ->count(15)
+            ->count(30)
             ->create();
 
         $orders = Order::factory()
-            ->count(10)
+            ->count(100)
+            ->state(new Sequence(
+                fn() => ['created_at' => fake()->dateTimeBetween('-6 months', 'now')]
+            ))
             ->create();
 
         $rand = rand(1, 15);
