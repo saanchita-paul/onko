@@ -31,6 +31,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import type {  PaginatedCustomers } from '@/pages/orders/order-form';
+import { toast } from 'sonner';
 interface Product {
     id: string;
     name: string;
@@ -194,7 +195,7 @@ export default function CreateOrder({ products, companyDetails, customers }: Ine
                     setItems(parsedItems);
                 }
             } catch (error) {
-                console.error('Failed to parse temp_items from localStorage:', error);
+                toast.error('Failed to load temp_items from localStorage');
             }
         }
     }, []);

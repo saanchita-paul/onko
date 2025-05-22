@@ -4,6 +4,7 @@ import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import printJS from 'print-js';
+import { toast } from 'sonner';
 
 
 export default function ConfirmOrder({ customer, items, companyDetails, orderId}: PageProps<{ customer: Customer; items: OrderItem[];  companyDetails: CompanyDetails, orderId: string }>) {
@@ -65,7 +66,7 @@ export default function ConfirmOrder({ customer, items, companyDetails, orderId}
                 itemsFromStorage = JSON.parse(storedItems);
 
         } else {
-            console.log('No temp_items found in localStorage');
+            toast.warning('No temp_items found in localStorage');
         }
 
         router.visit(route('orders.create'), {
