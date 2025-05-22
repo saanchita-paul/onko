@@ -194,7 +194,7 @@ export default function CreateOrder({ products, companyDetails, customers }: Ine
                 if (Array.isArray(parsedItems)) {
                     setItems(parsedItems);
                 }
-            } catch (error) {
+            } catch {
                 toast.error('Failed to load temp_items from localStorage');
             }
         }
