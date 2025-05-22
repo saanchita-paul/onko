@@ -222,8 +222,8 @@ export default function CreateOrder({ products, companyDetails, customers }: Ine
                         <Card>
                             <CardContent className="space-y-4 p-6 sm:p-6">
                                 <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <div className="flex items-center gap-2">
+                                    <div className="space-y-4">
+                                        <div className="flex flex-col md:flex-row md:items-center md:gap-2 space-y-2 md:space-y-0">
                                             <div className="flex items-center gap-4">
                                                 {imagePreview && (
                                                     <div className="relative w-14 h-11 rounded-md overflow-hidden border border-input bg-white">
@@ -289,7 +289,7 @@ export default function CreateOrder({ products, companyDetails, customers }: Ine
 
                                             <Input
                                                 placeholder="Company Name"
-                                                className="flex-1"
+                                                className="flex-1 w-full"
                                                 value={data.company_name}
                                                 onChange={(e) => setData('company_name', e.target.value)}
                                                 onBlur={submit}
@@ -310,7 +310,7 @@ export default function CreateOrder({ products, companyDetails, customers }: Ine
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <div className="flex items-center gap-2">
+                                        <div className="flex flex-col md:flex-row md:items-center md:gap-2 space-y-2 md:space-y-0">
                                             <label className="text-sm font-medium w-20">Date:</label>
                                             <Popover>
                                                 <PopoverTrigger asChild>
@@ -338,7 +338,7 @@ export default function CreateOrder({ products, companyDetails, customers }: Ine
                                                 </PopoverContent>
                                             </Popover>
                                         </div>
-                                        <div className="flex items-center gap-2">
+                                        <div className="flex flex-col md:flex-row md:items-center md:gap-2 space-y-2 md:space-y-0">
                                             <label className="text-sm font-medium w-14">Order</label>
                                             <Input
                                                 placeholder="auto generates"
@@ -353,7 +353,7 @@ export default function CreateOrder({ products, companyDetails, customers }: Ine
                                 </div>
                             </CardContent>
                             <div className="p-0">
-                                <div className="mb-2 grid grid-cols-6 font-bold p-4">
+                                <div className="hidden sm:grid mb-2 grid-cols-6 font-bold p-4 text-sm sm:text-base">
                                     <span>#</span>
                                     <span>Item</span>
                                     <span className="text-center">Qty</span>
@@ -364,10 +364,17 @@ export default function CreateOrder({ products, companyDetails, customers }: Ine
                                 {items
                                     .filter((item) => item.qty > 0)
                                     .map((item, index) => (
-                                    <div key={index} className="grid grid-cols-6 items-center gap-2 border-t py-2 p-4">
-                                        <span>{index + 1}</span>
-                                        <div className="text-left">{item.name}</div>
-                                        <div className="flex justify-center">
+                                    <div key={index} className="grid grid-cols-1 sm:grid-cols-6 sm:items-center gap-2 border-t p-4 text-sm sm:text-base">
+                                        <div className="flex sm:block">
+                                            <span className="font-medium sm:hidden w-24">#</span>
+                                            <span>{index + 1}</span>
+                                        </div>
+                                        <div className="flex sm:block">
+                                            <span className="font-medium sm:hidden w-24">Item:</span>
+                                            <span className="text-left">{item.name}</span>
+                                        </div>
+                                        <div className="flex sm:justify-center sm:block">
+                                            <span className="font-medium sm:hidden w-24">Qty:</span>
                                             <Input
                                                 type="number"
                                                 value={item.qty}
@@ -382,26 +389,32 @@ export default function CreateOrder({ products, companyDetails, customers }: Ine
                                                 className="text-center w-16 border"
                                             />
                                         </div>
-                                        <div className="text-right w-full pr-2 border px-2 py-1 rounded">{item.price}</div>
-                                        <div className="text-right w-full">
-                                            {item.qty * item.price} /-
+                                        <div className="flex sm:justify-end sm:block">
+                                            <span className="font-medium sm:hidden w-24">Price:</span>
+                                            <span className="text-right w-full pr-2 border px-2 py-1 rounded">{item.price}</span>
                                         </div>
-                                        <Button variant="ghost" size="icon" onClick={() => removeItem(index)}>
-                                            <X className="h-4 w-4" />
-                                        </Button>
+                                        <div className="flex sm:justify-end sm:block">
+                                            <span className="font-medium sm:hidden w-24">Total:</span>
+                                            <span className="text-right w-full">{item.qty * item.price} /-</span>
+                                        </div>
+                                        <div className="flex justify-end">
+                                            <Button variant="ghost" size="icon" onClick={() => removeItem(index)}>
+                                                <X className="h-4 w-4" />
+                                            </Button>
+                                        </div>
                                     </div>
                                 ))}
-                                <div className="mt-2 flex justify-between items-center border-t border-b pt-2 font-bold p-4">
-                                    <span>Subtotal</span>
-                                    <span className="pr-27">{subtotal} /-</span>
+                                <div className="mt-2 flex justify-between items-center border-t border-b pt-2 font-bold p-4 text-sm sm:text-base">
+                                    <span className="text-left">Subtotal</span>
+                                    <span className="text-right ml-auto">{subtotal} /-</span>
                                 </div>
                                 <div className="mt-2 flex justify-center">
                                     <Button variant="outline">Add custom product</Button>
                                 </div>
                             </div>
-                            <div className="flex items-center justify-between border-t pt-4 text-lg font-bold p-4">
-                                <span>Grand Total</span>
-                                <span className="pr-27">{subtotal} /-</span>
+                            <div className="mt-2 flex justify-between items-center border-t border-b pt-4 font-bold p-4 text-sm sm:text-base">
+                                <span className="text-left">Grand Total</span>
+                                <span className="text-right ml-auto">{subtotal} /-</span>
                             </div>
                         </Card>
                         <div className="flex flex-wrap justify-end gap-2">
@@ -414,7 +427,7 @@ export default function CreateOrder({ products, companyDetails, customers }: Ine
 
                         </div>
                     </div>
-                    <div className="w-[350px] space-y-4">
+                    <div className="w-full xl:max-w-sm space-y-4">
                         <div className="relative">
                             <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
                             <Input placeholder="Search for products" className="pl-10" />
