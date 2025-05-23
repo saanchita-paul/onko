@@ -29,10 +29,10 @@ interface OrderFormProps {
     onOpenChange: Dispatch<SetStateAction<boolean>>
     customers: PaginatedCustomers,
     orderItems: OrderItem[],
-    companyDetails: CompanyDetails | null
+    companyDetails: CompanyDetails | null,
 }
 
-export function OrderForm({ open, onOpenChange, customers, orderItems, companyDetails }: OrderFormProps) {
+export function OrderForm({ open, onOpenChange, customers, orderItems, companyDetails}: OrderFormProps) {
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
         email: '',

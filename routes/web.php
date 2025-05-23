@@ -7,6 +7,8 @@ use App\Http\Controllers\OptionController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SalesController;
+use App\Models\Order;
+use App\Models\Product;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -32,6 +34,44 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/options', [OptionController::class, 'store'])->name('options.store');
     Route::post('/orders/confirm', [OrderController::class, 'confirm'])->name('orders.confirm');
     Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
+    Route::get('/orders/{order}', function (Order $order) {
+        $customer = $order->customer;
+        $productIds = [];
+        $productsQtyMap = [];
+        foreach ($order->orderItems as $orderItem) {
+            $productIds[] = $orderItem->consignmentItem->product_id;
+            $productsQtyMap[$orderItem->consignmentItem->product_id] = $orderItem->qty;
+        }
+//        dd($productsQtyMap);
+        $items = [];
+        $products = Product::whereIn('id', $productIds)->get();
+        foreach($products as $product){
+            $items[] = [
+                'id' => $product->id,
+                'name' => $product->name,
+                'quantity' => $product->quantity,
+                'short_id' =>  $product->short_id,
+                'price' => $product->price,
+                'qty' => $productsQtyMap[$product->id]
+            ];
+        }
+//        dd($items);
+        $companyDetails = \App\Models\Option::companyDetails();
+
+        return Inertia::render('orders/view', [
+            'customer' => $customer,
+            'items' => $items,
+            'companyDetails' => $companyDetails,
+            'orderId' => $order->id,
+        ]);
+    })->name('orders.show');
+
+    Route::post('order/reset', function () {
+        session()->forget('user_order_session');
+//        dd(session('user_order_session'));
+        return redirect()->route('orders.create')->with('isReset', true);
+    })->name('orders.reset');
+
 
 });
 

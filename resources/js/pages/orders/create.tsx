@@ -25,13 +25,12 @@ import {
 import { useEffect, useRef, useState } from 'react';
 import { Textarea } from "@/components/ui/textarea";
 import { PageProps } from '@inertiajs/core';
-import { CompanyDetails, LaravelPaginationItem } from '@/types';
+import { CompanyDetails, Customer, LaravelPaginationItem } from '@/types';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import type {  PaginatedCustomers } from '@/pages/orders/order-form';
-import { toast } from 'sonner';
 interface Product {
     id: string;
     name: string;
@@ -49,18 +48,41 @@ interface InertiaProps extends PageProps {
     };
     companyDetails?: CompanyDetails | null;
     customers: PaginatedCustomers;
-    orderItems: []
+    orderItems: [],
+    userOrderSession?: {
+        customer: Customer;
+        items: Item[];
+        companyDetails: CompanyDetails;
+        orderId: string;
+    };
 }
 interface Item extends Product {
     qty: number;
 }
-export default function CreateOrder({ products, companyDetails, customers }: InertiaProps) {
+export default function CreateOrder({ products, companyDetails, customers, userOrderSession, isReset }: InertiaProps) {
     const [productList, setProductList] = useState<Product[]>(products.data);
+    useEffect(() => {
+        if (userOrderSession) {
+            console.log("Restoring from session:", userOrderSession);
+        }
+    }, [userOrderSession]);
+
+    useEffect(() => {
+        if (isReset) {
+            console.log('Order session was reset ✅');
+            setItems([]);
+        }
+    }, [isReset]);
 
     useEffect(() => {
         setProductList(products.data);
     }, [products.data]);
     const [items, setItems] = useRemember<Item[]>([], 'order_items');
+    // const itemsToShow = items.length ? items : userOrderSession?.items;
+
+    if (!items.length && userOrderSession?.items?.length){
+        setItems(userOrderSession.items)
+    }
     const addItem = (product: Product) => {
         setItems((prevItems) => {
             const existingIndex = prevItems.findIndex(item => item.id === product.id);
@@ -180,25 +202,25 @@ export default function CreateOrder({ products, companyDetails, customers }: Ine
 
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-    useEffect(() => {
-        if (items.length > 0) {
-            localStorage.setItem('temp_items', JSON.stringify(items));
-        }
-    }, [items]);
-
-    useEffect(() => {
-        const storedItems = localStorage.getItem('temp_items');
-        if (storedItems && items.length === 0) {
-            try {
-                const parsedItems = JSON.parse(storedItems);
-                if (Array.isArray(parsedItems)) {
-                    setItems(parsedItems);
-                }
-            } catch {
-                toast.error('Failed to load temp_items from localStorage');
-            }
-        }
-    }, []);
+    // useEffect(() => {
+    //     if (items.length > 0) {
+    //         localStorage.setItem('temp_items', JSON.stringify(items));
+    //     }
+    // }, [items]);
+    //
+    // useEffect(() => {
+    //     const storedItems = localStorage.getItem('temp_items');
+    //     if (storedItems && items.length === 0) {
+    //         try {
+    //             const parsedItems = JSON.parse(storedItems);
+    //             if (Array.isArray(parsedItems)) {
+    //                 setItems(parsedItems);
+    //             }
+    //         } catch {
+    //             toast.error('Failed to load temp_items from localStorage');
+    //         }
+    //     }
+    // }, []);
 
 
     return (

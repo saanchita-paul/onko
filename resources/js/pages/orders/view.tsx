@@ -4,14 +4,12 @@ import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import printJS from 'print-js';
-// import { usePage } from '@inertiajs/react';
+// import { toast } from 'sonner';
 
-export default function ConfirmOrder({ customer, items, companyDetails, orderId}: PageProps<{ customer: Customer; items: OrderItem[];  companyDetails: CompanyDetails, orderId: string }>) {
+
+export default function View({ customer, items, companyDetails, orderId}: PageProps<{ customer: Customer; items: OrderItem[];  companyDetails: CompanyDetails, orderId: string }>) {
     console.log('confirm',items);
-    // const { props } = usePage();
-    // const { customer, items, companyDetails, orderId } = props;
-    // const sessionOrderItems = props.items;
-    const [isConfirmed, setIsConfirmed] = useState(false);
+    const [isConfirmed, setIsConfirmed] = useState(true);
     const [orderItems] = useState<OrderItem[]>(items);
     const subtotal = (() => {
         return orderItems.reduce((total: number, item: OrderItem) => {
@@ -66,16 +64,14 @@ export default function ConfirmOrder({ customer, items, companyDetails, orderId}
         // let itemsFromStorage = [];
         //
         // if (storedItems) {
-        //         itemsFromStorage = JSON.parse(storedItems);
+        //     itemsFromStorage = JSON.parse(storedItems);
         //
         // } else {
         //     toast.warning('No temp_items found in localStorage');
         // }
-        // console.log({sessionOrderItems});
 
         router.visit(route('orders.create'), {
             data: {
-                // items: sessionOrderItems
                 items
             },
         });
@@ -88,20 +84,17 @@ export default function ConfirmOrder({ customer, items, companyDetails, orderId}
             <div className="p-8 space-y-6">
                 <div className="flex items-center justify-between">
                     <div className="flex">
-                        <Tabs defaultValue="new-invoice" className="bg-white dark:bg-black text-black dark:text-white rounded-lg">
-                            <TabsList className="px-1 py-1 dark:bg-neutral-900 bg-black">
+                        <Tabs defaultValue="new-invoice" orientation="vertical">
+                            <TabsList className="px-1 py-1 border-r border-gray-300">
                                 <TabsTrigger value="new-invoice">New Invoice</TabsTrigger>
                                 <TabsTrigger value="all-orders">All Orders</TabsTrigger>
                             </TabsList>
-                            <TabsContent value="new-invoice" className="p-4 dark:bg-black bg-white">
-                            </TabsContent>
-                            <TabsContent value="all-orders" className="p-4 dark:bg-black bg-white">
-                            </TabsContent>
+                            <TabsContent value="new-invoice"></TabsContent>
+                            <TabsContent value="all-orders"></TabsContent>
                         </Tabs>
-
                     </div>
                     <button
-                        className="cursor-pointer px-4 py-2 bg-black text-white rounded text-sm hover:bg-gray-800 dark:bg-white dark:text-black"
+                        className="cursor-pointer px-4 py-2 bg-black text-white rounded text-sm hover:bg-gray-800"
                         onClick={isConfirmed ? passCreateOrder : handleReset}
                     >
                         {isConfirmed ? 'Create Another Order' : 'Reset'}
@@ -109,7 +102,7 @@ export default function ConfirmOrder({ customer, items, companyDetails, orderId}
                 </div>
 
                 <div className="text-left">
-                    <h1 className="text-2xl font-bold dark:text-white">
+                    <h1 className="text-2xl font-bold">
                         {isConfirmed ? (
                             <>
                                 Order Created <span className="text-black-400">✔</span>
@@ -125,7 +118,7 @@ export default function ConfirmOrder({ customer, items, companyDetails, orderId}
                     </p>
                 </div>
 
-                <div id="printable-invoice" className="border rounded-md shadow-sm bg-white p-6 max-w-4xl mx-auto dark:bg-black">
+                <div id="printable-invoice" className="border rounded-md shadow-sm bg-white p-6 max-w-4xl mx-auto">
                     <style>{`
                     .order-id {
                         margin-bottom: 10px!important;
@@ -194,7 +187,7 @@ export default function ConfirmOrder({ customer, items, companyDetails, orderId}
                                 )}
                                 <h2 className="text-lg font-semibold">{companyDetails?.company_name}</h2>
                             </div>
-                            <p className="text-sm text-black-600 mt-2 leading-snug dark:text-gray-300">
+                            <p className="text-sm text-black-600 mt-2 leading-snug">
                                 {companyDetails?.company_address}
                             </p>
                         </div>
@@ -210,7 +203,7 @@ export default function ConfirmOrder({ customer, items, companyDetails, orderId}
                                     })}</span>
                             </div>
                             <div className="grid grid-cols-[auto_1fr] gap-5 text-gray-600 order-id mb-38">
-                                <span className="font-medium text-black dark:text-white">Order</span>
+                                <span className="font-medium">Order</span>
                                 <span className="text-right break-all">
                                   {orderId ? orderId : 'confirm to generate'}
                                 </span>
@@ -224,9 +217,9 @@ export default function ConfirmOrder({ customer, items, companyDetails, orderId}
 
                     <div className="text-center text-lg font-semibold my-4">INVOICE</div>
 
-                    <table className="w-full text-sm text-left border-t border-b border-black mb-4">
+                    <table className="w-full text-sm text-left border-t border-b border-gray-300 mb-4">
                         <thead>
-                        <tr className="border-b bg-gray-100 dark:bg-black text-black dark:text-white">
+                        <tr className="border-b">
                             <th className="py-2 px-2">#</th>
                             <th className="py-2 px-2">Item</th>
                             <th className="py-2 px-2">Qty</th>
@@ -237,9 +230,10 @@ export default function ConfirmOrder({ customer, items, companyDetails, orderId}
                         <tbody>
 
                         {orderItems.map((item: { name: string; qty: number; price: number }, i: number) => {
+                            console.log({orderItems});
                             const total = item.qty * item.price;
                             return (
-                                <tr key={i} className="border-b dark:text-gray-100">
+                                <tr key={i} className="border-b">
                                     <td className="py-2 px-2">{i + 1}</td>
                                     <td className="py-2 px-2">{item.name}</td>
                                     <td className="py-2 px-2">{item.qty}</td>
@@ -253,25 +247,25 @@ export default function ConfirmOrder({ customer, items, companyDetails, orderId}
                     </table>
 
                     <div className="flex justify-between border-b">
-                        <span className="font-medium text-black dark:text-white">Subtotal</span>
-                        <span className="text-black dark:text-white">{subtotal}/-</span>
+                        <span className="font-medium">Subtotal</span>
+                        <span>{subtotal}/-</span>
                     </div>
                     <div className="text-sm text-gray-700">
                         <div className="flex justify-between border-t font-bold pt-2 text-black mt-50">
-                            <span className="text-black dark:text-white">Grand Total</span>
-                            <span className="text-black dark:text-white">{subtotal}/-</span>
+                            <span>Grand Total</span>
+                            <span>{subtotal}/-</span>
                         </div>
                     </div>
                     <div className="flex justify-end mt-8 gap-2">
                         {!isConfirmed ? (
                             <>
-                                <button className="cursor-pointer px-4 py-2 border border-gray-400 rounded text-sm text-black hover:bg-gray-100 dark:text-white dark:hover:bg-black"
+                                <button className="cursor-pointer px-4 py-2 border border-gray-400 rounded text-sm text-black hover:bg-gray-100"
                                         onClick={handleEdit}
                                 >
                                     Edit
                                 </button>
                                 <button
-                                    className="cursor-pointer px-4 py-2 bg-black text-white rounded text-sm hover:bg-gray-800 dark:bg-white dark:text-black"
+                                    className="cursor-pointer px-4 py-2 bg-black text-white rounded text-sm hover:bg-gray-800"
                                     onClick={handleConfirm}
                                 >
                                     Confirm
