@@ -388,15 +388,15 @@ export default function CreateOrder({ products, companyDetails, customers, userO
                                     .filter((item) => item.qty > 0)
                                     .map((item, index) => (
                                     <div key={index} className="grid grid-cols-1 sm:grid-cols-6 sm:items-center gap-2 border-t p-4 text-sm sm:text-base">
-                                        <div className="flex sm:block">
+                                        <div className="flex justify-between sm:block">
                                             <span className="font-medium sm:hidden w-24">#</span>
-                                            <span>{index + 1}</span>
+                                            <span className="text-right sm:text-left">{index + 1}</span>
                                         </div>
-                                        <div className="flex sm:block">
+                                        <div className="flex justify-between sm:block">
                                             <span className="font-medium sm:hidden w-24">Item:</span>
-                                            <span className="text-left">{item.name}</span>
+                                            <span className="text-right sm:text-left">{item.name}</span>
                                         </div>
-                                        <div className="flex sm:justify-center sm:block">
+                                        <div className="flex justify-between sm:justify-center sm:block">
                                             <span className="font-medium sm:hidden w-24">Qty:</span>
                                             <Input
                                                 type="number"
@@ -416,15 +416,16 @@ export default function CreateOrder({ products, companyDetails, customers, userO
                                             <span className="font-medium sm:hidden w-24">Price:</span>
                                             <span className="text-right w-full pr-2 border px-2 py-1 rounded">{item.price}</span>
                                         </div>
-                                        <div className="flex sm:justify-end sm:block">
+                                        <div className="flex justify-between sm:justify-end sm:block">
                                             <span className="font-medium sm:hidden w-24">Total:</span>
-                                            <span className="text-right w-full">{item.qty * item.price} /-</span>
+                                            <span className="text-right w-full">{item.qty * item.price}/-</span>
                                         </div>
                                         <div className="flex justify-end">
                                             <Button variant="ghost" size="icon" onClick={() => removeItem(index)}>
                                                 <X className="h-4 w-4" />
                                             </Button>
                                         </div>
+
                                     </div>
                                 ))}
                                 <div className="mt-2 flex justify-between items-center border-t border-b pt-2 font-bold p-4 text-sm sm:text-base">
