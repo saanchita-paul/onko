@@ -84,17 +84,19 @@ export default function View({ customer, items, companyDetails, orderId}: PagePr
             <div className="p-8 space-y-6">
                 <div className="flex items-center justify-between">
                     <div className="flex">
-                        <Tabs defaultValue="new-invoice" orientation="vertical">
-                            <TabsList className="px-1 py-1 border-r border-gray-300">
+                        <Tabs defaultValue="new-invoice" className="bg-white dark:bg-black text-black dark:text-white rounded-lg">
+                            <TabsList className="px-1 py-1 dark:bg-neutral-900 bg-black">
                                 <TabsTrigger value="new-invoice">New Invoice</TabsTrigger>
                                 <TabsTrigger value="all-orders">All Orders</TabsTrigger>
                             </TabsList>
-                            <TabsContent value="new-invoice"></TabsContent>
-                            <TabsContent value="all-orders"></TabsContent>
+                            <TabsContent value="new-invoice" className="p-4 dark:bg-black bg-white">
+                            </TabsContent>
+                            <TabsContent value="all-orders" className="p-4 dark:bg-black bg-white">
+                            </TabsContent>
                         </Tabs>
                     </div>
                     <button
-                        className="cursor-pointer px-4 py-2 bg-black text-white rounded text-sm hover:bg-gray-800"
+                        className="cursor-pointer px-4 py-2 bg-black text-white rounded text-sm hover:bg-gray-800 dark:bg-white dark:text-black"
                         onClick={isConfirmed ? passCreateOrder : handleReset}
                     >
                         {isConfirmed ? 'Create Another Order' : 'Reset'}
@@ -118,7 +120,7 @@ export default function View({ customer, items, companyDetails, orderId}: PagePr
                     </p>
                 </div>
 
-                <div id="printable-invoice" className="border rounded-md shadow-sm bg-white p-6 max-w-4xl mx-auto">
+                <div id="printable-invoice" className="border rounded-md shadow-sm bg-white p-6 max-w-4xl mx-auto dark:bg-black">
                     <style>{`
                     .order-id {
                         margin-bottom: 10px!important;
@@ -203,7 +205,7 @@ export default function View({ customer, items, companyDetails, orderId}: PagePr
                                     })}</span>
                             </div>
                             <div className="grid grid-cols-[auto_1fr] gap-5 text-gray-600 order-id mb-38">
-                                <span className="font-medium">Order</span>
+                                <span className="font-medium dark:text-white">Order</span>
                                 <span className="text-right break-all">
                                   {orderId ? orderId : 'confirm to generate'}
                                 </span>
@@ -252,8 +254,8 @@ export default function View({ customer, items, companyDetails, orderId}: PagePr
                     </div>
                     <div className="text-sm text-gray-700">
                         <div className="flex justify-between border-t font-bold pt-2 text-black mt-50">
-                            <span>Grand Total</span>
-                            <span>{subtotal}/-</span>
+                            <span className="dark:text-white">Grand Total</span>
+                            <span className="dark:text-white">{subtotal}/-</span>
                         </div>
                     </div>
                     <div className="flex justify-end mt-8 gap-2">
@@ -274,20 +276,20 @@ export default function View({ customer, items, companyDetails, orderId}: PagePr
                         ) : (
                             <>
                                 <button
-                                    className="no-print cursor-pointer px-4 py-2 border border-gray-400 rounded text-sm text-black hover:bg-gray-100"
+                                    className="no-print cursor-pointer px-4 py-2 border border-gray-400 rounded text-sm text-black hover:bg-gray-100 dark:text-white dark:hover:bg-black"
                                     onClick={passCreateOrder}
                                 >
                                     Create Another Order
                                 </button>
 
-                                <button className="no-print cursor-pointer px-4 py-2 border border-gray-400 rounded text-sm text-black hover:bg-gray-100">
+                                <button className="no-print cursor-pointer px-4 py-2 border border-gray-400 rounded text-sm text-black hover:bg-gray-100 dark:text-white dark:hover:bg-black">
                                     Schedule Delivery
                                 </button>
-                                <button className="no-print cursor-pointer px-4 py-2 border border-gray-400 rounded text-sm text-black hover:bg-gray-100">
+                                <button className="no-print cursor-pointer px-4 py-2 border border-gray-400 rounded text-sm text-black hover:bg-gray-100 dark:text-white dark:hover:bg-black">
                                     Mark as Paid
                                 </button>
                                 <button
-                                    className="no-print cursor-pointer px-4 py-2 border border-gray-400 rounded text-sm bg-black text-white hover:bg-gray-100 hover:text-black"
+                                    className="no-print cursor-pointer px-4 py-2 border border-gray-400 rounded text-sm bg-black text-white hover:bg-gray-100 hover:text-black dark:bg-white dark:text-black"
                                     onClick={handlePrint}
                                 >
                                     Print Invoice
