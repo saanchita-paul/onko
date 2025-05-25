@@ -70,4 +70,26 @@ class OrderController extends ApiOrderController
         return redirect()->route('orders.create')->with('isReset', true);
     }
 
+    public function saveTempTaxDiscount(Request $request)
+    {
+        $validated = $request->validate([
+            'tax' => 'nullable|numeric',
+            'tax_description' => 'nullable|string',
+            'discount' => 'nullable|numeric',
+            'discount_description' => 'nullable|string'
+        ]);
+
+        session([
+            'temp_tax_discount' => [
+                'tax' => $validated['tax'] ?? null,
+                'tax_description' => $validated['tax_description'] ?? '',
+                'discount' => $validated['discount'] ?? null,
+                'discount_description' => $validated['discount_description'] ?? ''
+            ]
+        ]);
+
+        return redirect()->back()->with('message', 'Temporary tax and discount saved in session.');
+
+    }
+
 }

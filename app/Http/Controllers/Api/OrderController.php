@@ -111,12 +111,33 @@ class OrderController extends Controller
                     } else {
                         throw new \Exception("Product not found with ID: {$item['id']}");
                     }
-
                 }
-            });
-//            session()->forget('user_order_session');
-//            session()->forget('isReset');
-//            return redirect()->route('orders.show', $order->id);
+//                dd(session()->has('temp_tax_discount'));
+            if (session()->has('temp_tax_discount')) {
+                $temp = session('temp_tax_discount');
+
+//                $order->tax_total = $temp['tax'] ?? 0;
+//                $order->discount_total = $temp['discount'] ?? 0;
+
+                $tax = $temp['tax'] ?? 0;
+                $discount = $temp['discount'] ?? 0;
+
+                $order->tax_total = $tax;
+                $order->discount_total = $discount;
+
+//                $order->sub_total = $order->sub_total + $tax - $discount;
+                $order->grand_total = $order->grand_total + $tax - $discount;
+                $order->meta = [
+                    'tax_description' => $temp['tax_description'] ?? '',
+                    'discount_description' => $temp['discount_description'] ?? '',
+                ];
+                $order->save();
+
+                session()->forget('temp_tax_discount');
+            } else {
+                $order->save();
+            }
+        });
             return $order;
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Failed to save order: ' . $e->getMessage())->withInput();
@@ -162,6 +183,28 @@ class OrderController extends Controller
             'message' => 'Order session has been reset.',
         ];
     }
+
+    public function saveTempTaxDiscount(Request $request)
+    {
+        $validated = $request->validate([
+            'tax' => 'nullable|numeric',
+            'tax_description' => 'nullable|string',
+            'discount' => 'nullable|numeric',
+            'discount_description' => 'nullable|string'
+        ]);
+
+        session([
+            'temp_tax_discount' => [
+                'tax' => $validated['tax'] ?? null,
+                'tax_description' => $validated['tax_description'] ?? '',
+                'discount' => $validated['discount'] ?? null,
+                'discount_description' => $validated['discount_description'] ?? ''
+            ]
+        ]);
+
+        return response()->json(['message' => 'Temporary tax and discount saved in session.']);
+    }
+
 
 
 }

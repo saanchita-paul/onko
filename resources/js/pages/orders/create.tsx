@@ -31,6 +31,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import type {  PaginatedCustomers } from '@/pages/orders/order-form';
+import axios from 'axios';
 interface Product {
     id: string;
     name: string;
@@ -61,6 +62,7 @@ interface Item extends Product {
 }
 export default function CreateOrder({ products, companyDetails, customers, userOrderSession, isReset }: InertiaProps) {
     const [productList, setProductList] = useState<Product[]>(products.data);
+    console.log({userOrderSession});
     useEffect(() => {
         if (userOrderSession) {
             console.log("Restoring from session:", userOrderSession);
@@ -199,6 +201,38 @@ export default function CreateOrder({ products, companyDetails, customers, userO
     }, [products.data, items]);
 
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+    const [showTaxField, setShowTaxField] = useState(false);
+    const [showDiscountField, setShowDiscountField] = useState(false);
+    const [tax, setTax] = useState(0);
+    const [discount, setDiscount] = useState(0);
+    const [taxDescription, setTaxDescription] = useState('');
+    const [discountDescription, setDiscountDescription] = useState('');
+
+    const handleSaveTaxDiscount = async () => {
+        try {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
+
+            const response = await axios.post('/orders/temp-tax-discount', {
+                tax,
+                tax_description: taxDescription,
+                discount,
+                discount_description: discountDescription
+            }, {
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken
+                }
+            });
+
+            if (response.status === 200) {
+                alert('Tax and Discount saved successfully!');
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Failed to save tax and discount');
+        }
+    };
+
 
     return (
         <AppLayout>
@@ -412,6 +446,48 @@ export default function CreateOrder({ products, companyDetails, customers, userO
                                 <div className="mt-2 flex justify-center">
                                     <Button variant="outline">Add custom product</Button>
                                 </div>
+                                {showTaxField && (
+                                    <div className="my-4 p-4 border rounded">
+                                        <h4 className="font-bold mb-2">Add Tax</h4>
+                                        <Input
+                                            placeholder="Tax Description"
+                                            value={taxDescription}
+                                            onChange={(e) => setTaxDescription(e.target.value)}
+                                            className="mb-2"
+                                        />
+                                        <Input
+                                            placeholder="Tax Amount"
+                                            type="number"
+                                            value={tax}
+                                            onChange={(e) => setTax(Number(e.target.value))}
+                                            className="mb-2"
+                                        />
+                                    </div>
+                                )}
+
+                                {showDiscountField && (
+                                    <div className="my-4 p-4 border rounded">
+                                        <h4 className="font-bold mb-2">Add Discount</h4>
+                                        <Input
+                                            placeholder="Discount Description"
+                                            value={discountDescription}
+                                            onChange={(e) => setDiscountDescription(e.target.value)}
+                                            className="mb-2"
+                                        />
+                                        <Input
+                                            placeholder="Discount Amount"
+                                            type="number"
+                                            value={discount}
+                                            onChange={(e) => setDiscount(Number(e.target.value))}
+                                            className="mb-2"
+                                        />
+                                    </div>
+                                )}
+                                {(showTaxField || showDiscountField) && (
+                                    <div className="mt-4 flex justify-end">
+                                        <Button onClick={handleSaveTaxDiscount}>Save Tax/Discount</Button>
+                                    </div>
+                                )}
                             </div>
                             <div className="mt-2 flex justify-between items-center border-t pt-4 font-bold p-4 text-sm sm:text-base">
                                 <span className="text-left">Grand Total</span>
@@ -420,8 +496,8 @@ export default function CreateOrder({ products, companyDetails, customers, userO
                         </Card>
                         <div className="flex flex-wrap justify-end gap-2">
                             <Button variant="outline" className="cursor-pointer">Add a fee or charge</Button>
-                            <Button variant="outline" className="cursor-pointer">Add discount</Button>
-                            <Button variant="outline" className="cursor-pointer">Add tax</Button>
+                            <Button variant="outline" className="cursor-pointer" onClick={() => setShowDiscountField(!showDiscountField)}>Add discount</Button>
+                            <Button variant="outline" className="cursor-pointer" onClick={() => setShowTaxField(!showTaxField)}>Add tax</Button>
                             <Button className="cursor-pointer" disabled={items.length === 0}  onClick={() => setDrawerOpen(true)}>
                                 Create order
                             </Button>
