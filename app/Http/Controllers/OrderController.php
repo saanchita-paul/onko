@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\SaveTempTaxDiscountRequest;
 use App\Http\Requests\StoreOrderRequest;
 use App\Models\Order;
 use Inertia\Inertia;
@@ -28,6 +29,7 @@ class OrderController extends ApiOrderController
                 'companyDetails' => $response['companyDetails'],
                 'customers' => $response['customers'],
                 'isReset' => session('isReset', false),
+                'tempTaxDiscount' => session('temp_tax_discount')
             ];
             $data['userOrderSession'] = session('user_order_session');
 
@@ -69,27 +71,9 @@ class OrderController extends ApiOrderController
         return redirect()->route('orders.create')->with('isReset', true);
     }
 
-    public function saveTempTaxDiscount(Request $request)
+    public function saveTempTaxDiscount(SaveTempTaxDiscountRequest $request)
     {
-        $validated = $request->validate([
-            'tax' => 'nullable|numeric',
-            'tax_type' => 'nullable|in:fixed,percentage',
-            'tax_description' => 'nullable|string',
-            'discount' => 'nullable|numeric',
-            'discount_type' => 'nullable|in:fixed,percentage',
-            'discount_description' => 'nullable|string'
-        ]);
-        session([
-            'temp_tax_discount' => [
-                'tax' => $validated['tax'] ?? null,
-                'tax_type' => $validated['tax_type'] ?? 'fixed',
-                'tax_description' => $validated['tax_description'] ?? '',
-                'discount' => $validated['discount'] ?? null,
-                'discount_type' => $validated['discount_type'] ?? 'fixed',
-                'discount_description' => $validated['discount_description'] ?? ''
-            ]
-        ]);
-
+        parent::saveTempTaxDiscount($request);
         return redirect()->back()->with('message', 'Temporary tax and discount saved in session.');
 
     }
