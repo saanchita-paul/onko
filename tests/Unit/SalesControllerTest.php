@@ -79,7 +79,7 @@ class SalesControllerTest extends TestCase
 
         // Current week: 3 orders
         Order::factory()->count(3)->create([
-            'created_at' => Carbon::now()->startOfWeek()->addDays(1),
+            'created_at' => Carbon::now(),
             'grand_total' => 2000
         ]);
 
@@ -145,7 +145,7 @@ class SalesControllerTest extends TestCase
         $this->actingAs($this->user);
 
         Order::factory()->count(5)->create([
-            'created_at' => Carbon::now()->startOfQuarter(),
+            'created_at' => Carbon::now(),
             'grand_total' => 2000,
         ]);
 
@@ -176,7 +176,7 @@ class SalesControllerTest extends TestCase
         $this->actingAs($this->user);
 
         Order::factory()->count(4)->create([
-            'created_at' => Carbon::now()->startOfYear(),
+            'created_at' => Carbon::now(),
             'grand_total' => 3000,
         ]);
 
@@ -230,7 +230,7 @@ class SalesControllerTest extends TestCase
     }
 
     public function test_best_sellers_for_all_time()
-    {   
+    {
         $this->actingAs(User::factory()->create());
 
         Consignment::factory()->count(2)->create();
@@ -278,7 +278,7 @@ class SalesControllerTest extends TestCase
                 ->where('bQuantity.0.id', $bestSellerByQty[0]['product_id'])
                 ->has('bSubTotal', 10)
                 ->where('bSubTotal.0.id', $bestSellerByValue[0]['product_id']);
-        }); 
+        });
 
         $this->assertTrue(true);
 
@@ -303,22 +303,22 @@ class SalesControllerTest extends TestCase
     }
 
     public function test_best_sellers_for_week()
-    {   
+    {
         $this->bestSellersTestHelper('week');
     }
 
     public function test_best_sellers_for_month()
-    {   
+    {
         $this->bestSellersTestHelper('month');
     }
 
     public function test_best_sellers_for_quarter()
-    {   
+    {
         $this->bestSellersTestHelper('quarter');
     }
 
     public function test_best_sellers_for_year()
-    {   
+    {
         $this->bestSellersTestHelper('year');
     }
 
@@ -384,7 +384,7 @@ class SalesControllerTest extends TestCase
                 ->where('bQuantity.0.id', $bestSellerByQty[0]['product_id'])
                 ->has('bSubTotal', 10)
                 ->where('bSubTotal.0.id', $bestSellerByValue[0]['product_id']);
-        }); 
+        });
 
         $this->assertTrue(true);
     }
