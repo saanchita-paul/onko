@@ -2,10 +2,20 @@
 
 namespace Tests\Unit;
 
+use App\Http\Controllers\OrderController;
+use App\Models\ConsignmentItem;
+use App\Models\Option;
+use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\User;
+use Illuminate\Routing\Redirector;
+use Inertia\Response;
+use Mockery;
 use Tests\TestCase;
 use App\Models\Product;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Session\Store as SessionStore;
+use Illuminate\Http\RedirectResponse as HttpRedirectResponse;
 
 class OrderControllerTest extends TestCase
 {
@@ -29,4 +39,29 @@ class OrderControllerTest extends TestCase
             ->where('products.current_page', 1)
         );
     }
+
+    public function test_reset_clears_session_and_redirects()
+    {
+        $session = \Mockery::mock(SessionStore::class);
+        $session->shouldReceive('forget')->once()->with('user_order_session');
+        $session->shouldReceive('get')->andReturn([]);
+
+        $this->app->make(Redirector::class);
+        $routeName = 'orders.create';
+        $url = route($routeName);
+
+        $this->app->instance('session', $session);
+
+        $controller = new OrderController();
+
+        $response = $controller->reset();
+
+        $this->assertInstanceOf(HttpRedirectResponse::class, $response);
+        $this->assertEquals($url, $response->getTargetUrl());
+        $this->assertTrue($response->getSession()->get('isReset'));
+    }
+
+
+
+
 }

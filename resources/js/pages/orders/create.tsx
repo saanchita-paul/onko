@@ -69,7 +69,6 @@ export default function CreateOrder({ products, companyDetails, customers, userO
 
     useEffect(() => {
         if (isReset) {
-            console.log('Order session was reset ✅');
             setItems([]);
         }
     }, [isReset]);
@@ -78,7 +77,6 @@ export default function CreateOrder({ products, companyDetails, customers, userO
         setProductList(products.data);
     }, [products.data]);
     const [items, setItems] = useRemember<Item[]>([], 'order_items');
-    // const itemsToShow = items.length ? items : userOrderSession?.items;
 
     if (!items.length && userOrderSession?.items?.length){
         setItems(userOrderSession.items)
@@ -201,27 +199,6 @@ export default function CreateOrder({ products, companyDetails, customers, userO
     }, [products.data, items]);
 
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-    // useEffect(() => {
-    //     if (items.length > 0) {
-    //         localStorage.setItem('temp_items', JSON.stringify(items));
-    //     }
-    // }, [items]);
-    //
-    // useEffect(() => {
-    //     const storedItems = localStorage.getItem('temp_items');
-    //     if (storedItems && items.length === 0) {
-    //         try {
-    //             const parsedItems = JSON.parse(storedItems);
-    //             if (Array.isArray(parsedItems)) {
-    //                 setItems(parsedItems);
-    //             }
-    //         } catch {
-    //             toast.error('Failed to load temp_items from localStorage');
-    //         }
-    //     }
-    // }, []);
-
 
     return (
         <AppLayout>
@@ -547,7 +524,6 @@ export default function CreateOrder({ products, companyDetails, customers, userO
                     </div>
                 </div>
             </div>
-
             <OrderForm open={drawerOpen} onOpenChange={setDrawerOpen} customers={customers} orderItems={items} companyDetails={companyDetails ?? null}/>
         </AppLayout>
     );

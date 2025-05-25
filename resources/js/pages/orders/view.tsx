@@ -4,11 +4,9 @@ import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import printJS from 'print-js';
-// import { toast } from 'sonner';
 
 
 export default function View({ customer, items, companyDetails, orderId}: PageProps<{ customer: Customer; items: OrderItem[];  companyDetails: CompanyDetails, orderId: string }>) {
-    console.log('confirm',items);
     const [isConfirmed, setIsConfirmed] = useState(true);
     const [orderItems] = useState<OrderItem[]>(items);
     const subtotal = (() => {
@@ -45,7 +43,6 @@ export default function View({ customer, items, companyDetails, orderId}: PagePr
     };
 
     const passCreateOrder = () => {
-        // router.visit(route('orders.create'));
         router.post(route('orders.reset'), {}, {
             preserveState: false,
         });
@@ -60,16 +57,6 @@ export default function View({ customer, items, companyDetails, orderId}: PagePr
 
 
     const handleEdit = () => {
-        // const storedItems = localStorage.getItem('temp_items');
-        // let itemsFromStorage = [];
-        //
-        // if (storedItems) {
-        //     itemsFromStorage = JSON.parse(storedItems);
-        //
-        // } else {
-        //     toast.warning('No temp_items found in localStorage');
-        // }
-
         router.visit(route('orders.create'), {
             data: {
                 items
@@ -85,7 +72,7 @@ export default function View({ customer, items, companyDetails, orderId}: PagePr
                 <div className="flex items-center justify-between">
                     <div className="flex">
                         <Tabs defaultValue="new-invoice" className="bg-white dark:bg-black text-black dark:text-white rounded-lg">
-                            <TabsList className="px-1 py-1 dark:bg-neutral-900 bg-black">
+                            <TabsList className="px-1 py-1 dark:bg-neutral-900">
                                 <TabsTrigger value="new-invoice">New Invoice</TabsTrigger>
                                 <TabsTrigger value="all-orders">All Orders</TabsTrigger>
                             </TabsList>
@@ -219,7 +206,7 @@ export default function View({ customer, items, companyDetails, orderId}: PagePr
 
                     <div className="text-center text-lg font-semibold my-4">INVOICE</div>
 
-                    <table className="w-full text-sm text-left border-t border-b border-gray-300 mb-4">
+                    <table className="w-full text-sm text-left border-t border-b border-black mb-4">
                         <thead>
                         <tr className="border-b">
                             <th className="py-2 px-2">#</th>
@@ -232,7 +219,6 @@ export default function View({ customer, items, companyDetails, orderId}: PagePr
                         <tbody>
 
                         {orderItems.map((item: { name: string; qty: number; price: number }, i: number) => {
-                            console.log({orderItems});
                             const total = item.qty * item.price;
                             return (
                                 <tr key={i} className="border-b">

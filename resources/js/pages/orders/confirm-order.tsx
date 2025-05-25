@@ -4,13 +4,8 @@ import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import printJS from 'print-js';
-// import { usePage } from '@inertiajs/react';
 
 export default function ConfirmOrder({ customer, items, companyDetails, orderId}: PageProps<{ customer: Customer; items: OrderItem[];  companyDetails: CompanyDetails, orderId: string }>) {
-    console.log('confirm',items);
-    // const { props } = usePage();
-    // const { customer, items, companyDetails, orderId } = props;
-    // const sessionOrderItems = props.items;
     const [isConfirmed, setIsConfirmed] = useState(false);
     const [orderItems] = useState<OrderItem[]>(items);
     const subtotal = (() => {
@@ -47,7 +42,6 @@ export default function ConfirmOrder({ customer, items, companyDetails, orderId}
     };
 
     const passCreateOrder = () => {
-        // router.visit(route('orders.create'));
         router.post(route('orders.reset'), {}, {
             preserveState: false,
         });
@@ -62,20 +56,8 @@ export default function ConfirmOrder({ customer, items, companyDetails, orderId}
 
 
     const handleEdit = () => {
-        // const storedItems = localStorage.getItem('temp_items');
-        // let itemsFromStorage = [];
-        //
-        // if (storedItems) {
-        //         itemsFromStorage = JSON.parse(storedItems);
-        //
-        // } else {
-        //     toast.warning('No temp_items found in localStorage');
-        // }
-        // console.log({sessionOrderItems});
-
         router.visit(route('orders.create'), {
             data: {
-                // items: sessionOrderItems
                 items
             },
         });
@@ -89,7 +71,7 @@ export default function ConfirmOrder({ customer, items, companyDetails, orderId}
                 <div className="flex items-center justify-between">
                     <div className="flex">
                         <Tabs defaultValue="new-invoice" className="bg-white dark:bg-black text-black dark:text-white rounded-lg">
-                            <TabsList className="px-1 py-1 dark:bg-neutral-900 bg-black">
+                            <TabsList className="px-1 py-1 dark:bg-neutral-900">
                                 <TabsTrigger value="new-invoice">New Invoice</TabsTrigger>
                                 <TabsTrigger value="all-orders">All Orders</TabsTrigger>
                             </TabsList>
@@ -226,7 +208,7 @@ export default function ConfirmOrder({ customer, items, companyDetails, orderId}
 
                     <table className="w-full text-sm text-left border-t border-b border-black mb-4">
                         <thead>
-                        <tr className="border-b bg-gray-100 dark:bg-black text-black dark:text-white">
+                        <tr className="border-b dark:bg-black text-black dark:text-white">
                             <th className="py-2 px-2">#</th>
                             <th className="py-2 px-2">Item</th>
                             <th className="py-2 px-2">Qty</th>
