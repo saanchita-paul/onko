@@ -101,22 +101,6 @@ export function AddProductForm() {
         setData('combinations', getCombinations(data.variants));
     };
 
-    const demo = () => {
-        toast.custom(() => (
-            <div className="flex h-[100px] w-[350px] items-start gap-2 rounded-xl border border-blue-700 bg-white p-4 shadow-lg dark:border-gray-200 dark:bg-zinc-900">
-                <BadgeCheckIcon className="text-blue-600 h-5 w-5" />
-                <div>
-                    <p className="text-sm font-semibold text-blue-600">Product Created</p>
-                    <p className="text-sm text-zinc-700 dark:text-zinc-300">Your new product has been created.</p>
-                    <div className="mt-3 flex justify-start gap-4 text-sm text-blue-600">
-                        <button className="hover:underline">Add another</button>
-                        <button className="text-zinc-500 hover:underline dark:text-zinc-400">Details</button>
-                    </div>
-                </div>
-            </div>
-        ));
-    };
-
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
 
@@ -124,6 +108,7 @@ export function AddProductForm() {
             onSuccess: (data: InertiaResponse) => {
                 reset();
                 setShowAdvanced(false);
+                setOnVariationPage(false)
                 if (data.props.flash?.success) {
                     toast.custom(() => (
                         <div
@@ -174,10 +159,6 @@ export function AddProductForm() {
                         {onVariationPage ? 'Confirm Variations' : 'Add Product'}
                     </SheetTitle>
                 </SheetHeader>
-
-                <button type="button" onClick={demo}>
-                    Demo
-                </button>
 
                 <form onSubmit={handleSubmit} className="space-y-4 overflow-y-auto">
                     <div className="items-center space-y-2">
