@@ -13,6 +13,8 @@ class CustomerController extends Controller
     public function index(Request $request)
     {
         $range = $request->input('range');
+        $offset = $request->input('offset');
+        $offset = (int) $offset;
 
         $query = Customer::query();
 
@@ -20,28 +22,36 @@ class CustomerController extends Controller
             $today = Carbon::today();
             switch ($range) {
                 case 'today':
-                    $currentFrom = Carbon::today()->startOfDay();
-                    $currentTo = Carbon::today()->endOfDay();
+                    $date = $today->copy()->addDays($offset);
+                    $currentFrom = $date->copy()->startOfDay();
+                    $currentTo = $date->copy()->endOfDay();
                     break;
+
                 case 'week':
-                    $currentFrom = $today->copy()->startOfWeek(Carbon::SATURDAY);
-                    $currentTo = $today->copy()->endOfWeek(Carbon::FRIDAY);
+                    $startOfWeek = $today->copy()->startOfWeek(Carbon::SATURDAY)->addWeeks($offset);
+                    $endOfWeek = $today->copy()->startOfWeek(Carbon::SATURDAY)->addWeeks($offset)->endOfWeek(Carbon::FRIDAY);
+                    $currentFrom = $startOfWeek;
+                    $currentTo = $endOfWeek;
                     break;
 
                 case 'month':
-                    $currentFrom = $today->copy()->startOfMonth();
-                    $currentTo = $today->copy()->endOfMonth();
+                    $date = $today->copy()->addMonths($offset);
+                    $currentFrom = $date->copy()->startOfMonth();
+                    $currentTo = $date->copy()->endOfMonth();
                     break;
 
                 case 'quarter':
-                    $currentFrom = $today->copy()->startOfQuarter();
-                    $currentTo = $today->copy()->endOfQuarter();
+                    $date = $today->copy()->addQuarters($offset);
+                    $currentFrom = $date->copy()->startOfQuarter();
+                    $currentTo = $date->copy()->endOfQuarter();
                     break;
 
                 case 'year':
-                    $currentFrom = $today->copy()->startOfYear();
-                    $currentTo = $today->copy()->endOfYear();
+                    $date = $today->copy()->addYears($offset);
+                    $currentFrom = $date->copy()->startOfYear();
+                    $currentTo = $date->copy()->endOfYear();
                     break;
+
                 default:
                     $currentFrom = null;
                     $currentTo = null;

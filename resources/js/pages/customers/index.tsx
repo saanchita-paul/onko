@@ -111,11 +111,14 @@ export default function Index({ customers }: Props) {
     const links = customers.links.filter((_, idx) => idx > 0 && idx < customers.links.length - 1);
 
     const [range, setRange] = useState('all');
+    const [offset, setOffset] = useState(0);
 
-    const handleRangeChange = (value: string) => {
+    const handleRangeChange = (value: string, offset = 0) => {
+        setOffset(offset);
         router.get(
             route('customers.index'),
             {
+                offset: offset,
                 range: value,
             },
             {
@@ -164,7 +167,7 @@ export default function Index({ customers }: Props) {
                             Today
                         </TabsTrigger>
                         <TabsTrigger value="week" className={tabTriggerClass}>
-                            week
+                            Week
                         </TabsTrigger>
                         <TabsTrigger value="month" className={tabTriggerClass}>
                             Month
@@ -183,65 +186,125 @@ export default function Index({ customers }: Props) {
 
                     <TabsContent value="today">
                         <div className="flex w-full justify-between">
-                            <Button variant="outline">
+                            <Button
+                                variant="outline"
+                                onClick={() => {
+                                    handleRangeChange(range, offset - 1);
+                                }}
+                            >
                                 <ChevronLeftIcon />
-                                Yesterday
+                                {offset == 0 ? 'Yesterday' : 'Previous Day'}
                             </Button>
-                            <Button variant="outline">
-                                Tomorrow <ChevronRightIcon />
-                            </Button>
+                            {offset < 0 && (
+                                <Button
+                                    variant="outline"
+                                    onClick={() => {
+                                        handleRangeChange(range, offset + 1);
+                                    }}
+                                >
+                                    Next Day <ChevronRightIcon />
+                                </Button>
+                            )}
                         </div>
                         <DataTable columns={columns} data={customers.data} />
                     </TabsContent>
 
                     <TabsContent value="week">
                         <div className="flex w-full justify-between">
-                            <Button variant="outline">
+                            <Button
+                                variant="outline"
+                                onClick={() => {
+                                    handleRangeChange(range, offset - 1);
+                                }}
+                            >
                                 <ChevronLeftIcon />
-                                Last Week
+                                {offset == 0 ? 'Last Week' : 'Previous Week'}
                             </Button>
-                            <Button variant="outline">
-                                Next Week <ChevronRightIcon />
-                            </Button>
+                            {offset < 0 && (
+                                <Button
+                                    variant="outline"
+                                    onClick={() => {
+                                        handleRangeChange(range, offset + 1);
+                                    }}
+                                >
+                                    Next Week <ChevronRightIcon />
+                                </Button>
+                            )}
                         </div>
                         <DataTable columns={columns} data={customers.data} />
                     </TabsContent>
 
                     <TabsContent value="month">
                         <div className="flex w-full justify-between">
-                            <Button variant="outline">
+                            <Button
+                                variant="outline"
+                                onClick={() => {
+                                    handleRangeChange(range, offset - 1);
+                                }}
+                            >
                                 <ChevronLeftIcon />
-                                Last Month
+                                {offset == 0 ? 'Last Month' : 'Previous Month'}
                             </Button>
-                            <Button variant="outline">
-                                Next Month <ChevronRightIcon />
-                            </Button>
+                            {offset < 0 && (
+                                <Button
+                                    variant="outline"
+                                    onClick={() => {
+                                        handleRangeChange(range, offset + 1);
+                                    }}
+                                >
+                                    Next Month <ChevronRightIcon />
+                                </Button>
+                            )}
                         </div>
                         <DataTable columns={columns} data={customers.data} />
                     </TabsContent>
 
                     <TabsContent value="quarter">
                         <div className="flex w-full justify-between">
-                            <Button variant="outline">
+                            <Button
+                                variant="outline"
+                                onClick={() => {
+                                    handleRangeChange(range, offset - 1);
+                                }}
+                            >
                                 <ChevronLeftIcon />
-                                Last Quarter
+                                {offset == 0 ? 'Last Quarter' : 'Previous Quarter'}
                             </Button>
-                            <Button variant="outline">
-                                Next Quarter <ChevronRightIcon />
-                            </Button>
+                            {offset < 0 && (
+                                <Button
+                                    variant="outline"
+                                    onClick={() => {
+                                        handleRangeChange(range, offset + 1);
+                                    }}
+                                >
+                                    Next Quarter <ChevronRightIcon />
+                                </Button>
+                            )}
                         </div>
                         <DataTable columns={columns} data={customers.data} />
                     </TabsContent>
 
                     <TabsContent value="year">
                         <div className="flex w-full justify-between">
-                            <Button variant="outline">
+                            <Button
+                                variant="outline"
+                                onClick={() => {
+                                    handleRangeChange(range, offset - 1);
+                                }}
+                            >
                                 <ChevronLeftIcon />
-                                Last Year
+                                {offset == 0 ? 'Last Year' : 'Previous Year'}
                             </Button>
-                            <Button variant="outline">
-                                Next Year <ChevronRightIcon />
-                            </Button>
+                            {offset < 0 && (
+                                <Button
+                                    variant="outline"
+                                    onClick={() => {
+                                        handleRangeChange(range, offset + 1);
+                                    }}
+                                >
+                                    Next Year <ChevronRightIcon />
+                                </Button>
+                            )}
                         </div>
                         <DataTable columns={columns} data={customers.data} />
                     </TabsContent>
