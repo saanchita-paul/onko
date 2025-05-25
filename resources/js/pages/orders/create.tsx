@@ -73,22 +73,11 @@ interface Item extends Product {
 
 export default function CreateOrder({ products, companyDetails, customers, userOrderSession, isReset, tempTaxDiscount }: InertiaProps) {
     const [productList, setProductList] = useState<Product[]>(products.data);
-    console.log({userOrderSession});
     useEffect(() => {
         if (userOrderSession) {
             console.log("Restoring from session:", userOrderSession);
         }
     }, [userOrderSession]);
-    // useEffect(() => {
-    //     if (tempTaxDiscount) {
-    //         setTax(tempTaxDiscount.tax);
-    //         setTaxType(tempTaxDiscount.tax_type);
-    //         setTaxDescription(tempTaxDiscount.tax_description);
-    //         setDiscount(tempTaxDiscount.discount);
-    //         setDiscountType(tempTaxDiscount.discount_type);
-    //         setDiscountDescription(tempTaxDiscount.discount_description);
-    //     }
-    // }, [tempTaxDiscount]);
 
     useEffect(() => {
         if (isReset) {
@@ -223,17 +212,10 @@ export default function CreateOrder({ products, companyDetails, customers, userO
 
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-    // const [showTaxField, setShowTaxField] = useState(false);
-    // const [showDiscountField, setShowDiscountField] = useState(false);
-
-    // const [showTaxField, setShowTaxField] = useState(Boolean(tempTaxDiscount?.tax));
-    // const [showDiscountField, setShowDiscountField] = useState(Boolean(tempTaxDiscount?.discount));
-
 
     const [showTaxField, setShowTaxField] = useState(false);
     const [showDiscountField, setShowDiscountField] = useState(false);
 
-// Effect runs when tempTaxDiscount changes
     useEffect(() => {
         if (tempTaxDiscount) {
             setTax(tempTaxDiscount.tax);
@@ -247,14 +229,6 @@ export default function CreateOrder({ products, companyDetails, customers, userO
             setShowDiscountField(Boolean(tempTaxDiscount.discount));
         }
     }, [tempTaxDiscount]);
-    // const [tax, setTax] = useState(0);
-    // const [discount, setDiscount] = useState(0);
-    // const [taxDescription, setTaxDescription] = useState('');
-    // const [discountDescription, setDiscountDescription] = useState('');
-    // const [taxType, setTaxType] = useState<'fixed' | 'percentage'>('fixed');
-    // const [discountType, setDiscountType] = useState<'fixed' | 'percentage'>('fixed');
-    // const [taxType, setTaxType] = useState<'' | 'fixed' | 'percentage'>('');
-    // const [discountType, setDiscountType] = useState<'' | 'fixed' | 'percentage'>('');
 
     const [tax, setTax] = useState(tempTaxDiscount?.tax ?? 0);
     const [taxType, setTaxType] = useState<'' | 'fixed' | 'percentage'>(tempTaxDiscount?.tax_type ?? '');

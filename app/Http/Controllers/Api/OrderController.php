@@ -114,28 +114,10 @@ class OrderController extends Controller
                         throw new \Exception("Product not found with ID: {$item['id']}");
                     }
                 }
-//                dd(session()->has('temp_tax_discount'));
             if (session()->has('temp_tax_discount')) {
                 $temp = session('temp_tax_discount');
 
-//                $order->tax_total = $temp['tax'] ?? 0;
-//                $order->discount_total = $temp['discount'] ?? 0;
-
                 $subTotal = $order->sub_total;
-
-//                // Calculate tax amount
-//                if (($temp['tax_type'] ?? 'fixed') === 'percentage') {
-//                    $taxAmount = $subTotal * ($temp['tax'] / 100);
-//                } else {
-//                    $taxAmount = $temp['tax'] ?? 0;
-//                }
-//
-//                // Calculate discount amount
-//                if (($temp['discount_type'] ?? 'fixed') === 'percentage') {
-//                    $discountAmount = $subTotal * ($temp['discount'] / 100);
-//                } else {
-//                    $discountAmount = $temp['discount'] ?? 0;
-//                }
 
                 if (($temp['tax_type'] ?? null) === 'percentage') {
                     $taxAmount = $subTotal * ($temp['tax'] / 100);
@@ -152,7 +134,6 @@ class OrderController extends Controller
                 $order->tax_total = $taxAmount;
                 $order->discount_total = $discountAmount;
 
-//                $order->sub_total = $order->sub_total + $tax - $discount;
                 $order->grand_total = $order->sub_total + $taxAmount - $discountAmount;
                 $order->meta = [
                     'tax_description' => $temp['tax_description'] ?? '',
