@@ -40,7 +40,6 @@ class OrderController extends ApiOrderController
         session(['user_order_session' => $sessionData]);
         return Inertia::render('orders/confirm-order', $sessionData);
 
-
     }
 
     public function store(StoreOrderRequest $request)
@@ -74,16 +73,19 @@ class OrderController extends ApiOrderController
     {
         $validated = $request->validate([
             'tax' => 'nullable|numeric',
+            'tax_type' => 'nullable|in:fixed,percentage',
             'tax_description' => 'nullable|string',
             'discount' => 'nullable|numeric',
+            'discount_type' => 'nullable|in:fixed,percentage',
             'discount_description' => 'nullable|string'
         ]);
-
         session([
             'temp_tax_discount' => [
                 'tax' => $validated['tax'] ?? null,
+                'tax_type' => $validated['tax_type'] ?? 'fixed',
                 'tax_description' => $validated['tax_description'] ?? '',
                 'discount' => $validated['discount'] ?? null,
+                'discount_type' => $validated['discount_type'] ?? 'fixed',
                 'discount_description' => $validated['discount_description'] ?? ''
             ]
         ]);

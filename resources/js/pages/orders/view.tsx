@@ -5,10 +5,26 @@ import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import printJS from 'print-js';
 
+export interface OrderMeta {
+    tax_type?: string;
+    tax_percentage?: number | null;
+    tax_description?: string;
+    discount_type?: string;
+    discount_percentage?: number | null;
+    discount_description?: string;
+}
 
-export default function View({ customer, items, companyDetails, orderId}: PageProps<{ customer: Customer; items: OrderItem[];  companyDetails: CompanyDetails, orderId: string }>) {
+export default function View({ customer, items, companyDetails, orderId, discountTotal, taxTotal, meta}: PageProps<{
+    customer: Customer;
+    items: OrderItem[];
+    companyDetails: CompanyDetails,
+    orderId: string,
+    discountTotal: number;
+    taxTotal: number;
+    meta: OrderMeta; }>) {
     const [isConfirmed, setIsConfirmed] = useState(true);
     const [orderItems] = useState<OrderItem[]>(items);
+
     const subtotal = (() => {
         return orderItems.reduce((total: number, item: OrderItem) => {
             return total + item.qty * item.price;
@@ -68,22 +84,20 @@ export default function View({ customer, items, companyDetails, orderId}: PagePr
     return (
         <AppLayout>
             <Head title="Confirm Order" />
-            <div className="p-8 space-y-6">
+            <div className="space-y-6 p-8">
                 <div className="flex items-center justify-between">
                     <div className="flex">
-                        <Tabs defaultValue="new-invoice" className="bg-white dark:bg-black text-black dark:text-white rounded-lg">
+                        <Tabs defaultValue="new-invoice" className="rounded-lg bg-white text-black dark:bg-black dark:text-white">
                             <TabsList className="px-1 py-1 dark:bg-neutral-900">
                                 <TabsTrigger value="new-invoice">New Invoice</TabsTrigger>
                                 <TabsTrigger value="all-orders">All Orders</TabsTrigger>
                             </TabsList>
-                            <TabsContent value="new-invoice" className="p-4 dark:bg-black bg-white">
-                            </TabsContent>
-                            <TabsContent value="all-orders" className="p-4 dark:bg-black bg-white">
-                            </TabsContent>
+                            <TabsContent value="new-invoice" className="bg-white p-4 dark:bg-black"></TabsContent>
+                            <TabsContent value="all-orders" className="bg-white p-4 dark:bg-black"></TabsContent>
                         </Tabs>
                     </div>
                     <button
-                        className="cursor-pointer px-4 py-2 bg-black text-white rounded text-sm hover:bg-gray-800 dark:bg-white dark:text-black"
+                        className="cursor-pointer rounded bg-black px-4 py-2 text-sm text-white hover:bg-gray-800 dark:bg-white dark:text-black"
                         onClick={isConfirmed ? passCreateOrder : handleReset}
                     >
                         {isConfirmed ? 'Create Another Order' : 'Reset'}
@@ -102,12 +116,10 @@ export default function View({ customer, items, companyDetails, orderId}: PagePr
                             </>
                         )}
                     </h1>
-                    <p className="text-sm text-black-500">
-                        # {orderId ? orderId : 'Order Preview'}
-                    </p>
+                    <p className="text-black-500 text-sm"># {orderId ? orderId : 'Order Preview'}</p>
                 </div>
 
-                <div id="printable-invoice" className="border rounded-md shadow-sm bg-white p-6 max-w-4xl mx-auto dark:bg-black">
+                <div id="printable-invoice" className="mx-auto max-w-4xl rounded-md border bg-white p-6 shadow-sm dark:bg-black">
                     <style>{`
                     .order-id {
                         margin-bottom: 10px!important;
@@ -166,71 +178,67 @@ export default function View({ customer, items, companyDetails, orderId}: PagePr
                       }
                     `}</style>
 
-                    <div className="flex justify-between mb-6">
+                    <div className="mb-6 flex justify-between">
                         <div>
                             <div className="flex items-center gap-2">
                                 {companyDetails?.logo ? (
                                     <img src={companyDetails.logo} alt="Logo" className="h-12 w-12 object-contain" />
                                 ) : (
-                                    <div className="h-8 w-8 bg-gray-200 rounded flex items-center justify-center text-xs">No Logo</div>
+                                    <div className="flex h-8 w-8 items-center justify-center rounded bg-gray-200 text-xs">No Logo</div>
                                 )}
                                 <h2 className="text-lg font-semibold">{companyDetails?.company_name}</h2>
                             </div>
-                            <p className="text-sm text-black-600 mt-2 leading-snug">
-                                {companyDetails?.company_address}
-                            </p>
+                            <p className="text-black-600 mt-2 text-sm leading-snug">{companyDetails?.company_address}</p>
                         </div>
-                        <div className="text-sm text-black-600 min-w-[280px] space-y-1 print:text-xs mr-5">
+                        <div className="text-black-600 mr-5 min-w-[280px] space-y-1 text-sm print:text-xs">
                             {/*    /!*<p><strong>Date:</strong> {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</p>*!/*/}
-                            <div className="grid grid-cols-[auto_1fr] gap-2 mb-3">
+                            <div className="mb-3 grid grid-cols-[auto_1fr] gap-2">
                                 <span className="font-medium">Date:</span>
-                                <span className="text-right">{companyDetails?.invoice_date &&
-                                    new Date(companyDetails.invoice_date).toLocaleDateString('en-GB', {
-                                        day: 'numeric',
-                                        month: 'short',
-                                        year: 'numeric',
-                                    })}</span>
-                            </div>
-                            <div className="grid grid-cols-[auto_1fr] gap-5 text-gray-600 order-id mb-38">
-                                <span className="font-medium dark:text-white">Order</span>
-                                <span className="text-right break-all">
-                                  {orderId ? orderId : 'confirm to generate'}
+                                <span className="text-right">
+                                    {companyDetails?.invoice_date &&
+                                        new Date(companyDetails.invoice_date).toLocaleDateString('en-GB', {
+                                            day: 'numeric',
+                                            month: 'short',
+                                            year: 'numeric',
+                                        })}
                                 </span>
                             </div>
-                            <div className="grid grid-cols-[auto_1fr] gap-2 customer-id mb-30">
+                            <div className="order-id mb-38 grid grid-cols-[auto_1fr] gap-5 text-gray-600">
+                                <span className="font-medium dark:text-white">Order</span>
+                                <span className="text-right break-all">{orderId ? orderId : 'confirm to generate'}</span>
+                            </div>
+                            <div className="customer-id mb-30 grid grid-cols-[auto_1fr] gap-2">
                                 <span className="font-medium">Customer ID</span>
                                 <span className="text-right break-all">{customer.id}</span>
                             </div>
                         </div>
                     </div>
 
-                    <div className="text-center text-lg font-semibold my-4">INVOICE</div>
+                    <div className="my-4 text-center text-lg font-semibold">INVOICE</div>
 
-                    <table className="w-full text-sm text-left border-t border-b border-black mb-4">
+                    <table className="mb-4 w-full border-t border-b border-black text-left text-sm">
                         <thead>
-                        <tr className="border-b">
-                            <th className="py-2 px-2">#</th>
-                            <th className="py-2 px-2">Item</th>
-                            <th className="py-2 px-2">Qty</th>
-                            <th className="py-2 px-2">Price</th>
-                            <th className="py-2 px-2 text-right">Total</th>
-                        </tr>
+                            <tr className="border-b">
+                                <th className="px-2 py-2">#</th>
+                                <th className="px-2 py-2">Item</th>
+                                <th className="px-2 py-2">Qty</th>
+                                <th className="px-2 py-2">Price</th>
+                                <th className="px-2 py-2 text-right">Total</th>
+                            </tr>
                         </thead>
                         <tbody>
-
-                        {orderItems.map((item: { name: string; qty: number; price: number }, i: number) => {
-                            const total = item.qty * item.price;
-                            return (
-                                <tr key={i} className="border-b">
-                                    <td className="py-2 px-2">{i + 1}</td>
-                                    <td className="py-2 px-2">{item.name}</td>
-                                    <td className="py-2 px-2">{item.qty}</td>
-                                    <td className="py-2 px-2">{item.price.toFixed(2)}/-</td>
-                                    <td className="py-2 px-2 text-right">{total.toFixed(2)}/-</td>
-                                </tr>
-                            );
-                        })}
-
+                            {orderItems.map((item: { name: string; qty: number; price: number }, i: number) => {
+                                const total = item.qty * item.price;
+                                return (
+                                    <tr key={i} className="border-b">
+                                        <td className="px-2 py-2">{i + 1}</td>
+                                        <td className="px-2 py-2">{item.name}</td>
+                                        <td className="px-2 py-2">{item.qty}</td>
+                                        <td className="px-2 py-2">{item.price.toFixed(2)}/-</td>
+                                        <td className="px-2 py-2 text-right">{total.toFixed(2)}/-</td>
+                                    </tr>
+                                );
+                            })}
                         </tbody>
                     </table>
 
@@ -238,22 +246,41 @@ export default function View({ customer, items, companyDetails, orderId}: PagePr
                         <span className="font-medium">Subtotal</span>
                         <span>{subtotal}/-</span>
                     </div>
+                    {discountTotal !== null && discountTotal > 0 && (
+                        <div className="flex justify-between border-b">
+                            <span className="font-medium">
+                                Discount {meta?.discount_type === 'percentage' ? `(${meta?.discount_percentage}%)` : ''}
+                            </span>
+                            <span>-{discountTotal.toFixed(2)}/-</span>
+                        </div>
+                    )}
+
+                    {taxTotal !== null && taxTotal > 0 && (
+                        <div className="flex justify-between border-b">
+                            <span className="font-medium">
+                                Tax {meta?.tax_type ? `(${meta?.tax_type})` : ''}
+                                {meta?.tax_percentage ? ` (${meta?.tax_percentage}%)` : ''}
+                            </span>
+                            <span>{taxTotal.toFixed(2)}/-</span>
+                        </div>
+                    )}
                     <div className="text-sm text-gray-700">
-                        <div className="flex justify-between border-t font-bold pt-2 text-black mt-50">
+                        <div className="mt-50 flex justify-between border-t pt-2 font-bold text-black">
                             <span className="dark:text-white">Grand Total</span>
-                            <span className="dark:text-white">{subtotal}/-</span>
+                            <span>{(subtotal - discountTotal + taxTotal).toFixed(2)}/-</span>
                         </div>
                     </div>
-                    <div className="flex justify-end mt-8 gap-2">
+                    <div className="mt-8 flex justify-end gap-2">
                         {!isConfirmed ? (
                             <>
-                                <button className="cursor-pointer px-4 py-2 border border-gray-400 rounded text-sm text-black hover:bg-gray-100"
-                                        onClick={handleEdit}
+                                <button
+                                    className="cursor-pointer rounded border border-gray-400 px-4 py-2 text-sm text-black hover:bg-gray-100"
+                                    onClick={handleEdit}
                                 >
                                     Edit
                                 </button>
                                 <button
-                                    className="cursor-pointer px-4 py-2 bg-black text-white rounded text-sm hover:bg-gray-800"
+                                    className="cursor-pointer rounded bg-black px-4 py-2 text-sm text-white hover:bg-gray-800"
                                     onClick={handleConfirm}
                                 >
                                     Confirm
@@ -262,20 +289,20 @@ export default function View({ customer, items, companyDetails, orderId}: PagePr
                         ) : (
                             <>
                                 <button
-                                    className="no-print cursor-pointer px-4 py-2 border border-gray-400 rounded text-sm text-black hover:bg-gray-100 dark:text-white dark:hover:bg-black"
+                                    className="no-print cursor-pointer rounded border border-gray-400 px-4 py-2 text-sm text-black hover:bg-gray-100 dark:text-white dark:hover:bg-black"
                                     onClick={passCreateOrder}
                                 >
                                     Create Another Order
                                 </button>
 
-                                <button className="no-print cursor-pointer px-4 py-2 border border-gray-400 rounded text-sm text-black hover:bg-gray-100 dark:text-white dark:hover:bg-black">
+                                <button className="no-print cursor-pointer rounded border border-gray-400 px-4 py-2 text-sm text-black hover:bg-gray-100 dark:text-white dark:hover:bg-black">
                                     Schedule Delivery
                                 </button>
-                                <button className="no-print cursor-pointer px-4 py-2 border border-gray-400 rounded text-sm text-black hover:bg-gray-100 dark:text-white dark:hover:bg-black">
+                                <button className="no-print cursor-pointer rounded border border-gray-400 px-4 py-2 text-sm text-black hover:bg-gray-100 dark:text-white dark:hover:bg-black">
                                     Mark as Paid
                                 </button>
                                 <button
-                                    className="no-print cursor-pointer px-4 py-2 border border-gray-400 rounded text-sm bg-black text-white hover:bg-gray-100 hover:text-black dark:bg-white dark:text-black"
+                                    className="no-print cursor-pointer rounded border border-gray-400 bg-black px-4 py-2 text-sm text-white hover:bg-gray-100 hover:text-black dark:bg-white dark:text-black"
                                     onClick={handlePrint}
                                 >
                                     Print Invoice
@@ -284,7 +311,6 @@ export default function View({ customer, items, companyDetails, orderId}: PagePr
                         )}
                     </div>
                 </div>
-
             </div>
         </AppLayout>
     );

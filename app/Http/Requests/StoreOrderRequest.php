@@ -29,6 +29,7 @@ class StoreOrderRequest extends FormRequest
             'items.*.price' => 'required|numeric|min:0',
             'sub_total' => 'required|numeric|min:0',
             'grand_total' => 'required|numeric|min:0',
+
         ];
     }
 }

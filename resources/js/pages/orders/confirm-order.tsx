@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import printJS from 'print-js';
 
-export default function ConfirmOrder({ customer, items, companyDetails, orderId}: PageProps<{ customer: Customer; items: OrderItem[];  companyDetails: CompanyDetails, orderId: string }>) {
+export default function ConfirmOrder({ customer, items, companyDetails, orderId, tempTaxDiscount}: PageProps<{ customer: Customer; items: OrderItem[];  companyDetails: CompanyDetails, orderId: string }>) {
     const [isConfirmed, setIsConfirmed] = useState(false);
     const [orderItems] = useState<OrderItem[]>(items);
     const subtotal = (() => {
@@ -14,6 +14,23 @@ export default function ConfirmOrder({ customer, items, companyDetails, orderId}
         }, 0);
     })();
 
+    let taxAmount = 0;
+    let discountAmount = 0;
+
+    if (tempTaxDiscount) {
+        if (tempTaxDiscount.tax) {
+            taxAmount = tempTaxDiscount.tax_type === 'percentage'
+                ? subtotal * (tempTaxDiscount.tax / 100)
+                : tempTaxDiscount.tax;
+        }
+        if (tempTaxDiscount.discount) {
+            discountAmount = tempTaxDiscount.discount_type === 'percentage'
+                ? subtotal * (tempTaxDiscount.discount / 100)
+                : tempTaxDiscount.discount;
+        }
+    }
+
+    const grandTotal = subtotal + taxAmount - discountAmount;
 
     const handleConfirm = () => {
         router.post(
@@ -22,7 +39,8 @@ export default function ConfirmOrder({ customer, items, companyDetails, orderId}
                 customer_id: customer.id,
                 items: items,
                 sub_total: subtotal,
-                grand_total: subtotal,
+                grand_total: grandTotal,
+
             },
             {
                 onSuccess: () => {
@@ -58,7 +76,8 @@ export default function ConfirmOrder({ customer, items, companyDetails, orderId}
     const handleEdit = () => {
         router.visit(route('orders.create'), {
             data: {
-                items
+                items,
+                tempTaxDiscount
             },
         });
 
@@ -238,10 +257,28 @@ export default function ConfirmOrder({ customer, items, companyDetails, orderId}
                         <span className="font-medium text-black dark:text-white">Subtotal</span>
                         <span className="text-black dark:text-white">{subtotal}/-</span>
                     </div>
+                    {taxAmount > 0 && (
+                        <div className="flex justify-between border-b">
+                            <span className="font-medium text-black dark:text-white">
+                              Tax ({tempTaxDiscount?.tax_description || tempTaxDiscount?.tax_type})
+                            </span>
+                            <span className="text-black dark:text-white">{taxAmount.toFixed(2)}/-</span>
+                        </div>
+                    )}
+
+                    {discountAmount > 0 && (
+                        <div className="flex justify-between border-b">
+                            <span className="font-medium text-black dark:text-white">
+                              Discount ({tempTaxDiscount?.discount_description || tempTaxDiscount?.discount_type})
+                            </span>
+                            <span className="text-black dark:text-white">-{discountAmount.toFixed(2)}/-</span>
+                        </div>
+                    )}
+
                     <div className="text-sm text-gray-700">
                         <div className="flex justify-between border-t font-bold pt-2 text-black mt-50">
                             <span className="text-black dark:text-white">Grand Total</span>
-                            <span className="text-black dark:text-white">{subtotal}/-</span>
+                            <span className="text-black dark:text-white">{grandTotal}/-</span>
                         </div>
                     </div>
                     <div className="flex justify-end mt-8 gap-2">

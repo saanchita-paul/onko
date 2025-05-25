@@ -51,12 +51,13 @@ class OrderController extends Controller
     public function getConfirmData(Request $request)
     {
         $companyDetails = Option::companyDetails();
-
+        $tempTaxDiscount = session('temp_tax_discount', null);
         return [
             'customer' => $request->input('customer'),
             'items' => $request->input('items'),
             'companyDetails' => $companyDetails,
             'orderId' => '',
+            'tempTaxDiscount' => $tempTaxDiscount,
         ];
     }
 
@@ -119,17 +120,46 @@ class OrderController extends Controller
 //                $order->tax_total = $temp['tax'] ?? 0;
 //                $order->discount_total = $temp['discount'] ?? 0;
 
-                $tax = $temp['tax'] ?? 0;
-                $discount = $temp['discount'] ?? 0;
+                $subTotal = $order->sub_total;
 
-                $order->tax_total = $tax;
-                $order->discount_total = $discount;
+//                // Calculate tax amount
+//                if (($temp['tax_type'] ?? 'fixed') === 'percentage') {
+//                    $taxAmount = $subTotal * ($temp['tax'] / 100);
+//                } else {
+//                    $taxAmount = $temp['tax'] ?? 0;
+//                }
+//
+//                // Calculate discount amount
+//                if (($temp['discount_type'] ?? 'fixed') === 'percentage') {
+//                    $discountAmount = $subTotal * ($temp['discount'] / 100);
+//                } else {
+//                    $discountAmount = $temp['discount'] ?? 0;
+//                }
+
+                if (($temp['tax_type'] ?? null) === 'percentage') {
+                    $taxAmount = $subTotal * ($temp['tax'] / 100);
+                } else {
+                    $taxAmount = $temp['tax'] ?? 0;
+                }
+
+                if (($temp['discount_type'] ?? null) === 'percentage') {
+                    $discountAmount = $subTotal * ($temp['discount'] / 100);
+                } else {
+                    $discountAmount = $temp['discount'] ?? 0;
+                }
+
+                $order->tax_total = $taxAmount;
+                $order->discount_total = $discountAmount;
 
 //                $order->sub_total = $order->sub_total + $tax - $discount;
-                $order->grand_total = $order->grand_total + $tax - $discount;
+                $order->grand_total = $order->sub_total + $taxAmount - $discountAmount;
                 $order->meta = [
                     'tax_description' => $temp['tax_description'] ?? '',
+                    'tax_type' => $temp['tax_type'] ?? null,
+                    'tax_percentage' => ($temp['tax_type'] ?? null) === 'percentage' ? $temp['tax'] : null,
                     'discount_description' => $temp['discount_description'] ?? '',
+                    'discount_type' => $temp['discount_type'] ?? null,
+                    'discount_percentage' => $temp['discount_type'] === 'percentage' ? $temp['discount'] : null,
                 ];
                 $order->save();
 
@@ -172,6 +202,9 @@ class OrderController extends Controller
             'items' => $items,
             'companyDetails' => $companyDetails,
             'orderId' => $order->id,
+            'discountTotal' => $order->discount_total,
+            'taxTotal' => $order->tax_total,
+            'meta' => json_decode($order->meta, true),
         ];
     }
 
@@ -182,27 +215,6 @@ class OrderController extends Controller
         return [
             'message' => 'Order session has been reset.',
         ];
-    }
-
-    public function saveTempTaxDiscount(Request $request)
-    {
-        $validated = $request->validate([
-            'tax' => 'nullable|numeric',
-            'tax_description' => 'nullable|string',
-            'discount' => 'nullable|numeric',
-            'discount_description' => 'nullable|string'
-        ]);
-
-        session([
-            'temp_tax_discount' => [
-                'tax' => $validated['tax'] ?? null,
-                'tax_description' => $validated['tax_description'] ?? '',
-                'discount' => $validated['discount'] ?? null,
-                'discount_description' => $validated['discount_description'] ?? ''
-            ]
-        ]);
-
-        return response()->json(['message' => 'Temporary tax and discount saved in session.']);
     }
 
 
