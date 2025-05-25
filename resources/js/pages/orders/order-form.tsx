@@ -29,10 +29,10 @@ interface OrderFormProps {
     onOpenChange: Dispatch<SetStateAction<boolean>>
     customers: PaginatedCustomers,
     orderItems: OrderItem[],
-    companyDetails: CompanyDetails | null
+    companyDetails: CompanyDetails | null,
 }
 
-export function OrderForm({ open, onOpenChange, customers, orderItems, companyDetails }: OrderFormProps) {
+export function OrderForm({ open, onOpenChange, customers, orderItems, companyDetails}: OrderFormProps) {
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
         email: '',
@@ -65,6 +65,7 @@ export function OrderForm({ open, onOpenChange, customers, orderItems, companyDe
                             </div>
                         </div>
                     ));
+
                 } else if (data.props.flash?.error) {
                     toast.error(data.props.flash.error);
                 }
@@ -100,7 +101,6 @@ export function OrderForm({ open, onOpenChange, customers, orderItems, companyDe
 
 
     const handleSelectCustomer = (customer: Customer ) => {
-        console.log('Order Items:', orderItems);
         onOpenChange(false);
 
         router.post(route('orders.confirm'), {

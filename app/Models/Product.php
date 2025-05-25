@@ -14,6 +14,15 @@ class Product extends Model
     use HasFactory, HasUuids;
 
     protected $appends = [ 'short_id' ];
+    protected $fillable = [
+      'name',
+      'quantity',
+      'unit',
+      'description',
+      'hasVariations',
+      'image_url',
+      'price'
+    ];
 
     public function productAttributes(): HasMany
     {
@@ -36,7 +45,7 @@ class Product extends Model
     {
         return Attribute::make(
             get: fn($value) => $value/100,
-            set: fn($value) => $value*100 
+            set: fn($value) => $value*100
         );
     }
 }

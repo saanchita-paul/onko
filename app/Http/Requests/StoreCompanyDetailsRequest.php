@@ -15,7 +15,7 @@ class StoreCompanyDetailsRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'company_name' => 'required|string',
+            'company_name' => 'nullable|string',
             'company_address' => 'nullable|string',
             'invoice_date' => 'nullable',
             'logo' => 'nullable|image|max:2048',

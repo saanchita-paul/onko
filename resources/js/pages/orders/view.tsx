@@ -5,8 +5,9 @@ import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import printJS from 'print-js';
 
-export default function ConfirmOrder({ customer, items, companyDetails, orderId}: PageProps<{ customer: Customer; items: OrderItem[];  companyDetails: CompanyDetails, orderId: string }>) {
-    const [isConfirmed, setIsConfirmed] = useState(false);
+
+export default function View({ customer, items, companyDetails, orderId}: PageProps<{ customer: Customer; items: OrderItem[];  companyDetails: CompanyDetails, orderId: string }>) {
+    const [isConfirmed, setIsConfirmed] = useState(true);
     const [orderItems] = useState<OrderItem[]>(items);
     const subtotal = (() => {
         return orderItems.reduce((total: number, item: OrderItem) => {
@@ -80,7 +81,6 @@ export default function ConfirmOrder({ customer, items, companyDetails, orderId}
                             <TabsContent value="all-orders" className="p-4 dark:bg-black bg-white">
                             </TabsContent>
                         </Tabs>
-
                     </div>
                     <button
                         className="cursor-pointer px-4 py-2 bg-black text-white rounded text-sm hover:bg-gray-800 dark:bg-white dark:text-black"
@@ -91,7 +91,7 @@ export default function ConfirmOrder({ customer, items, companyDetails, orderId}
                 </div>
 
                 <div className="text-left">
-                    <h1 className="text-2xl font-bold dark:text-white">
+                    <h1 className="text-2xl font-bold">
                         {isConfirmed ? (
                             <>
                                 Order Created <span className="text-black-400">✔</span>
@@ -176,7 +176,7 @@ export default function ConfirmOrder({ customer, items, companyDetails, orderId}
                                 )}
                                 <h2 className="text-lg font-semibold">{companyDetails?.company_name}</h2>
                             </div>
-                            <p className="text-sm text-black-600 mt-2 leading-snug dark:text-gray-300">
+                            <p className="text-sm text-black-600 mt-2 leading-snug">
                                 {companyDetails?.company_address}
                             </p>
                         </div>
@@ -192,7 +192,7 @@ export default function ConfirmOrder({ customer, items, companyDetails, orderId}
                                     })}</span>
                             </div>
                             <div className="grid grid-cols-[auto_1fr] gap-5 text-gray-600 order-id mb-38">
-                                <span className="font-medium text-black dark:text-white">Order</span>
+                                <span className="font-medium dark:text-white">Order</span>
                                 <span className="text-right break-all">
                                   {orderId ? orderId : 'confirm to generate'}
                                 </span>
@@ -208,7 +208,7 @@ export default function ConfirmOrder({ customer, items, companyDetails, orderId}
 
                     <table className="w-full text-sm text-left border-t border-b border-black mb-4">
                         <thead>
-                        <tr className="border-b dark:bg-black text-black dark:text-white">
+                        <tr className="border-b">
                             <th className="py-2 px-2">#</th>
                             <th className="py-2 px-2">Item</th>
                             <th className="py-2 px-2">Qty</th>
@@ -221,7 +221,7 @@ export default function ConfirmOrder({ customer, items, companyDetails, orderId}
                         {orderItems.map((item: { name: string; qty: number; price: number }, i: number) => {
                             const total = item.qty * item.price;
                             return (
-                                <tr key={i} className="border-b dark:text-gray-100">
+                                <tr key={i} className="border-b">
                                     <td className="py-2 px-2">{i + 1}</td>
                                     <td className="py-2 px-2">{item.name}</td>
                                     <td className="py-2 px-2">{item.qty}</td>
@@ -235,25 +235,25 @@ export default function ConfirmOrder({ customer, items, companyDetails, orderId}
                     </table>
 
                     <div className="flex justify-between border-b">
-                        <span className="font-medium text-black dark:text-white">Subtotal</span>
-                        <span className="text-black dark:text-white">{subtotal}/-</span>
+                        <span className="font-medium">Subtotal</span>
+                        <span>{subtotal}/-</span>
                     </div>
                     <div className="text-sm text-gray-700">
                         <div className="flex justify-between border-t font-bold pt-2 text-black mt-50">
-                            <span className="text-black dark:text-white">Grand Total</span>
-                            <span className="text-black dark:text-white">{subtotal}/-</span>
+                            <span className="dark:text-white">Grand Total</span>
+                            <span className="dark:text-white">{subtotal}/-</span>
                         </div>
                     </div>
                     <div className="flex justify-end mt-8 gap-2">
                         {!isConfirmed ? (
                             <>
-                                <button className="cursor-pointer px-4 py-2 border border-gray-400 rounded text-sm text-black hover:bg-gray-100 dark:text-white dark:hover:bg-black"
+                                <button className="cursor-pointer px-4 py-2 border border-gray-400 rounded text-sm text-black hover:bg-gray-100"
                                         onClick={handleEdit}
                                 >
                                     Edit
                                 </button>
                                 <button
-                                    className="cursor-pointer px-4 py-2 bg-black text-white rounded text-sm hover:bg-gray-800 dark:bg-white dark:text-black"
+                                    className="cursor-pointer px-4 py-2 bg-black text-white rounded text-sm hover:bg-gray-800"
                                     onClick={handleConfirm}
                                 >
                                     Confirm
@@ -262,20 +262,20 @@ export default function ConfirmOrder({ customer, items, companyDetails, orderId}
                         ) : (
                             <>
                                 <button
-                                    className="no-print cursor-pointer px-4 py-2 border border-gray-400 rounded text-sm text-black hover:bg-gray-100"
+                                    className="no-print cursor-pointer px-4 py-2 border border-gray-400 rounded text-sm text-black hover:bg-gray-100 dark:text-white dark:hover:bg-black"
                                     onClick={passCreateOrder}
                                 >
                                     Create Another Order
                                 </button>
 
-                                <button className="no-print cursor-pointer px-4 py-2 border border-gray-400 rounded text-sm text-black hover:bg-gray-100">
+                                <button className="no-print cursor-pointer px-4 py-2 border border-gray-400 rounded text-sm text-black hover:bg-gray-100 dark:text-white dark:hover:bg-black">
                                     Schedule Delivery
                                 </button>
-                                <button className="no-print cursor-pointer px-4 py-2 border border-gray-400 rounded text-sm text-black hover:bg-gray-100">
+                                <button className="no-print cursor-pointer px-4 py-2 border border-gray-400 rounded text-sm text-black hover:bg-gray-100 dark:text-white dark:hover:bg-black">
                                     Mark as Paid
                                 </button>
                                 <button
-                                    className="no-print cursor-pointer px-4 py-2 border border-gray-400 rounded text-sm bg-black text-white hover:bg-gray-100 hover:text-black"
+                                    className="no-print cursor-pointer px-4 py-2 border border-gray-400 rounded text-sm bg-black text-white hover:bg-gray-100 hover:text-black dark:bg-white dark:text-black"
                                     onClick={handlePrint}
                                 >
                                     Print Invoice

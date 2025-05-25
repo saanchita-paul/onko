@@ -7,6 +7,8 @@ use App\Http\Controllers\OptionController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SalesController;
+use App\Models\Order;
+use App\Models\Product;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -32,6 +34,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/options', [OptionController::class, 'store'])->name('options.store');
     Route::post('/orders/confirm', [OrderController::class, 'confirm'])->name('orders.confirm');
     Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
+    Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+    Route::post('/order/reset', [OrderController::class, 'reset'])->name('orders.reset');
+
 
 });
 

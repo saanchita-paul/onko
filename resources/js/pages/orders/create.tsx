@@ -25,7 +25,7 @@ import {
 import { useEffect, useRef, useState } from 'react';
 import { Textarea } from "@/components/ui/textarea";
 import { PageProps } from '@inertiajs/core';
-import { CompanyDetails, LaravelPaginationItem } from '@/types';
+import { CompanyDetails, Customer, LaravelPaginationItem } from '@/types';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
@@ -48,18 +48,39 @@ interface InertiaProps extends PageProps {
     };
     companyDetails?: CompanyDetails | null;
     customers: PaginatedCustomers;
-    orderItems: []
+    orderItems: [],
+    userOrderSession?: {
+        customer: Customer;
+        items: Item[];
+        companyDetails: CompanyDetails;
+        orderId: string;
+    };
 }
 interface Item extends Product {
     qty: number;
 }
-export default function CreateOrder({ products, companyDetails, customers }: InertiaProps) {
+export default function CreateOrder({ products, companyDetails, customers, userOrderSession, isReset }: InertiaProps) {
     const [productList, setProductList] = useState<Product[]>(products.data);
+    useEffect(() => {
+        if (userOrderSession) {
+            console.log("Restoring from session:", userOrderSession);
+        }
+    }, [userOrderSession]);
+
+    useEffect(() => {
+        if (isReset) {
+            setItems([]);
+        }
+    }, [isReset]);
 
     useEffect(() => {
         setProductList(products.data);
     }, [products.data]);
     const [items, setItems] = useRemember<Item[]>([], 'order_items');
+
+    if (!items.length && userOrderSession?.items?.length){
+        setItems(userOrderSession.items)
+    }
     const addItem = (product: Product) => {
         setItems((prevItems) => {
             const existingIndex = prevItems.findIndex(item => item.id === product.id);
@@ -177,6 +198,7 @@ export default function CreateOrder({ products, companyDetails, customers }: Ine
         setProductList(adjustedProducts);
     }, [products.data, items]);
 
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     return (
         <AppLayout>
@@ -200,70 +222,84 @@ export default function CreateOrder({ products, companyDetails, customers }: Ine
                         <Card>
                             <CardContent className="space-y-4 p-6 sm:p-6">
                                 <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <div className="flex items-center gap-2">
-                                            <div className={`relative group ${imagePreview ? 'w-14 h-11' : 'w-12 h-9'}`}>
-                                                <input
-                                                    type="file"
-                                                    id="fileUpload"
-                                                    className="hidden"
-                                                    accept="image/*"
-                                                    onChange={(e) => {
-                                                        const file = e.target.files?.[0];
-                                                        if (file) {
-                                                            const reader = new FileReader();
-                                                            reader.onloadend = () => {
-                                                                if (typeof reader.result === "string") {
-                                                                    setImagePreview(reader.result);
-                                                                }
-                                                            };
-                                                            setData('logo', file);
-                                                            reader.readAsDataURL(file);
-                                                        }
-                                                    }}
-                                                    ref={fileInputRef}
-                                                />
-                                                <label
-                                                    htmlFor="fileUpload"
-                                                    className={`flex items-center justify-center h-full w-full rounded-md ${imagePreview ? 'border-0' : 'border border-input'} bg-white-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 cursor-pointer hover:bg-white-200 dark:hover:bg-neutral-700 overflow-hidden relative group`}
-                                                    title="Choose File"
-                                                >
-                                                    {imagePreview ? (
+                                    <div className="space-y-4">
+                                        <div className="flex flex-col md:flex-row md:items-center md:gap-2 space-y-2 md:space-y-0">
+                                            <div className="flex items-center gap-4">
+                                                {imagePreview && (
+                                                    <div className="relative w-14 h-11 rounded-md overflow-hidden border border-input bg-white">
                                                         <img
                                                             src={imagePreview}
                                                             alt="Preview"
-                                                            className="absolute top-0 left-0 w-full h-full object-cover"
+                                                            className="w-full h-full object-cover"
                                                         />
-                                                    ) : (
-                                                        <ImageIcon className="w-4 h-4" />
-                                                    )}
-                                                </label>
+                                                        <button
+                                                            onClick={() => {
+                                                                setImagePreview(null);
+                                                                setData('logo', null);
+                                                                if (fileInputRef.current) {
+                                                                    fileInputRef.current.value = '';
+                                                                }
+                                                            }}
+                                                            className="absolute top-1 right-1 p-1 rounded-full bg-white text-black hover:bg-neutral-200 transition"
+                                                            title="Remove"
+                                                        >
+                                                            <X className="h-3 w-3" />
+                                                        </button>
+                                                    </div>
+                                                )}
+                                                {!imagePreview && (
+                                                    <div className="relative group w-12 h-9">
+                                                        <input
+                                                            type="file"
+                                                            id="fileUpload"
+                                                            className="hidden"
+                                                            accept="image/*"
+                                                            onChange={(e) => {
+                                                                const file = e.target.files?.[0];
+                                                                if (file) {
+                                                                    if (file.size > 2 * 1024 * 1024) {
+                                                                        setErrorMessage("Image must not exceed 2MB.");
+                                                                        return;
+                                                                    }
 
-                                                {imagePreview && (
-                                                    <button
-                                                        onClick={() => {
-                                                            setImagePreview(null);
-                                                            setData('logo', null);
-                                                            if (fileInputRef.current) {
-                                                                fileInputRef.current.value = '';
-                                                            }
-                                                        }}
-                                                        className="absolute top-0 right-0 m-1 p-1 rounded-full bg-white text-black opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10"
-                                                        title="Remove"
-                                                    >
-                                                        <X className="h-3 w-3" />
-                                                    </button>
+                                                                    const reader = new FileReader();
+                                                                    reader.onloadend = () => {
+                                                                        if (typeof reader.result === "string") {
+                                                                            setImagePreview(reader.result);
+                                                                            setErrorMessage(null);
+                                                                        }
+                                                                    };
+                                                                    setData('logo', file);
+                                                                    reader.readAsDataURL(file);
+                                                                }
+                                                            }}
+                                                            ref={fileInputRef}
+                                                        />
+
+                                                        <label
+                                                            htmlFor="fileUpload"
+                                                            className="flex items-center justify-center h-full w-full rounded-md border border-input bg-white-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 cursor-pointer hover:bg-white-200 dark:hover:bg-neutral-700"
+                                                            title="Choose File"
+                                                        >
+                                                            <ImageIcon className="w-4 h-4" />
+                                                        </label>
+                                                    </div>
                                                 )}
                                             </div>
+
                                             <Input
                                                 placeholder="Company Name"
-                                                className="flex-1"
+                                                className="flex-1 w-full"
                                                 value={data.company_name}
                                                 onChange={(e) => setData('company_name', e.target.value)}
                                                 onBlur={submit}
                                                 onKeyDown={(e) => e.key === 'Enter' && submit()}
                                             />
+
                                         </div>
+                                        {errorMessage && (
+                                            <p className="text-sm text-red-600 mt-1">{errorMessage}</p>
+                                        )}
                                         <Textarea
                                             placeholder="Company Address
 (optional)"
@@ -274,7 +310,7 @@ export default function CreateOrder({ products, companyDetails, customers }: Ine
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <div className="flex items-center gap-2">
+                                        <div className="flex flex-col md:flex-row md:items-center md:gap-2 space-y-2 md:space-y-0">
                                             <label className="text-sm font-medium w-20">Date:</label>
                                             <Popover>
                                                 <PopoverTrigger asChild>
@@ -302,8 +338,8 @@ export default function CreateOrder({ products, companyDetails, customers }: Ine
                                                 </PopoverContent>
                                             </Popover>
                                         </div>
-                                        <div className="flex items-center gap-2">
-                                            <label className="text-sm font-medium w-14">Order #</label>
+                                        <div className="flex flex-col md:flex-row md:items-center md:gap-2 space-y-2 md:space-y-0">
+                                            <label className="text-sm font-medium w-14">Order</label>
                                             <Input
                                                 placeholder="auto generates"
                                                 readOnly
@@ -317,7 +353,7 @@ export default function CreateOrder({ products, companyDetails, customers }: Ine
                                 </div>
                             </CardContent>
                             <div className="p-0">
-                                <div className="mb-2 grid grid-cols-6 font-bold p-4">
+                                <div className="hidden sm:grid mb-2 grid-cols-6 font-bold p-4 text-sm sm:text-base">
                                     <span>#</span>
                                     <span>Item</span>
                                     <span className="text-center">Qty</span>
@@ -328,10 +364,17 @@ export default function CreateOrder({ products, companyDetails, customers }: Ine
                                 {items
                                     .filter((item) => item.qty > 0)
                                     .map((item, index) => (
-                                    <div key={index} className="grid grid-cols-6 items-center gap-2 border-t py-2 p-4">
-                                        <span>{index + 1}</span>
-                                        <div className="text-left">{item.name}</div>
-                                        <div className="flex justify-center">
+                                    <div key={index} className="grid grid-cols-1 sm:grid-cols-6 sm:items-center gap-2 border-t p-4 text-sm sm:text-base">
+                                        <div className="flex justify-between sm:block">
+                                            <span className="font-medium sm:hidden w-24">#</span>
+                                            <span className="text-right sm:text-left">{index + 1}</span>
+                                        </div>
+                                        <div className="flex justify-between sm:block">
+                                            <span className="font-medium sm:hidden w-24">Item:</span>
+                                            <span className="text-right sm:text-left">{item.name}</span>
+                                        </div>
+                                        <div className="flex justify-between sm:justify-center sm:block">
+                                            <span className="font-medium sm:hidden w-24">Qty:</span>
                                             <Input
                                                 type="number"
                                                 value={item.qty}
@@ -346,26 +389,33 @@ export default function CreateOrder({ products, companyDetails, customers }: Ine
                                                 className="text-center w-16 border"
                                             />
                                         </div>
-                                        <div className="text-right w-full pr-2 border px-2 py-1 rounded">{item.price}</div>
-                                        <div className="text-right w-full">
-                                            {item.qty * item.price} /-
+                                        <div className="flex sm:justify-end sm:block">
+                                            <span className="font-medium sm:hidden w-24">Price:</span>
+                                            <span className="text-right w-full pr-2 border px-2 py-1 rounded">{item.price}</span>
                                         </div>
-                                        <Button variant="ghost" size="icon" onClick={() => removeItem(index)}>
-                                            <X className="h-4 w-4" />
-                                        </Button>
+                                        <div className="flex justify-between sm:justify-end sm:block">
+                                            <span className="font-medium sm:hidden w-24">Total:</span>
+                                            <span className="text-right w-full">{item.qty * item.price}/-</span>
+                                        </div>
+                                        <div className="flex justify-end">
+                                            <Button variant="ghost" size="icon" onClick={() => removeItem(index)}>
+                                                <X className="h-4 w-4" />
+                                            </Button>
+                                        </div>
+
                                     </div>
                                 ))}
-                                <div className="mt-2 flex justify-between items-center border-t border-b pt-2 font-bold p-4">
-                                    <span>Subtotal</span>
-                                    <span className="pr-27">{subtotal} /-</span>
+                                <div className="mt-2 flex justify-between items-center border-t border-b pt-2 font-bold p-4 text-sm sm:text-base">
+                                    <span className="text-left">Subtotal</span>
+                                    <span className="text-right ml-auto">{subtotal} /-</span>
                                 </div>
                                 <div className="mt-2 flex justify-center">
                                     <Button variant="outline">Add custom product</Button>
                                 </div>
                             </div>
-                            <div className="flex items-center justify-between border-t pt-4 text-lg font-bold p-4">
-                                <span>Grand Total</span>
-                                <span className="pr-27">{subtotal} /-</span>
+                            <div className="mt-2 flex justify-between items-center border-t pt-4 font-bold p-4 text-sm sm:text-base">
+                                <span className="text-left">Grand Total</span>
+                                <span className="text-right ml-auto">{subtotal} /-</span>
                             </div>
                         </Card>
                         <div className="flex flex-wrap justify-end gap-2">
@@ -378,7 +428,7 @@ export default function CreateOrder({ products, companyDetails, customers }: Ine
 
                         </div>
                     </div>
-                    <div className="w-[350px] space-y-4">
+                    <div className="w-full xl:max-w-sm space-y-4">
                         <div className="relative">
                             <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
                             <Input placeholder="Search for products" className="pl-10" />
@@ -474,7 +524,6 @@ export default function CreateOrder({ products, companyDetails, customers }: Ine
                     </div>
                 </div>
             </div>
-
             <OrderForm open={drawerOpen} onOpenChange={setDrawerOpen} customers={customers} orderItems={items} companyDetails={companyDetails ?? null}/>
         </AppLayout>
     );
