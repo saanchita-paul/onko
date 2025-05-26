@@ -86,4 +86,11 @@ class OrderController extends ApiOrderController
         return redirect()->back()->with('message', 'Temporary tax and discount saved in session.');
     }
 
+    public function clearTempTaxDiscount()
+    {
+        session()->forget('temp_tax_discount');
+        return response()->json(['message' => 'Temporary tax and discount session cleared.']);
+    }
+
+
 }

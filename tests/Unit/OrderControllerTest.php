@@ -230,4 +230,20 @@ class OrderControllerTest extends TestCase
             ->has('orders.data', 5)
         );
     }
+
+    public function it_clears_temp_tax_discount_from_session()
+    {
+        session(['temp_tax_discount' => ['tax' => 5, 'discount' => 10]]);
+
+        $this->assertTrue(session()->has('temp_tax_discount'));
+
+        $response = $this->postJson(route('clear.temp.tax.discount'));
+
+        $this->assertFalse(session()->has('temp_tax_discount'));
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'message' => 'Temporary tax and discount session cleared.',
+            ]);
+    }
 }
