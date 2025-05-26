@@ -33,7 +33,7 @@ import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
 import { useState } from 'react';
-
+import { AddCustomerForm } from './add-customer';
 export const columns: ColumnDef<Product>[] = [
     {
         accessorKey: 'id',
@@ -133,30 +133,34 @@ export default function Index({ customers }: Props) {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Customers" />
             <div className="relative flex flex-1 flex-col gap-4 rounded-xl p-4">
-                <Tabs defaultValue="todys-highlights" className="w-full">
-                    <TabsList className="mb-4 px-1 py-1">
-                        <TabsTrigger value="todys-highlights" className={tabTriggerClass} p-4>
-                            Today's Highlights
-                        </TabsTrigger>
-                        <TabsTrigger value="all-orders" className={tabTriggerClass}>
-                            All Orders
-                        </TabsTrigger>
-                        <TabsTrigger value="returns" className={tabTriggerClass}>
-                            Returns
-                        </TabsTrigger>
-                        <TabsTrigger value="refund-policy" className={tabTriggerClass}>
-                            Refund Policy
-                        </TabsTrigger>
-                    </TabsList>
+                <div className="w-full flex justify-between">
+                    <Tabs defaultValue="todys-highlights" className="w-full">
+                        <TabsList className="mb-4 px-1 py-1">
+                            <TabsTrigger value="todys-highlights" className={tabTriggerClass} p-4>
+                                Today's Highlights
+                            </TabsTrigger>
+                            <TabsTrigger value="all-orders" className={tabTriggerClass}>
+                                All Orders
+                            </TabsTrigger>
+                            <TabsTrigger value="returns" className={tabTriggerClass}>
+                                Returns
+                            </TabsTrigger>
+                            <TabsTrigger value="refund-policy" className={tabTriggerClass}>
+                                Refund Policy
+                            </TabsTrigger>
+                        </TabsList>
 
-                    <TabsContent value="todys-highlights"></TabsContent>
+                        <TabsContent value="todys-highlights"></TabsContent>
 
-                    <TabsContent value="all-orders"></TabsContent>
+                        <TabsContent value="all-orders"></TabsContent>
 
-                    <TabsContent value="returns"></TabsContent>
+                        <TabsContent value="returns"></TabsContent>
 
-                    <TabsContent value="refund-policy"></TabsContent>
-                </Tabs>
+                        <TabsContent value="refund-policy"></TabsContent>
+                    </Tabs>
+                    <AddCustomerForm />
+                </div>
+                
                 <h1 className="text-5xl font-bold">Customers</h1>
                 <Tabs value={range} onValueChange={handleRangeChange} className="w-full">
                     <TabsList className="mb-4 px-1 py-1">
@@ -179,7 +183,6 @@ export default function Index({ customers }: Props) {
                             Year
                         </TabsTrigger>
                     </TabsList>
-
                     <TabsContent value="all">
                         <DataTable columns={columns} data={customers.data} />
                     </TabsContent>
