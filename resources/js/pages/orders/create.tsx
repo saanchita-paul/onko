@@ -233,8 +233,7 @@ export default function CreateOrder({ products, companyDetails, customers, userO
     const [taxType, setTaxType] = useState<'' | 'fixed' | 'percentage'>(tempTaxDiscount?.tax_type ?? '');
     const [taxDescription, setTaxDescription] = useState(tempTaxDiscount?.tax_description ?? '');
 
-    // const [discount, setDiscount] = useState(tempTaxDiscount?.discount ?? 0);
-    // const [discountType, setDiscountType] = useState<'' | 'fixed' | 'percentage'>(tempTaxDiscount?.discount_type ?? '');
+
     const [discountDescription, setDiscountDescription] = useState(tempTaxDiscount?.discount_description ?? '');
 
     const [discount, setDiscount] = useState(0);
