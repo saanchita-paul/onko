@@ -247,7 +247,7 @@ export default function CreateOrder({ products, companyDetails, customers, userO
         try {
             const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
 
-            const response = await axios.post('/orders/temp-tax-discount', {
+            await axios.post('/orders/temp-tax-discount', {
                 tax,
                 tax_type: taxType,
                 tax_description: taxDescription,
@@ -259,10 +259,6 @@ export default function CreateOrder({ products, companyDetails, customers, userO
                     'X-CSRF-TOKEN': csrfToken
                 }
             });
-
-            if (response.status === 200) {
-                console.log('Tax and Discount saved successfully!');
-            }
         } catch (error) {
             console.error(error);
             toast.error('Failed to save tax and discount');
@@ -491,15 +487,11 @@ export default function CreateOrder({ products, companyDetails, customers, userO
                                                 try {
                                                     const csrfToken =
                                                         document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
-                                                    const response = await axios.delete('/orders/temp-tax-discount', {
+                                                     await axios.delete('/orders/temp-tax-discount', {
                                                         headers: {
                                                             'X-CSRF-TOKEN': csrfToken,
                                                         },
                                                     });
-
-                                                    if (response.status === 200) {
-                                                        console.log('Tax removed.');
-                                                    }
                                                 } catch (error) {
                                                     console.error(error);
                                                     toast.error('Something went wrong');
@@ -547,18 +539,14 @@ export default function CreateOrder({ products, companyDetails, customers, userO
                                                 try {
                                                     const csrfToken =
                                                         document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
-                                                    const response = await axios.delete('/orders/temp-tax-discount', {
+                                                     await axios.delete('/orders/temp-tax-discount', {
                                                         headers: {
                                                             'X-CSRF-TOKEN': csrfToken,
                                                         },
                                                     });
-
-                                                    if (response.status === 200) {
-                                                        console.log('Discount removed.');
-                                                    }
                                                 } catch (error) {
                                                     console.error(error);
-                                                    console.log('Failed to remove discount');
+                                                    toast.error('Failed to remove discount');
                                                 }
                                             }}
                                             aria-label="Remove Discount"
