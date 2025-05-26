@@ -262,7 +262,7 @@ export default function CreateOrder({ products, companyDetails, customers, userO
             });
 
             if (response.status === 200) {
-                toast('Tax and Discount saved successfully!');
+                console.log('Tax and Discount saved successfully!');
             }
         } catch (error) {
             console.error(error);
@@ -580,10 +580,10 @@ export default function CreateOrder({ products, companyDetails, customers, userO
                             <Button variant="outline" className="cursor-pointer">
                                 Add a fee or charge
                             </Button>
-                            <Button variant="outline" className="cursor-pointer" onClick={() => setShowDiscountField(!showDiscountField)}>
+                            <Button variant="outline" className="cursor-pointer" disabled={items.length === 0} onClick={() => setShowDiscountField(!showDiscountField)}>
                                 Add discount
                             </Button>
-                            <Button variant="outline" className="cursor-pointer" onClick={() => setShowTaxField(!showTaxField)}>
+                            <Button variant="outline" className="cursor-pointer" disabled={items.length === 0} onClick={() => setShowTaxField(!showTaxField)}>
                                 Add tax
                             </Button>
                             <Button className="cursor-pointer" disabled={items.length === 0} onClick={() => setDrawerOpen(true)}>

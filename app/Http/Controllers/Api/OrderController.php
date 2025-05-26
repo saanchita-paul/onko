@@ -199,22 +199,5 @@ class OrderController extends Controller
         ];
     }
 
-    public function saveTempTaxDiscount(SaveTempTaxDiscountRequest $request)
-    {
-        $validated = $request->validated();
-        session([
-            'temp_tax_discount' => [
-                'tax' => $validated['tax'] ?? null,
-                'tax_type' => $validated['tax_type'] ?? 'fixed',
-                'tax_description' => $validated['tax_description'] ?? '',
-                'discount' => $validated['discount'] ?? null,
-                'discount_type' => $validated['discount_type'] ?? 'fixed',
-                'discount_description' => $validated['discount_description'] ?? ''
-            ]
-        ]);
-        return response()->json(['message' => 'Temporary tax and discount saved.']);
-
-    }
-
 
 }
