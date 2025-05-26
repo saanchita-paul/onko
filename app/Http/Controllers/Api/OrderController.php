@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 
+use App\Http\Requests\SaveTempTaxDiscountRequest;
 use App\Http\Requests\StoreOrderRequest;
 use App\Models\ConsignmentItem;
 use App\Models\Customer;
@@ -103,12 +104,13 @@ class OrderController extends Controller
     public function getConfirmData(Request $request)
     {
         $companyDetails = Option::companyDetails();
-
+        $tempTaxDiscount = session('temp_tax_discount', null);
         return [
             'customer' => $request->input('customer'),
             'items' => $request->input('items'),
             'companyDetails' => $companyDetails,
             'orderId' => '',
+            'tempTaxDiscount' => $tempTaxDiscount,
         ];
     }
 
@@ -163,12 +165,43 @@ class OrderController extends Controller
                     } else {
                         throw new \Exception("Product not found with ID: {$item['id']}");
                     }
-
                 }
-            });
-//            session()->forget('user_order_session');
-//            session()->forget('isReset');
-//            return redirect()->route('orders.show', $order->id);
+            if (session()->has('temp_tax_discount')) {
+                $temp = session('temp_tax_discount');
+
+                $subTotal = $order->sub_total;
+
+                if (($temp['tax_type'] ?? null) === 'percentage') {
+                    $taxAmount = $subTotal * ($temp['tax'] / 100);
+                } else {
+                    $taxAmount = $temp['tax'] ?? 0;
+                }
+
+                if (($temp['discount_type'] ?? null) === 'percentage') {
+                    $discountAmount = $subTotal * ($temp['discount'] / 100);
+                } else {
+                    $discountAmount = $temp['discount'] ?? 0;
+                }
+
+                $order->tax_total = $taxAmount;
+                $order->discount_total = $discountAmount;
+
+                $order->grand_total = $order->sub_total + $taxAmount - $discountAmount;
+                $order->meta = [
+                    'tax_description' => $temp['tax_description'] ?? '',
+                    'tax_type' => $temp['tax_type'] ?? null,
+                    'tax_percentage' => ($temp['tax_type'] ?? null) === 'percentage' ? $temp['tax'] : null,
+                    'discount_description' => $temp['discount_description'] ?? '',
+                    'discount_type' => $temp['discount_type'] ?? null,
+                    'discount_percentage' => $temp['discount_type'] === 'percentage' ? $temp['discount'] : null,
+                ];
+                $order->save();
+
+                session()->forget('temp_tax_discount');
+            } else {
+                $order->save();
+            }
+        });
             return $order;
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Failed to save order: ' . $e->getMessage())->withInput();
@@ -203,6 +236,9 @@ class OrderController extends Controller
             'items' => $items,
             'companyDetails' => $companyDetails,
             'orderId' => $order->id,
+            'discountTotal' => $order->discount_total,
+            'taxTotal' => $order->tax_total,
+            'meta' => json_decode($order->meta, true),
         ];
     }
 

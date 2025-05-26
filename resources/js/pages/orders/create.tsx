@@ -31,6 +31,8 @@ import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import type {  PaginatedCustomers } from '@/pages/orders/order-form';
+import axios from 'axios';
+import { toast } from 'sonner';
 interface Product {
     id: string;
     name: string;
@@ -38,7 +40,14 @@ interface Product {
     quantity: number;
     price: number;
 }
-
+interface TempTaxDiscount {
+    tax: number;
+    tax_type: 'fixed' | 'percentage' | '';
+    tax_description: string;
+    discount: number;
+    discount_type: 'fixed' | 'percentage' | '';
+    discount_description: string;
+}
 interface InertiaProps extends PageProps {
     products: {
         data: Product[];
@@ -55,11 +64,14 @@ interface InertiaProps extends PageProps {
         companyDetails: CompanyDetails;
         orderId: string;
     };
+    tempTaxDiscount?: TempTaxDiscount;
 }
 interface Item extends Product {
     qty: number;
 }
-export default function CreateOrder({ products, companyDetails, customers, userOrderSession, isReset }: InertiaProps) {
+
+
+export default function CreateOrder({ products, companyDetails, customers, userOrderSession, isReset, tempTaxDiscount }: InertiaProps) {
     const [productList, setProductList] = useState<Product[]>(products.data);
     useEffect(() => {
         if (userOrderSession) {
@@ -200,15 +212,79 @@ export default function CreateOrder({ products, companyDetails, customers, userO
 
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+
+    const [showTaxField, setShowTaxField] = useState(false);
+    const [showDiscountField, setShowDiscountField] = useState(false);
+
+    useEffect(() => {
+        if (tempTaxDiscount) {
+            setTax(tempTaxDiscount.tax);
+            setTaxType(tempTaxDiscount.tax_type);
+            setTaxDescription(tempTaxDiscount.tax_description);
+            setDiscount(tempTaxDiscount.discount);
+            setDiscountType(tempTaxDiscount.discount_type);
+            setDiscountDescription(tempTaxDiscount.discount_description);
+
+            setShowTaxField(Boolean(tempTaxDiscount.tax));
+            setShowDiscountField(Boolean(tempTaxDiscount.discount));
+        }
+    }, [tempTaxDiscount]);
+
+    const [tax, setTax] = useState(tempTaxDiscount?.tax ?? 0);
+    const [taxType, setTaxType] = useState<'' | 'fixed' | 'percentage'>(tempTaxDiscount?.tax_type ?? '');
+    const [taxDescription, setTaxDescription] = useState(tempTaxDiscount?.tax_description ?? '');
+
+    const [discount, setDiscount] = useState(tempTaxDiscount?.discount ?? 0);
+    const [discountType, setDiscountType] = useState<'' | 'fixed' | 'percentage'>(tempTaxDiscount?.discount_type ?? '');
+    const [discountDescription, setDiscountDescription] = useState(tempTaxDiscount?.discount_description ?? '');
+
+
+    const taxAmount = taxType === 'percentage' ? (subtotal * tax) / 100 : tax;
+    const discountAmount = discountType === 'percentage' ? (subtotal * discount) / 100 : discount;
+
+    const grandTotal = subtotal + taxAmount - discountAmount;
+
+    const handleSaveTaxDiscount = async () => {
+        try {
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
+
+            const response = await axios.post('/orders/temp-tax-discount', {
+                tax,
+                tax_type: taxType,
+                tax_description: taxDescription,
+                discount,
+                discount_type: discountType,
+                discount_description: discountDescription
+            }, {
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken
+                }
+            });
+
+            if (response.status === 200) {
+                console.log('Tax and Discount saved successfully!');
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Failed to save tax and discount');
+        }
+    };
+
+
+
     return (
         <AppLayout>
             <Head title="Create Order" />
             <div className="p-6 sm:p-6">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
+                <div className="mb-4 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
                     <Tabs defaultValue="new-invoice">
                         <TabsList className="px-1 py-1">
-                            <TabsTrigger value="new-invoice" className={tabTriggerClass}>New Invoice</TabsTrigger>
-                            <TabsTrigger value="all-orders" className={tabTriggerClass}>All Orders</TabsTrigger>
+                            <TabsTrigger value="new-invoice" className={tabTriggerClass}>
+                                New Invoice
+                            </TabsTrigger>
+                            <TabsTrigger value="all-orders" className={tabTriggerClass}>
+                                All Orders
+                            </TabsTrigger>
                         </TabsList>
                         <TabsContent value="new-invoice"></TabsContent>
                         <TabsContent value="all-orders"></TabsContent>
@@ -217,21 +293,17 @@ export default function CreateOrder({ products, companyDetails, customers, userO
                 </div>
                 <h1 className="text-2xl font-bold">New Invoice</h1>
                 <p className="text-muted-foreground mb-4">Create a new Invoice or Sales Receipt</p>
-                <div className="flex flex-col lg:flex-row gap-6">
-                    <div className="w-full lg:flex-1 space-y-4">
+                <div className="flex flex-col gap-6 lg:flex-row">
+                    <div className="w-full space-y-4 lg:flex-1">
                         <Card>
                             <CardContent className="space-y-4 p-6 sm:p-6">
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-4">
-                                        <div className="flex flex-col md:flex-row md:items-center md:gap-2 space-y-2 md:space-y-0">
+                                        <div className="flex flex-col space-y-2 md:flex-row md:items-center md:gap-2 md:space-y-0">
                                             <div className="flex items-center gap-4">
                                                 {imagePreview && (
-                                                    <div className="relative w-14 h-11 rounded-md overflow-hidden border border-input bg-white">
-                                                        <img
-                                                            src={imagePreview}
-                                                            alt="Preview"
-                                                            className="w-full h-full object-cover"
-                                                        />
+                                                    <div className="border-input relative h-11 w-14 overflow-hidden rounded-md border bg-white">
+                                                        <img src={imagePreview} alt="Preview" className="h-full w-full object-cover" />
                                                         <button
                                                             onClick={() => {
                                                                 setImagePreview(null);
@@ -240,7 +312,7 @@ export default function CreateOrder({ products, companyDetails, customers, userO
                                                                     fileInputRef.current.value = '';
                                                                 }
                                                             }}
-                                                            className="absolute top-1 right-1 p-1 rounded-full bg-white text-black hover:bg-neutral-200 transition"
+                                                            className="absolute top-1 right-1 rounded-full bg-white p-1 text-black transition hover:bg-neutral-200"
                                                             title="Remove"
                                                         >
                                                             <X className="h-3 w-3" />
@@ -248,7 +320,7 @@ export default function CreateOrder({ products, companyDetails, customers, userO
                                                     </div>
                                                 )}
                                                 {!imagePreview && (
-                                                    <div className="relative group w-12 h-9">
+                                                    <div className="group relative h-9 w-12">
                                                         <input
                                                             type="file"
                                                             id="fileUpload"
@@ -258,13 +330,13 @@ export default function CreateOrder({ products, companyDetails, customers, userO
                                                                 const file = e.target.files?.[0];
                                                                 if (file) {
                                                                     if (file.size > 2 * 1024 * 1024) {
-                                                                        setErrorMessage("Image must not exceed 2MB.");
+                                                                        setErrorMessage('Image must not exceed 2MB.');
                                                                         return;
                                                                     }
 
                                                                     const reader = new FileReader();
                                                                     reader.onloadend = () => {
-                                                                        if (typeof reader.result === "string") {
+                                                                        if (typeof reader.result === 'string') {
                                                                             setImagePreview(reader.result);
                                                                             setErrorMessage(null);
                                                                         }
@@ -278,10 +350,10 @@ export default function CreateOrder({ products, companyDetails, customers, userO
 
                                                         <label
                                                             htmlFor="fileUpload"
-                                                            className="flex items-center justify-center h-full w-full rounded-md border border-input bg-white-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 cursor-pointer hover:bg-white-200 dark:hover:bg-neutral-700"
+                                                            className="border-input bg-white-100 hover:bg-white-200 flex h-full w-full cursor-pointer items-center justify-center rounded-md border text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700"
                                                             title="Choose File"
                                                         >
-                                                            <ImageIcon className="w-4 h-4" />
+                                                            <ImageIcon className="h-4 w-4" />
                                                         </label>
                                                     </div>
                                                 )}
@@ -289,17 +361,14 @@ export default function CreateOrder({ products, companyDetails, customers, userO
 
                                             <Input
                                                 placeholder="Company Name"
-                                                className="flex-1 w-full"
+                                                className="w-full flex-1"
                                                 value={data.company_name}
                                                 onChange={(e) => setData('company_name', e.target.value)}
                                                 onBlur={submit}
                                                 onKeyDown={(e) => e.key === 'Enter' && submit()}
                                             />
-
                                         </div>
-                                        {errorMessage && (
-                                            <p className="text-sm text-red-600 mt-1">{errorMessage}</p>
-                                        )}
+                                        {errorMessage && <p className="mt-1 text-sm text-red-600">{errorMessage}</p>}
                                         <Textarea
                                             placeholder="Company Address
 (optional)"
@@ -310,19 +379,19 @@ export default function CreateOrder({ products, companyDetails, customers, userO
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <div className="flex flex-col md:flex-row md:items-center md:gap-2 space-y-2 md:space-y-0">
-                                            <label className="text-sm font-medium w-20">Date:</label>
+                                        <div className="flex flex-col space-y-2 md:flex-row md:items-center md:gap-2 md:space-y-0">
+                                            <label className="w-20 text-sm font-medium">Date:</label>
                                             <Popover>
                                                 <PopoverTrigger asChild>
                                                     <button
                                                         type="button"
                                                         className={cn(
-                                                            'flex justify-between items-center w-full border rounded-md px-3 py-2 text-left text-sm',
-                                                            !data.invoice_date && 'text-muted-foreground'
+                                                            'flex w-full items-center justify-between rounded-md border px-3 py-2 text-left text-sm',
+                                                            !data.invoice_date && 'text-muted-foreground',
                                                         )}
                                                     >
                                                         {data.invoice_date ? format(data.invoice_date, 'dd-MM-yyyy') : 'Pick a date'}
-                                                        <CalendarIcon className="ml-2 h-4 w-4 text-muted-foreground" />
+                                                        <CalendarIcon className="text-muted-foreground ml-2 h-4 w-4" />
                                                     </button>
                                                 </PopoverTrigger>
                                                 <PopoverContent className="w-auto p-0">
@@ -338,12 +407,12 @@ export default function CreateOrder({ products, companyDetails, customers, userO
                                                 </PopoverContent>
                                             </Popover>
                                         </div>
-                                        <div className="flex flex-col md:flex-row md:items-center md:gap-2 space-y-2 md:space-y-0">
-                                            <label className="text-sm font-medium w-14">Order</label>
+                                        <div className="flex flex-col space-y-2 md:flex-row md:items-center md:gap-2 md:space-y-0">
+                                            <label className="w-14 text-sm font-medium">Order</label>
                                             <Input
                                                 placeholder="auto generates"
                                                 readOnly
-                                                className="flex-1 w-full cursor-pointer bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300"
+                                                className="w-full flex-1 cursor-pointer bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300"
                                             />
                                         </div>
                                     </div>
@@ -353,7 +422,7 @@ export default function CreateOrder({ products, companyDetails, customers, userO
                                 </div>
                             </CardContent>
                             <div className="p-0">
-                                <div className="hidden sm:grid mb-2 grid-cols-6 font-bold p-4 text-sm sm:text-base">
+                                <div className="mb-2 hidden grid-cols-6 p-4 text-sm font-bold sm:grid sm:text-base">
                                     <span>#</span>
                                     <span>Item</span>
                                     <span className="text-center">Qty</span>
@@ -364,71 +433,165 @@ export default function CreateOrder({ products, companyDetails, customers, userO
                                 {items
                                     .filter((item) => item.qty > 0)
                                     .map((item, index) => (
-                                    <div key={index} className="grid grid-cols-1 sm:grid-cols-6 sm:items-center gap-2 border-t p-4 text-sm sm:text-base">
-                                        <div className="flex justify-between sm:block">
-                                            <span className="font-medium sm:hidden w-24">#</span>
-                                            <span className="text-right sm:text-left">{index + 1}</span>
+                                        <div
+                                            key={index}
+                                            className="grid grid-cols-1 gap-2 border-t p-4 text-sm sm:grid-cols-6 sm:items-center sm:text-base"
+                                        >
+                                            <div className="flex justify-between sm:block">
+                                                <span className="w-24 font-medium sm:hidden">#</span>
+                                                <span className="text-right sm:text-left">{index + 1}</span>
+                                            </div>
+                                            <div className="flex justify-between sm:block">
+                                                <span className="w-24 font-medium sm:hidden">Item:</span>
+                                                <span className="text-right sm:text-left">{item.name}</span>
+                                            </div>
+                                            <div className="flex justify-between sm:block sm:justify-center">
+                                                <span className="w-24 font-medium sm:hidden">Qty:</span>
+                                                <Input
+                                                    type="number"
+                                                    value={item.qty}
+                                                    min={1}
+                                                    max={(productList.find((p) => p.id === item.id)?.quantity ?? 0) + item.qty}
+                                                    onChange={(e) => {
+                                                        const value = parseInt(e.target.value);
+                                                        updateQty(index, value);
+                                                    }}
+                                                    className="w-16 border text-center"
+                                                />
+                                            </div>
+                                            <div className="flex sm:block sm:justify-end">
+                                                <span className="w-24 font-medium sm:hidden">Price:</span>
+                                                <span className="w-full rounded border px-2 py-1 pr-2 text-right">{item.price}</span>
+                                            </div>
+                                            <div className="flex justify-between sm:block sm:justify-end">
+                                                <span className="w-24 font-medium sm:hidden">Total:</span>
+                                                <span className="w-full text-right">{item.qty * item.price}/-</span>
+                                            </div>
+                                            <div className="flex justify-end">
+                                                <Button variant="ghost" size="icon" onClick={() => removeItem(index)}>
+                                                    <X className="h-4 w-4" />
+                                                </Button>
+                                            </div>
                                         </div>
-                                        <div className="flex justify-between sm:block">
-                                            <span className="font-medium sm:hidden w-24">Item:</span>
-                                            <span className="text-right sm:text-left">{item.name}</span>
-                                        </div>
-                                        <div className="flex justify-between sm:justify-center sm:block">
-                                            <span className="font-medium sm:hidden w-24">Qty:</span>
-                                            <Input
-                                                type="number"
-                                                value={item.qty}
-                                                min={1}
-                                                max={
-                                                    (productList.find(p => p.id === item.id)?.quantity ?? 0) + item.qty
-                                                }
-                                                onChange={(e) => {
-                                                    const value = parseInt(e.target.value);
-                                                    updateQty(index, value);
-                                                }}
-                                                className="text-center w-16 border"
-                                            />
-                                        </div>
-                                        <div className="flex sm:justify-end sm:block">
-                                            <span className="font-medium sm:hidden w-24">Price:</span>
-                                            <span className="text-right w-full pr-2 border px-2 py-1 rounded">{item.price}</span>
-                                        </div>
-                                        <div className="flex justify-between sm:justify-end sm:block">
-                                            <span className="font-medium sm:hidden w-24">Total:</span>
-                                            <span className="text-right w-full">{item.qty * item.price}/-</span>
-                                        </div>
-                                        <div className="flex justify-end">
-                                            <Button variant="ghost" size="icon" onClick={() => removeItem(index)}>
-                                                <X className="h-4 w-4" />
-                                            </Button>
-                                        </div>
-
-                                    </div>
-                                ))}
-                                <div className="mt-2 flex justify-between items-center border-t border-b pt-2 font-bold p-4 text-sm sm:text-base">
+                                    ))}
+                                <div className="mt-2 flex items-center justify-between border-t border-b p-4 pt-2 text-sm font-bold sm:text-base">
                                     <span className="text-left">Subtotal</span>
-                                    <span className="text-right ml-auto">{subtotal} /-</span>
+                                    <span className="ml-auto text-right">{subtotal} /-</span>
                                 </div>
                                 <div className="mt-2 flex justify-center">
                                     <Button variant="outline">Add custom product</Button>
                                 </div>
+                                {showTaxField && (
+                                    <div className="relative my-4 rounded border p-4">
+                                        <button
+                                            className="absolute top-2 right-2 text-gray-600 hover:text-red-600"
+                                            onClick={() => {
+                                                setShowTaxField(false);
+                                                setTax(0);
+                                                setTaxDescription('');
+                                            }}
+                                            aria-label="Remove Tax"
+                                        >
+                                            X
+                                        </button>
+                                        <h4 className="mb-2 font-bold">Add Tax</h4>
+                                        <Input
+                                            placeholder="Tax Description"
+                                            value={taxDescription}
+                                            onChange={(e) => setTaxDescription(e.target.value)}
+                                            className="mb-2"
+                                        />
+                                        <div className="mb-2 flex items-center space-x-2">
+                                            <Input
+                                                placeholder="Tax Amount"
+                                                type="number"
+                                                value={tax}
+                                                onChange={(e) => setTax(Number(e.target.value))}
+                                                className="mb-2"
+                                            />
+                                            <select value={taxType} onChange={(e) => setTaxType(e.target.value as 'fixed' | 'percentage')} className="rounded border p-1 mb-2">
+                                                <option value="fixed">Fixed</option>
+                                                <option value="percentage">%</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {showDiscountField && (
+                                    <div className="relative my-4 rounded border p-4">
+                                        <button
+                                            className="absolute top-2 right-2 text-gray-600 hover:text-red-600"
+                                            onClick={() => {
+                                                setShowDiscountField(false);
+                                                setDiscount(0);
+                                                setDiscountDescription('');
+                                            }}
+                                            aria-label="Remove Discount"
+                                        >
+                                            X
+                                        </button>
+                                        <h4 className="mb-2 font-bold">Add Discount</h4>
+                                        <Input
+                                            placeholder="Discount Description"
+                                            value={discountDescription}
+                                            onChange={(e) => setDiscountDescription(e.target.value)}
+                                            className="mb-2"
+                                        />
+                                        <div className="mb-2 flex items-center space-x-2">
+                                            <Input
+                                                placeholder="Discount Amount"
+                                                type="number"
+                                                value={discount}
+                                                onChange={(e) => setDiscount(Number(e.target.value))}
+                                                className="flex-grow"
+                                                min={0}
+                                            />
+                                            <select
+                                                value={discountType}
+                                                onChange={(e) => setDiscountType(e.target.value as 'fixed' | 'percentage')}
+                                                className="rounded border p-1"
+                                            >
+                                                <option value="fixed">Fixed</option>
+                                                <option value="percentage">%</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                )}
+                                {(showTaxField || showDiscountField) && (
+                                    <div className="mt-4 flex justify-end p-4">
+                                        <Button onClick={handleSaveTaxDiscount}>
+                                            {showTaxField && showDiscountField
+                                                ? 'Save Tax & Discount'
+                                                : showTaxField
+                                                    ? 'Save Tax'
+                                                    : 'Save Discount'
+                                            }
+                                        </Button>
+                                    </div>
+                                )}
+
                             </div>
-                            <div className="mt-2 flex justify-between items-center border-t pt-4 font-bold p-4 text-sm sm:text-base">
+                            <div className="mt-2 flex items-center justify-between border-t p-4 pt-4 text-sm font-bold sm:text-base">
                                 <span className="text-left">Grand Total</span>
-                                <span className="text-right ml-auto">{subtotal} /-</span>
+                                <span className="ml-auto text-right">{grandTotal}/-</span>
                             </div>
                         </Card>
                         <div className="flex flex-wrap justify-end gap-2">
-                            <Button variant="outline" className="cursor-pointer">Add a fee or charge</Button>
-                            <Button variant="outline" className="cursor-pointer">Add discount</Button>
-                            <Button variant="outline" className="cursor-pointer">Add tax</Button>
-                            <Button className="cursor-pointer" disabled={items.length === 0}  onClick={() => setDrawerOpen(true)}>
+                            <Button variant="outline" className="cursor-pointer">
+                                Add a fee or charge
+                            </Button>
+                            <Button variant="outline" className="cursor-pointer" disabled={items.length === 0} onClick={() => setShowDiscountField(!showDiscountField)}>
+                                Add discount
+                            </Button>
+                            <Button variant="outline" className="cursor-pointer" disabled={items.length === 0} onClick={() => setShowTaxField(!showTaxField)}>
+                                Add tax
+                            </Button>
+                            <Button className="cursor-pointer" disabled={items.length === 0} onClick={() => setDrawerOpen(true)}>
                                 Create order
                             </Button>
-
                         </div>
                     </div>
-                    <div className="w-full xl:max-w-sm space-y-4">
+                    <div className="w-full space-y-4 xl:max-w-sm">
                         <div className="relative">
                             <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
                             <Input placeholder="Search for products" className="pl-10" />
@@ -437,10 +600,7 @@ export default function CreateOrder({ products, companyDetails, customers, userO
                             <CardContent className="space-y-4 p-4">
                                 <div className="flex items-center justify-between">
                                     <span className="font-bold">Products</span>
-                                    <Tabs
-                                        value={selectedTab}
-                                        onValueChange={handleTabChange}
-                                    >
+                                    <Tabs value={selectedTab} onValueChange={handleTabChange}>
                                         <TabsList className="px-1 py-1">
                                             <TabsTrigger value="in-stock" className={tabTriggerClass}>
                                                 In Stock
@@ -453,31 +613,20 @@ export default function CreateOrder({ products, companyDetails, customers, userO
                                 </div>
                                 <div className="space-y-2">
                                     {productList
-                                        .filter((product) =>
-                                            selectedTab === "all" ? true : product.quantity > 0
-                                        )
+                                        .filter((product) => (selectedTab === 'all' ? true : product.quantity > 0))
                                         .map((product) => (
-                                            <div
-                                                key={product.id}
-                                                className="flex items-center justify-between rounded-lg px-4 py-2"
-                                            >
+                                            <div key={product.id} className="flex items-center justify-between rounded-lg px-4 py-2">
                                                 <div>
-                                                    <div className="font-medium text-left leading-snug break-words">
-                                                      <span className="block">
-                                                        {product.name.split(" ").slice(0, 2).join(" ")}
-                                                      </span>
-                                                        <span className="block">
-                                                            {product.name.split(" ").slice(2).join(" ")}
-                                                        </span>
+                                                    <div className="text-left leading-snug font-medium break-words">
+                                                        <span className="block">{product.name.split(' ').slice(0, 2).join(' ')}</span>
+                                                        <span className="block">{product.name.split(' ').slice(2).join(' ')}</span>
                                                     </div>
 
-                                                    <div className="text-muted-foreground text-sm">
-                                                        ৳ {product.price}
-                                                    </div>
+                                                    <div className="text-muted-foreground text-sm">৳ {product.price}</div>
                                                 </div>
 
-                                                <div className="flex items-center justify-center gap-4 w-24">
-                                                    <span className="text-sm text-center w-4">{product.quantity}</span>
+                                                <div className="flex w-24 items-center justify-center gap-4">
+                                                    <span className="w-4 text-center text-sm">{product.quantity}</span>
                                                     <Button
                                                         variant="outline"
                                                         size="icon"
@@ -491,12 +640,12 @@ export default function CreateOrder({ products, companyDetails, customers, userO
                                         ))}
                                 </div>
 
-                                <div className="pt-4 border-t">
-                                    <div className="flex justify-center items-center gap-2 flex-wrap">
+                                <div className="border-t pt-4">
+                                    <div className="flex flex-wrap items-center justify-center gap-2">
                                         {products.links.map((link, idx) => (
                                             <Button
                                                 key={idx}
-                                                variant={link.active ? "default" : "outline"}
+                                                variant={link.active ? 'default' : 'outline'}
                                                 size="sm"
                                                 disabled={!link.url}
                                                 onClick={() => {
@@ -509,22 +658,27 @@ export default function CreateOrder({ products, companyDetails, customers, userO
                                                     }
                                                 }}
                                                 dangerouslySetInnerHTML={{ __html: link.label ?? '' }}
-                                                className={`px-3 py-1 text-sm border rounded transition
-                                                     ${link.active
-                                                    ? 'bg-black text-white dark:bg-white dark:text-black'
-                                                    : 'bg-transparent text-black dark:text-white border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800'}
-                                                    `}
+                                                className={`rounded border px-3 py-1 text-sm transition ${
+                                                    link.active
+                                                        ? 'bg-black text-white dark:bg-white dark:text-black'
+                                                        : 'border-gray-300 bg-transparent text-black hover:bg-gray-100 dark:border-gray-600 dark:text-white dark:hover:bg-gray-800'
+                                                } `}
                                             />
                                         ))}
                                     </div>
                                 </div>
                             </CardContent>
                         </Card>
-
                     </div>
                 </div>
             </div>
-            <OrderForm open={drawerOpen} onOpenChange={setDrawerOpen} customers={customers} orderItems={items} companyDetails={companyDetails ?? null}/>
+            <OrderForm
+                open={drawerOpen}
+                onOpenChange={setDrawerOpen}
+                customers={customers}
+                orderItems={items}
+                companyDetails={companyDetails ?? null}
+            />
         </AppLayout>
     );
 }

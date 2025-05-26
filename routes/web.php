@@ -36,6 +36,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
     Route::post('/order/reset', [OrderController::class, 'reset'])->name('orders.reset');
+    Route::post('/orders/temp-tax-discount', [OrderController::class, 'saveTempTaxDiscount']);
 
 
 });

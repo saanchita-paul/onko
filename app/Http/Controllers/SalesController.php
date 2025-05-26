@@ -12,6 +12,9 @@ class SalesController extends ApiSalesController
 {
     public function index(Request $request)
     {
+        session()->forget('temp_tax_discount');
+        session()->forget('user_order_session');
+        session()->forget('isReset');
         $response = parent::index($request);
 
         return Inertia::render('sales/index', $response);

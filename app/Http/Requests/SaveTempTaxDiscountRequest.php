@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreOrderRequest extends FormRequest
+class SaveTempTaxDiscountRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,14 +22,12 @@ class StoreOrderRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'customer_id' => 'required|uuid|exists:customers,id',
-            'items' => 'required|array|min:1',
-            'items.*.id' => 'required|uuid|exists:products,id',
-            'items.*.qty' => 'required|integer|min:1',
-            'items.*.price' => 'required|numeric|min:0',
-            'sub_total' => 'required|numeric|min:0',
-            'grand_total' => 'required|numeric|min:0',
-
+            'tax' => 'nullable|numeric',
+            'tax_type' => 'nullable|in:fixed,percentage',
+            'tax_description' => 'nullable|string',
+            'discount' => 'nullable|numeric',
+            'discount_type' => 'nullable|in:fixed,percentage',
+            'discount_description' => 'nullable|string'
         ];
     }
 }

@@ -3,6 +3,9 @@
 namespace Tests\Unit;
 
 use App\Http\Controllers\OrderController;
+use App\Http\Requests\SaveTempTaxDiscountRequest;
+use App\Models\ConsignmentItem;
+use App\Models\Option;
 use App\Models\Order;
 use App\Models\User;
 use Illuminate\Routing\Redirector;
@@ -12,6 +15,9 @@ use App\Models\Product;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Session\Store as SessionStore;
 use Illuminate\Http\RedirectResponse as HttpRedirectResponse;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Http\RedirectResponse;
+
 
 class OrderControllerTest extends TestCase
 {
@@ -64,6 +70,37 @@ class OrderControllerTest extends TestCase
         $this->assertTrue($response->getSession()->get('isReset'));
     }
 
+    public function it_saves_temp_tax_discount_to_session()
+    {
+        $validatedData = [
+            'tax' => 15,
+            'tax_type' => 'percentage',
+            'tax_description' => 'Service Tax',
+            'discount' => 7,
+            'discount_type' => 'fixed',
+            'discount_description' => 'Festival Offer',
+        ];
+
+        $request = Mockery::mock(SaveTempTaxDiscountRequest::class);
+        $request->shouldReceive('validated')->once()->andReturn($validatedData);
+
+        Session::start();
+
+        $controller = new OrderController();
+        $response = $controller->saveTempTaxDiscount($request);
+
+        $this->assertEquals(session('temp_tax_discount'), [
+            'tax' => 15,
+            'tax_type' => 'percentage',
+            'tax_description' => 'Service Tax',
+            'discount' => 7,
+            'discount_type' => 'fixed',
+            'discount_description' => 'Festival Offer',
+        ]);
+
+        $this->assertInstanceOf(RedirectResponse::class, $response);
+        $this->assertEquals(session('message'), 'Temporary tax and discount saved in session.');
+    }
     /** @test */
     public function it_returns_all_orders_when_range_is_all()
     {
