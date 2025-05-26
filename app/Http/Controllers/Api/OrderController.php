@@ -245,7 +245,7 @@ class OrderController extends Controller
     public function resetSession()
     {
         session()->forget('user_order_session');
-
+        session()->forget('temp_tax_discount');
         return [
             'message' => 'Order session has been reset.',
         ];
@@ -261,7 +261,7 @@ class OrderController extends Controller
                 'tax_description' => $validated['tax_description'] ?? '',
                 'discount' => $validated['discount'] ?? null,
                 'discount_type' => $validated['discount_type'] ?? 'fixed',
-                'discount_description' => $validated['discount_description'] ?? ''
+                'discount_description' => $validated['discount_description'] ?? '',
             ]
         ]);
         return redirect()->back()->with('message', 'Temporary tax and discount saved in session.');

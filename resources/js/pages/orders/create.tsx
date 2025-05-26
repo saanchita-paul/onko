@@ -242,21 +242,34 @@ export default function CreateOrder({ products, companyDetails, customers, userO
     const discountAmount = discountType === 'percentage' ? (subtotal * discount) / 100 : discount;
 
     const grandTotal = subtotal + taxAmount - discountAmount;
+    const [discountError, setDiscountError] = useState('');
 
     const handleSaveTaxDiscount = async () => {
         try {
             const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
 
+            setDiscountError('');
+
+            if (discountType === 'percentage' && discount > 100) {
+                setDiscountError('Discount percentage cannot be more than 100%');
+                return;
+            }
+
+            if (discountType === 'fixed' && discount > subtotal) {
+                setDiscountError('Fixed discount cannot be greater than subtotal');
+                return;
+            }
             await axios.post('/orders/temp-tax-discount', {
                 tax,
                 tax_type: taxType,
                 tax_description: taxDescription,
                 discount,
                 discount_type: discountType,
-                discount_description: discountDescription
+                discount_description: discountDescription,
             }, {
                 headers: {
-                    'X-CSRF-TOKEN': csrfToken
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json',
                 }
             });
         } catch (error) {
@@ -264,8 +277,15 @@ export default function CreateOrder({ products, companyDetails, customers, userO
             toast.error('Failed to save tax and discount');
         }
     };
-
-
+    useEffect(() => {
+        if (discountType === 'percentage' && discount > 100) {
+            setDiscountError('Discount percentage cannot be greater than 100%');
+        } else if (discountType === 'fixed' && discount > subtotal) {
+            setDiscountError('Fixed discount cannot be greater than the subtotal');
+        } else {
+            setDiscountError('');
+        }
+    }, [discount, discountType, subtotal]);
 
     return (
         <AppLayout>
@@ -565,24 +585,44 @@ export default function CreateOrder({ products, companyDetails, customers, userO
                                                 placeholder="Discount Amount"
                                                 type="number"
                                                 value={discount}
-                                                onChange={(e) => setDiscount(Number(e.target.value))}
+                                                onChange={(e) => {
+                                                    const value = Number(e.target.value);
+                                                    setDiscount(value);
+
+                                                    if (discountType === 'percentage' && value > 100) {
+                                                        setDiscountError('Discount percentage cannot be greater than 100%');
+                                                    } else if (discountType === 'fixed' && value > subtotal) {
+                                                        setDiscountError('Fixed discount cannot be greater than the subtotal');
+                                                    } else {
+                                                        setDiscountError('');
+                                                    }
+                                                }}
                                                 className="flex-grow"
                                                 min={0}
                                             />
                                             <select
                                                 value={discountType}
-                                                onChange={(e) => setDiscountType(e.target.value as 'fixed' | 'percentage')}
+                                            onChange={(e) => setDiscountType(e.target.value as 'fixed' | 'percentage')}
                                                 className="rounded border p-1"
                                             >
                                                 <option value="fixed">Fixed</option>
                                                 <option value="percentage">%</option>
                                             </select>
                                         </div>
+                                        {discountError && (
+                                            <p className="text-red-500 text-sm mt-1">{discountError}</p>
+                                        )}
                                     </div>
                                 )}
                                 {(showTaxField || showDiscountField) && (
+
                                     <div className="mt-4 flex justify-end p-4">
-                                        <Button onClick={handleSaveTaxDiscount}>
+                                        <Button onClick={handleSaveTaxDiscount}
+                                                disabled={
+                                                    (discountType === 'percentage' && discount > 100) ||
+                                                    (discountType === 'fixed' && discount > subtotal)
+                                                }
+                                        >
                                             {showTaxField && showDiscountField ? 'Save Tax & Discount' : showTaxField ? 'Save Tax' : 'Save Discount'}
                                         </Button>
                                     </div>

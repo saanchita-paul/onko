@@ -53,6 +53,7 @@ class OrderControllerTest extends TestCase
     {
         $session = \Mockery::mock(SessionStore::class);
         $session->shouldReceive('forget')->once()->with('user_order_session');
+        $session->shouldReceive('forget')->once()->with('temp_tax_discount');
         $session->shouldReceive('get')->andReturn([]);
 
         $this->app->make(Redirector::class);
@@ -64,6 +65,7 @@ class OrderControllerTest extends TestCase
         $controller = new OrderController();
 
         $response = $controller->reset();
+
 
         $this->assertInstanceOf(HttpRedirectResponse::class, $response);
         $this->assertEquals($url, $response->getTargetUrl());

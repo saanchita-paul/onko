@@ -27,7 +27,7 @@ class SaveTempTaxDiscountRequest extends FormRequest
             'tax_description' => 'nullable|string',
             'discount' => 'nullable|numeric',
             'discount_type' => 'nullable|in:fixed,percentage',
-            'discount_description' => 'nullable|string'
+            'discount_description' => 'nullable|string',
         ];
     }
 }
