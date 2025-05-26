@@ -177,15 +177,17 @@ class SalesController extends Controller
             return $percent > 0 ? "+ {$percent}%     Since " . $prevRangeName : "- " . abs($percent) . "% Since " . $prevRangeName;
         };
 
+        $haveCompareString = !in_array($range, ['all', 'custom']) && $range;
+
         return [
             'orders' => $orders,
             'grand_total' => $grandTotal,
             'total_order' => $totalOrder,
             'average_value' => $averageValue,
             'comparison' => [
-                'grand_total' => !in_array($range, ['all', 'custom']) ? $compare($grandTotal, $prevGrandTotal, $prevRangeName) : '',
-                'total_order' => !in_array($range, ['all', 'custom']) ? $compare($totalOrder, $prevTotalOrder, $prevRangeName) : '',
-                'average_value' => !in_array($range, ['all', 'custom']) ? $compare($averageValue, $prevAverageValue, $prevRangeName) : '',
+                'grand_total' => $haveCompareString ? $compare($grandTotal, $prevGrandTotal, $prevRangeName) : '',
+                'total_order' => $haveCompareString ? $compare($totalOrder, $prevTotalOrder, $prevRangeName) : '',
+                'average_value' => $haveCompareString ? $compare($averageValue, $prevAverageValue, $prevRangeName) : '',
             ],
             'bQuantity' => $quantity,
             'bSubTotal' => $subtotal,
