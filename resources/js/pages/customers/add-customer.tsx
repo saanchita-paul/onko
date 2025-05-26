@@ -10,15 +10,17 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
-import { useForm, router } from '@inertiajs/react'
+import { useForm } from '@inertiajs/react'
 import { useState } from "react"
+import InputError from '@/components/input-error';
+
 
 export function AddCustomerForm() {
 
   const { data, setData, post, processing, errors, reset } = useForm({
     name: '',
     email: '',
-    phone: ''
+    phone: '',
   });
 
   const [formOpen, setFormOpen] = useState<boolean|undefined>(undefined);
@@ -53,10 +55,11 @@ export function AddCustomerForm() {
             </Label>
             <Input 
                 id="name" 
-                className="col-span-3"
+                className={"col-span-3 " + (errors?.name && "border-red-500")}
                 value={data.name} 
                 onChange={e => setData('name', e.target.value)}
             />
+            <InputError message={errors.name} />
           </div>
 
           <div className="flex flex-col gap-2">
@@ -65,10 +68,11 @@ export function AddCustomerForm() {
             </Label>
             <Input
                 id="email"
-                className="col-span-3"
+                className={"col-span-3 " + (errors?.email && "border-red-500")}
                 value={data.email}
                 onChange={e => setData('email', e.target.value)}
             />
+            <InputError message={errors.email} />
           </div>
 
           <div className="flex flex-col gap-2">
@@ -77,11 +81,13 @@ export function AddCustomerForm() {
             </Label>
             <Input
                 id="phone"
-                className="col-span-3"
+                className={"col-span-3 " + (errors?.phone && "border-red-500")}
                 value={data.phone}
                 onChange={e => setData('phone', e.target.value)}
             />
+            <InputError message={errors.phone} />
           </div>
+          <InputError className="text-center" message={errors.form} />
         </div>
         <SheetFooter>
           <SheetClose asChild>
