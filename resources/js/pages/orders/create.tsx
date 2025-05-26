@@ -74,9 +74,6 @@ interface Item extends Product {
 export default function CreateOrder({ products, companyDetails, customers, userOrderSession, isReset, tempTaxDiscount }: InertiaProps) {
     const [productList, setProductList] = useState<Product[]>(products.data);
     useEffect(() => {
-        if (userOrderSession) {
-            console.log("Restoring from session:", userOrderSession);
-        }
     }, [userOrderSession]);
 
     useEffect(() => {
@@ -187,7 +184,9 @@ export default function CreateOrder({ products, companyDetails, customers, userO
         router.post(route('options.store'), formData, {
             forceFormData: true,
             preserveScroll: true,
-            onSuccess: () => console.log('Saved successfully'),
+            onSuccess: () => {
+
+            },
         });
     };
 
@@ -248,7 +247,7 @@ export default function CreateOrder({ products, companyDetails, customers, userO
         try {
             const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
 
-            const response = await axios.post('/orders/temp-tax-discount', {
+            await axios.post('/orders/temp-tax-discount', {
                 tax,
                 tax_type: taxType,
                 tax_description: taxDescription,
@@ -260,13 +259,9 @@ export default function CreateOrder({ products, companyDetails, customers, userO
                     'X-CSRF-TOKEN': csrfToken
                 }
             });
-
-            if (response.status === 200) {
-                console.log('Tax and Discount saved successfully!');
-            }
         } catch (error) {
             console.error(error);
-            alert('Failed to save tax and discount');
+            toast.error('Failed to save tax and discount');
         }
     };
 
@@ -408,7 +403,7 @@ export default function CreateOrder({ products, companyDetails, customers, userO
                                             </Popover>
                                         </div>
                                         <div className="flex flex-col space-y-2 md:flex-row md:items-center md:gap-2 md:space-y-0">
-                                            <label className="w-14 text-sm font-medium">Order</label>
+                                            <label className="w-15 text-sm font-medium">Order</label>
                                             <Input
                                                 placeholder="auto generates"
                                                 readOnly
@@ -485,10 +480,22 @@ export default function CreateOrder({ products, companyDetails, customers, userO
                                     <div className="relative my-4 rounded border p-4">
                                         <button
                                             className="absolute top-2 right-2 text-gray-600 hover:text-red-600"
-                                            onClick={() => {
+                                            onClick={async () => {
                                                 setShowTaxField(false);
                                                 setTax(0);
                                                 setTaxDescription('');
+                                                try {
+                                                    const csrfToken =
+                                                        document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
+                                                     await axios.delete('/orders/temp-tax-discount', {
+                                                        headers: {
+                                                            'X-CSRF-TOKEN': csrfToken,
+                                                        },
+                                                    });
+                                                } catch (error) {
+                                                    console.error(error);
+                                                    toast.error('Something went wrong');
+                                                }
                                             }}
                                             aria-label="Remove Tax"
                                         >
@@ -509,7 +516,11 @@ export default function CreateOrder({ products, companyDetails, customers, userO
                                                 onChange={(e) => setTax(Number(e.target.value))}
                                                 className="mb-2"
                                             />
-                                            <select value={taxType} onChange={(e) => setTaxType(e.target.value as 'fixed' | 'percentage')} className="rounded border p-1 mb-2">
+                                            <select
+                                                value={taxType}
+                                                onChange={(e) => setTaxType(e.target.value as 'fixed' | 'percentage')}
+                                                className="mb-2 rounded border p-1"
+                                            >
                                                 <option value="fixed">Fixed</option>
                                                 <option value="percentage">%</option>
                                             </select>
@@ -521,10 +532,22 @@ export default function CreateOrder({ products, companyDetails, customers, userO
                                     <div className="relative my-4 rounded border p-4">
                                         <button
                                             className="absolute top-2 right-2 text-gray-600 hover:text-red-600"
-                                            onClick={() => {
+                                            onClick={async () => {
                                                 setShowDiscountField(false);
                                                 setDiscount(0);
                                                 setDiscountDescription('');
+                                                try {
+                                                    const csrfToken =
+                                                        document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
+                                                     await axios.delete('/orders/temp-tax-discount', {
+                                                        headers: {
+                                                            'X-CSRF-TOKEN': csrfToken,
+                                                        },
+                                                    });
+                                                } catch (error) {
+                                                    console.error(error);
+                                                    toast.error('Failed to remove discount');
+                                                }
                                             }}
                                             aria-label="Remove Discount"
                                         >
@@ -560,16 +583,10 @@ export default function CreateOrder({ products, companyDetails, customers, userO
                                 {(showTaxField || showDiscountField) && (
                                     <div className="mt-4 flex justify-end p-4">
                                         <Button onClick={handleSaveTaxDiscount}>
-                                            {showTaxField && showDiscountField
-                                                ? 'Save Tax & Discount'
-                                                : showTaxField
-                                                    ? 'Save Tax'
-                                                    : 'Save Discount'
-                                            }
+                                            {showTaxField && showDiscountField ? 'Save Tax & Discount' : showTaxField ? 'Save Tax' : 'Save Discount'}
                                         </Button>
                                     </div>
                                 )}
-
                             </div>
                             <div className="mt-2 flex items-center justify-between border-t p-4 pt-4 text-sm font-bold sm:text-base">
                                 <span className="text-left">Grand Total</span>
@@ -580,10 +597,20 @@ export default function CreateOrder({ products, companyDetails, customers, userO
                             <Button variant="outline" className="cursor-pointer">
                                 Add a fee or charge
                             </Button>
-                            <Button variant="outline" className="cursor-pointer" disabled={items.length === 0} onClick={() => setShowDiscountField(!showDiscountField)}>
+                            <Button
+                                variant="outline"
+                                className="cursor-pointer"
+                                disabled={items.length === 0}
+                                onClick={() => setShowDiscountField(!showDiscountField)}
+                            >
                                 Add discount
                             </Button>
-                            <Button variant="outline" className="cursor-pointer" disabled={items.length === 0} onClick={() => setShowTaxField(!showTaxField)}>
+                            <Button
+                                variant="outline"
+                                className="cursor-pointer"
+                                disabled={items.length === 0}
+                                onClick={() => setShowTaxField(!showTaxField)}
+                            >
                                 Add tax
                             </Button>
                             <Button className="cursor-pointer" disabled={items.length === 0} onClick={() => setDrawerOpen(true)}>
