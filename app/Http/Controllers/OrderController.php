@@ -15,9 +15,8 @@ class OrderController extends ApiOrderController
     public function index(Request $request)
     {
         $response = parent::index($request);
-        $orders = json_decode($response->getContent(), true)['orders'];
         return Inertia::render('orders/index', [
-            'orders' => $orders
+            'orders' => $response
         ]);
     }
     public function create(Request $request)

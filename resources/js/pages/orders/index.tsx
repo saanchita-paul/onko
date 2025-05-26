@@ -1,7 +1,7 @@
 
 import AppLayout from '@/layouts/app-layout';
 import { Product, type BreadcrumbItem } from '@/types';
-import { Head, usePage } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { DataTable } from '@/components/data-table';
 import { LaravelPaginationItem } from '@/types';
@@ -48,6 +48,8 @@ import { useEffect, useState } from 'react';
 import { DateRangePicker } from '@/components/date-range-picker';
 import { DateRange } from 'react-day-picker';
 import { OrderFilterSheet } from '@/pages/orders/filter';
+import { Button } from '@/components/ui/button';
+import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
 
 export const columns: ColumnDef<Product>[] = [
     {
@@ -172,6 +174,7 @@ export default function Index({ orders } : Props) {
         from: undefined,
         to: undefined,
     });
+    const [offset, setOffset] = useState(0)
 
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
@@ -185,12 +188,22 @@ export default function Index({ orders } : Props) {
         Inertia.visit(`${window.location.pathname}?${params.toString()}`, { preserveScroll: true, preserveState: true });
     };
 
-    const handleRangeChange = (value: string) => {
+    const handleRangeChange = (value: string, offset = 0) => {
+        setOffset(offset);
+        router.get(
+            route('orders.index'),
+            {
+                offset: offset,
+                range: value,
+            },
+            {
+                preserveState: true,
+                replace: true,
+            },
+        );
         setRange(value);
-        const params = new URLSearchParams(window.location.search);
-        params.set('range', value);
-        Inertia.visit(`${window.location.pathname}?${params.toString()}`, { preserveScroll: true, preserveState: true });
     };
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Orders" />
@@ -214,11 +227,11 @@ export default function Index({ orders } : Props) {
                                 <div className="flex gap-2">
                                     <TabsList className="mb-4 px-1 py-1">
                                         <TabsTrigger value="all" className={tabTriggerClass}>All</TabsTrigger>
+                                        <TabsTrigger value="today" className={tabTriggerClass}>Today</TabsTrigger>
                                         <TabsTrigger value="week" className={tabTriggerClass}>Week</TabsTrigger>
                                         <TabsTrigger value="month" className={tabTriggerClass}>Month</TabsTrigger>
                                         <TabsTrigger value="quarter" className={tabTriggerClass}>Quarter</TabsTrigger>
                                         <TabsTrigger value="year" className={tabTriggerClass}>Year</TabsTrigger>
-                                        <TabsTrigger value="all-time" className={tabTriggerClass}>All Time</TabsTrigger>
                                     </TabsList>
                                     <DateRangePicker
                                         from={dateRange?.from}
@@ -244,23 +257,128 @@ export default function Index({ orders } : Props) {
                                 <DataTable columns={columns} data={orders.data} />
                             </TabsContent>
 
+                            <TabsContent value="today">
+                                <div className="flex w-full justify-between">
+                            <Button
+                                variant="outline"
+                                onClick={() => {
+                                    handleRangeChange(range, offset - 1);
+                                }}
+                            >
+                                <ChevronLeftIcon />
+                                {offset == 0 ? 'Yesterday' : 'Previous Day'}
+                            </Button>
+                            {offset < 0 && (
+                                <Button
+                                    variant="outline"
+                                    onClick={() => {
+                                        handleRangeChange(range, offset + 1);
+                                    }}
+                                >
+                                    Next Day <ChevronRightIcon />
+                                </Button>
+                            )}
+                        </div>
+                                <DataTable columns={columns} data={orders.data} />
+                            </TabsContent>
+
                             <TabsContent value="week">
-                                <DataTable columns={columns} data={[]} />
+                                <div className="flex w-full justify-between">
+                            <Button
+                                variant="outline"
+                                onClick={() => {
+                                    handleRangeChange(range, offset - 1);
+                                }}
+                            >
+                                <ChevronLeftIcon />
+                                {offset == 0 ? 'Last Week' : 'Previous Week'}
+                            </Button>
+                            {offset < 0 && (
+                                <Button
+                                    variant="outline"
+                                    onClick={() => {
+                                        handleRangeChange(range, offset + 1);
+                                    }}
+                                >
+                                    Next Week <ChevronRightIcon />
+                                </Button>
+                            )}
+                        </div>
+                                <DataTable columns={columns} data={orders.data} />
                             </TabsContent>
 
                             <TabsContent value="month">
-                                <DataTable columns={columns} data={[]} />
+                                <div className="flex w-full justify-between">
+                            <Button
+                                variant="outline"
+                                onClick={() => {
+                                    handleRangeChange(range, offset - 1);
+                                }}
+                            >
+                                <ChevronLeftIcon />
+                                {offset == 0 ? 'Last Month' : 'Previous Month'}
+                            </Button>
+                            {offset < 0 && (
+                                <Button
+                                    variant="outline"
+                                    onClick={() => {
+                                        handleRangeChange(range, offset + 1);
+                                    }}
+                                >
+                                    Next Month <ChevronRightIcon />
+                                </Button>
+                            )}
+                        </div>
+                                <DataTable columns={columns} data={orders.data} />
                             </TabsContent>
 
                             <TabsContent value="quarter">
-                                <DataTable columns={columns} data={[]} />
+                                <div className="flex w-full justify-between">
+                            <Button
+                                variant="outline"
+                                onClick={() => {
+                                    handleRangeChange(range, offset - 1);
+                                }}
+                            >
+                                <ChevronLeftIcon />
+                                {offset == 0 ? 'Last Quarter' : 'Previous Quarter'}
+                            </Button>
+                            {offset < 0 && (
+                                <Button
+                                    variant="outline"
+                                    onClick={() => {
+                                        handleRangeChange(range, offset + 1);
+                                    }}
+                                >
+                                    Next Quarter <ChevronRightIcon />
+                                </Button>
+                            )}
+                        </div>
+                                <DataTable columns={columns} data={orders.data} />
                             </TabsContent>
 
                             <TabsContent value="year">
-                                <DataTable columns={columns} data={[]} />
-                            </TabsContent>
-
-                            <TabsContent value="all-time">
+                                <div className="flex w-full justify-between">
+                            <Button
+                                variant="outline"
+                                onClick={() => {
+                                    handleRangeChange(range, offset - 1);
+                                }}
+                            >
+                                <ChevronLeftIcon />
+                                {offset == 0 ? 'Last Year' : 'Previous Year'}
+                            </Button>
+                            {offset < 0 && (
+                                <Button
+                                    variant="outline"
+                                    onClick={() => {
+                                        handleRangeChange(range, offset + 1);
+                                    }}
+                                >
+                                    Next Year <ChevronRightIcon />
+                                </Button>
+                            )}
+                        </div>
                                 <DataTable columns={columns} data={orders.data} />
                             </TabsContent>
                         </Tabs>
