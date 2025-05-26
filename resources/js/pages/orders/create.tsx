@@ -74,9 +74,6 @@ interface Item extends Product {
 export default function CreateOrder({ products, companyDetails, customers, userOrderSession, isReset, tempTaxDiscount }: InertiaProps) {
     const [productList, setProductList] = useState<Product[]>(products.data);
     useEffect(() => {
-        if (userOrderSession) {
-            console.log("Restoring from session:", userOrderSession);
-        }
     }, [userOrderSession]);
 
     useEffect(() => {
@@ -187,7 +184,9 @@ export default function CreateOrder({ products, companyDetails, customers, userO
         router.post(route('options.store'), formData, {
             forceFormData: true,
             preserveScroll: true,
-            onSuccess: () => console.log('Saved successfully'),
+            onSuccess: () => {
+
+            },
         });
     };
 
@@ -266,7 +265,7 @@ export default function CreateOrder({ products, companyDetails, customers, userO
             }
         } catch (error) {
             console.error(error);
-            alert('Failed to save tax and discount');
+            toast.error('Failed to save tax and discount');
         }
     };
 
@@ -503,7 +502,7 @@ export default function CreateOrder({ products, companyDetails, customers, userO
                                                     }
                                                 } catch (error) {
                                                     console.error(error);
-                                                    console.log('Failed to remove tax');
+                                                    toast.error('Something went wrong');
                                                 }
                                             }}
                                             aria-label="Remove Tax"
