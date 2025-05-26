@@ -13,7 +13,7 @@ import {
 import { useForm } from '@inertiajs/react'
 import { useState } from "react"
 import InputError from '@/components/input-error';
-
+import { toast } from 'sonner';
 
 export function AddCustomerForm() {
 
@@ -30,9 +30,10 @@ export function AddCustomerForm() {
     console.log('data: ', data);
     
     post(route('customers.store'), {
-        onError: (error) => {
-            console.log('error', error)
-            console.log('errors', errors)
+        onSuccess: () => {
+            reset()
+            setFormOpen(false)
+            toast.success("New Customer created.")
         }
     })
   }
@@ -47,7 +48,6 @@ export function AddCustomerForm() {
         <SheetHeader className="items-center">
           <SheetTitle>Add New Customer</SheetTitle>
         </SheetHeader>
-        {/* <form onSubmit={submit}> */}
         <div className="grid gap-4 py-4 mt-6">
           <div className="flex flex-col gap-2">
             <Label className="pl-0.5" htmlFor="name">
@@ -91,7 +91,8 @@ export function AddCustomerForm() {
         </div>
         <SheetFooter>
           <SheetClose asChild>
-            <Button 
+            <Button
+                disabled={processing} 
                 type="button"
                 onClick={submit}
             >
@@ -99,7 +100,6 @@ export function AddCustomerForm() {
             </Button>
           </SheetClose>
         </SheetFooter>
-        {/* </form> */}
       </SheetContent>
     </Sheet>
   )
