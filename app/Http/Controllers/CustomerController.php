@@ -6,6 +6,7 @@ use App\Http\Requests\SaveCustomerDetailsRequest;
 use App\Http\Controllers\Api\CustomerController as ApiCustomerController;
 use App\Models\Customer;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 class CustomerController extends ApiCustomerController
@@ -21,6 +22,8 @@ class CustomerController extends ApiCustomerController
 
     public function store(SaveCustomerDetailsRequest $request)
     {
+        Log::info('Testing Github Pipeline');
+        
         $validated = $request->validated();
         Customer::create($validated);
 
