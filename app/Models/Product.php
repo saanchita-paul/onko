@@ -48,4 +48,10 @@ class Product extends Model
             set: fn($value) => $value*100
         );
     }
+
+    public function suppliers()
+    {
+        return $this->belongsToMany(Supplier::class);
+    }
+
 }

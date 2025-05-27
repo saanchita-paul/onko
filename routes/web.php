@@ -7,8 +7,7 @@ use App\Http\Controllers\OptionController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SalesController;
-use App\Models\Order;
-use App\Models\Product;
+use App\Http\Controllers\SupplierController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -38,6 +37,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/order/reset', [OrderController::class, 'reset'])->name('orders.reset');
     Route::post('/orders/temp-tax-discount', [OrderController::class, 'saveTempTaxDiscount']);
     Route::delete('/orders/temp-tax-discount', [OrderController::class, 'clearTempTaxDiscount']);
+    Route::get('/suppliers', [SupplierController::class, 'index'])->name('products.index');
 
 
 });

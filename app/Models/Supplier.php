@@ -10,4 +10,16 @@ class Supplier extends Model
 {
     /** @use HasFactory<\Database\Factories\SupplierFactory> */
     use HasFactory, HasUuids;
+
+    protected $fillable = [
+        'name',
+        'address',
+        'phone',
+    ];
+
+    public function products()
+    {
+        return $this->belongsToMany(Product::class);
+    }
+
 }

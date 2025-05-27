@@ -52,7 +52,7 @@ class DatabaseSeeder extends Seeder
             ->create();
 
         Supplier::factory()
-            ->count(10)
+            ->count(100)
             ->create();
     }
 }

@@ -126,3 +126,10 @@ export type InertiaResponse<T = Record<string, unknown>> = Page<PageProps & {
 } & T>;
 
 
+export interface Suppliers {
+    id: string;
+    name: string;
+    address: string;
+    phone: string;
+
+}
