@@ -17,10 +17,13 @@ class PaymentFactory extends Factory
      */
     public function definition(): array
     {
+        $order = Order::factory()->create();
+
         return [
-            'order_id' => Order::factory(),
-            'payment_amount' => $this->faker->numberBetween(1000, 100000),
+            'order_id' => $order->id,
+            'payment_amount' => $order->grand_total,
             'payment_type' => $this->faker->randomElement(['cash', 'credit_card', 'bank_transfer']),
+            'status' => 'paid',
         ];
     }
 }

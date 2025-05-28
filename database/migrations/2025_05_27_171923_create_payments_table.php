@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignUuid('order_id')->constrained('orders')->cascadeOnDelete();
             $table->unsignedBigInteger('payment_amount');
             $table->string('payment_type')->nullable()->default('cash');
+            $table->string('status')->default('paid');
             $table->timestamps();
         });
     }
