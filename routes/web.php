@@ -37,7 +37,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/order/reset', [OrderController::class, 'reset'])->name('orders.reset');
     Route::post('/orders/temp-tax-discount', [OrderController::class, 'saveTempTaxDiscount']);
     Route::delete('/orders/temp-tax-discount', [OrderController::class, 'clearTempTaxDiscount']);
-    Route::get('/suppliers', [SupplierController::class, 'index'])->name('products.index');
+    Route::get('/suppliers', [SupplierController::class, 'index'])->name('suppliers.index');
 
 
 });

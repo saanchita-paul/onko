@@ -80,7 +80,7 @@ const mainNavGroups: NavGroup[] = [
         },
         {
             title: 'Suppliers',
-            href: '/suppliers',
+            href: route('suppliers.index'),
             icon: Boxes,
         },],
     },
