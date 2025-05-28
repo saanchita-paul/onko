@@ -2,6 +2,8 @@
 
 namespace Database\Factories;
 
+use App\Models\Product;
+use App\Models\Supplier;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -21,5 +23,13 @@ class SupplierFactory extends Factory
             'address' => fake()->address(),
             'phone' => fake()->phoneNumber(),
         ];
+    }
+
+    public function configure(): self
+    {
+        return $this->afterCreating(function (Supplier $supplier) {
+            $products = Product::factory()->count(rand(2, 5))->create();
+            $supplier->products()->attach($products);
+        });
     }
 }
