@@ -20,4 +20,10 @@ class Payment extends Model
     protected $casts = [
         'payment_amount' => 'integer',
     ];
+
+    public function order()
+    {
+        return $this->belongsTo(Order::class);
+    }
+
 }

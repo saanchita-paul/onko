@@ -17,11 +17,21 @@ class PaymentFactory extends Factory
      */
     public function definition(): array
     {
-        $order = Order::factory()->create();
+
+        $order = Order::with('payments')->get()->first(function ($order) {
+            return $order->payments->sum('payment_amount') < $order->grand_total;
+        });
+
+        if (!$order) {
+            $order = Order::factory()->create();
+        }
+
+        $paidAmount = $order->payments->sum('payment_amount');
+        $remainingAmount = $order->grand_total - $paidAmount;
 
         return [
             'order_id' => $order->id,
-            'payment_amount' => $order->grand_total,
+            'payment_amount' => $remainingAmount,
             'payment_type' => $this->faker->randomElement(['cash', 'credit_card', 'bank_transfer']),
             'status' => 'paid',
         ];
