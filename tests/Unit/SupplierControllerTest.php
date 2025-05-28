@@ -12,7 +12,7 @@ class SupplierControllerTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function it_displays_paginated_suppliers()
+    public function test_it_displays_paginated_suppliers()
     {
         $user = User::factory()->create();
         $this->actingAs($user);
