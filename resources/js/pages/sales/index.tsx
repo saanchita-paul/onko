@@ -20,22 +20,23 @@ interface BestSellers {
     subtotal: string;
     sum_qty: string;
 }
+
 interface Props {
     orders: Order[];
     grand_total: number;
     total_order: number;
     average_value: number;
     comparison: {
-        grand_total: string,
-        total_order: string,
-        average_value: string
-    }
+        grand_total: string;
+        total_order: string;
+        average_value: string;
+    };
     bQuantity: BestSellers[];
     bSubTotal: BestSellers[];
     chartData: {
         date: string;
-        sales: string
-    }[]
+        sales: string;
+    }[];
 }
 
 const chartConfig = {
@@ -70,6 +71,38 @@ export default function Index({ grand_total, total_order, average_value, compari
         from: undefined,
         to: undefined,
     });
+    const [offset, setOffset] = useState(0);
+
+    const currentRangeButtons = {
+        today: 'Yesterday',
+        week: 'Last Week',
+        month: 'Last Month',
+        quarter: 'Last Quarter',
+        year: 'Last Year',
+    };
+
+    const prevRangeButtons = {
+        today: {
+            prev: 'Previous Day',
+            next: 'Next Day',
+        },
+        week: {
+            prev: 'Previous Week',
+            next: 'Next Week',
+        },
+        month: {
+            prev: 'Previous Month',
+            next: 'Next Month',
+        },
+        quarter: {
+            prev: 'Previous Quarter',
+            next: 'Next Quarter',
+        },
+        year: {
+            prev: 'Previous Year',
+            next: 'Next Year',
+        },
+    };
 
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
@@ -90,15 +123,22 @@ export default function Index({ grand_total, total_order, average_value, compari
     const tabContent = (grand_total: number, total_order: number, average_value: number) => {
         return (
             <div className="flex flex-col gap-4">
+                {range !== 'all' && range !== 'custom' &&
                 <div className="flex w-full justify-between">
-                    <Button variant="outline">
+                    <Button variant="outline" onClick={() => handleRangeChange(range, undefined, offset-1)}>
                         <ChevronLeftIcon />
-                        Yesterday
+                        {offset < 0
+                            ? prevRangeButtons[range as keyof typeof prevRangeButtons].prev
+                            : currentRangeButtons[range as keyof typeof currentRangeButtons]}
                     </Button>
-                    <Button variant="outline">
-                        Tomorrow <ChevronRightIcon />
-                    </Button>
+                    {offset < 0 && (
+                        <Button variant="outline" onClick={()=> handleRangeChange(range, undefined, offset+1)}>
+                            {prevRangeButtons[range as keyof typeof prevRangeButtons].next}
+                            <ChevronRightIcon />
+                        </Button>
+                    )}
                 </div>
+                }
 
                 <div className="flex w-full gap-3">
                     <div className="flex w-2/3 flex-col gap-3">
@@ -133,19 +173,11 @@ export default function Index({ grand_total, total_order, average_value, compari
                             </CardHeader>
                             <CardContent>
                                 <ChartContainer config={chartConfig}>
-                                    <LineChart
-                                        data={chartData}
-                                        margin={{ left: 12, right: 12, top: 20, bottom: 20 }}
-                                    >
+                                    <LineChart data={chartData} margin={{ left: 12, right: 12, top: 20, bottom: 20 }}>
                                         {/* Only horizontal grid lines */}
                                         <CartesianGrid vertical={false} strokeDasharray="3 3" />
 
-                                        <XAxis
-                                            dataKey="date"
-                                            tickLine={false}
-                                            axisLine={false}
-                                            tickMargin={8}
-                                        />
+                                        <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={8} />
 
                                         <YAxis
                                             tickLine={false}
@@ -156,10 +188,7 @@ export default function Index({ grand_total, total_order, average_value, compari
                                         />
 
                                         {/* Optional Tooltip */}
-                                        <ChartTooltip
-                                            cursor={false}
-                                            content={<ChartTooltipContent hideLabel />}
-                                        />
+                                        <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
 
                                         {/* Line series */}
                                         <Line
@@ -185,7 +214,6 @@ export default function Index({ grand_total, total_order, average_value, compari
                                         />
                                     </LineChart>
                                 </ChartContainer>
-
                             </CardContent>
                         </Card>
                     </div>
@@ -261,10 +289,12 @@ export default function Index({ grand_total, total_order, average_value, compari
         );
     };
 
-    const handleRangeChange = (value: string, dateRange?: DateRange) => {
+    const handleRangeChange = (value: string, dateRange?: DateRange, offset = 0) => {
+        setOffset(offset)
         router.get(
             route('sales.index'),
             {
+                offset: offset,
                 date_range: dateRange,
                 range: value,
             },
@@ -277,7 +307,6 @@ export default function Index({ grand_total, total_order, average_value, compari
         const params = new URLSearchParams(window.location.search);
         params.set('range', value);
     };
-
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -325,12 +354,15 @@ export default function Index({ grand_total, total_order, average_value, compari
                                         Year
                                     </TabsTrigger>
                                 </TabsList>
-                                <DateRangePicker from={dateRange?.from} to={dateRange?.to} onChange={(newRange) => {
-                                    setRange('custom')
-                                    handleRangeChange('custom', newRange)
-                                    setDateRange(newRange)
-                                }
-                                }/>
+                                <DateRangePicker
+                                    from={dateRange?.from}
+                                    to={dateRange?.to}
+                                    onChange={(newRange) => {
+                                        setRange('custom');
+                                        handleRangeChange('custom', newRange);
+                                        setDateRange(newRange);
+                                    }}
+                                />
                             </div>
 
                             <TabsContent value={range}>{tabContent(grand_total, total_order, average_value)}</TabsContent>

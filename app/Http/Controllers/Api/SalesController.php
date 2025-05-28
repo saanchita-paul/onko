@@ -21,6 +21,8 @@ class SalesController extends Controller
         $query = Order::query();
         $prevQuery = Order::query();
         $range = $request->input('range');
+        $offset = $request->input('offset');
+        $offset = (int)$offset;
         $prevRangeName = "";
         $interval = '1 month';
 
@@ -47,18 +49,20 @@ class SalesController extends Controller
             }
             switch ($range) {
                 case 'today':
-                    $currentFrom = Carbon::today()->startOfDay();
-                    $currentTo = Carbon::today()->endOfDay();
+                    $date = $today->copy()->addDays($offset);
+                    $currentFrom = $date->copy()->startOfDay();
+                    $currentTo = $date->copy()->endOfDay();
 
-                    $previousFrom = Carbon::today()->subDays(1);
-                    $previousTo = Carbon::today()->subDays(1);
+                    $previousFrom = $currentFrom->copy()->subDays(1);
+                    $previousTo = $currentTo->copy()->subDays(1);
+
                     $interval = '2 hours';
 
                     $prevRangeName = 'Yesterday';
                     break;
                 case 'week':
-                    $currentFrom = $today->copy()->startOfWeek(Carbon::SATURDAY);
-                    $currentTo = $today->copy()->endOfWeek(Carbon::FRIDAY);
+                    $currentFrom = $today->copy()->startOfWeek(Carbon::SATURDAY)->addWeeks($offset);
+                    $currentTo = $today->copy()->startOfWeek(Carbon::SATURDAY)->addWeeks($offset)->endOfWeek(Carbon::FRIDAY);
 
                     $previousFrom = $currentFrom->copy()->subWeek();
                     $previousTo = $currentTo->copy()->subWeek();
@@ -69,8 +73,9 @@ class SalesController extends Controller
                     break;
 
                 case 'month':
-                    $currentFrom = $today->copy()->startOfMonth();
-                    $currentTo = $today->copy()->endOfMonth();
+                    $date = $today->copy()->addMonths($offset);
+                    $currentFrom = $date->copy()->startOfMonth();
+                    $currentTo = $date->copy()->endOfMonth();
 
                     $previousFrom = $currentFrom->copy()->subMonth();
                     $previousTo = $currentTo->copy()->subMonth();
@@ -81,8 +86,9 @@ class SalesController extends Controller
                     break;
 
                 case 'quarter':
-                    $currentFrom = $today->copy()->startOfQuarter();
-                    $currentTo = $today->copy()->endOfQuarter();
+                    $date = $today->copy()->addQuarters($offset);
+                    $currentFrom = $date->copy()->startOfQuarter();
+                    $currentTo = $date->copy()->endOfQuarter();
 
                     $previousFrom = $currentFrom->copy()->subQuarter();
                     $previousTo = $currentTo->copy()->subQuarter();
@@ -93,8 +99,9 @@ class SalesController extends Controller
                     break;
 
                 case 'year':
-                    $currentFrom = $today->copy()->startOfYear();
-                    $currentTo = $today->copy()->endOfYear();
+                    $date = $today->copy()->addYears($offset);
+                    $currentFrom = $date->copy()->startOfYear();
+                    $currentTo = $date->copy()->endOfYear();
 
                     $previousFrom = $currentFrom->copy()->subYear();
                     $previousTo = $currentTo->copy()->subYear();
