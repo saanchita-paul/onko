@@ -12,4 +12,5 @@ class OptionController extends ApiOptionController
     {
         parent::store($request);
     }
+
 }
