@@ -28,4 +28,24 @@ class OptionController extends Controller
 
         return redirect()->back()->with('success', 'Company details saved.');
     }
+
+    public function deleteLogo()
+    {
+        $logoOption = Option::where('key', 'logo')->first();
+
+        if ($logoOption && $logoOption->value) {
+            $url = $logoOption->value;
+            $prefix = Storage::disk(config('filesystems.upload'))->url('');
+
+            if (str_starts_with($url, $prefix)) {
+                $relativePath = str_replace($prefix, '', $url);
+                Storage::disk(config('filesystems.upload'))->delete($relativePath);
+            }
+
+            $logoOption->value = null;
+            $logoOption->save();
+        }
+
+        return response()->json(['message' => 'Logo deleted successfully']);
+    }
 }

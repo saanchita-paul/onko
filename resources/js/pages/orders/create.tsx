@@ -297,6 +297,18 @@ export default function CreateOrder({ products, companyDetails, customers, userO
         }
     }, [discount, discountType, subtotal]);
 
+    const handleRemoveImage = async () => {
+        try {
+            await axios.delete(route('options.logo.delete'));
+            setImagePreview(null);
+            setData('logo', null);
+            if (fileInputRef.current) {
+                fileInputRef.current.value = '';
+            }
+        } catch {
+            toast.error('Error deleting logo');
+        }
+    };
 
     return (
         <AppLayout>
@@ -328,23 +340,23 @@ export default function CreateOrder({ products, companyDetails, customers, userO
                                         <div className="flex flex-col space-y-2 md:flex-row md:items-center md:gap-2 md:space-y-0">
                                             <div className="flex items-center gap-4">
                                                 {imagePreview && (
-                                                    <div className="border-input relative h-11 w-14 overflow-hidden rounded-md border bg-white">
-                                                        <img src={imagePreview} alt="Preview" className="h-full w-full object-cover" />
+                                                    <div className="group relative h-11 w-14 overflow-hidden rounded-md border dark:bg-transparent">
+                                                        <img
+                                                            src={imagePreview}
+                                                            alt="Preview"
+                                                            className="h-full w-full object-cover"
+                                                            style={{ backgroundColor: 'transparent' }}
+                                                        />
                                                         <button
-                                                            onClick={() => {
-                                                                setImagePreview(null);
-                                                                setData('logo', null);
-                                                                if (fileInputRef.current) {
-                                                                    fileInputRef.current.value = '';
-                                                                }
-                                                            }}
-                                                            className="absolute top-1 right-1 rounded-full bg-white p-1 text-black transition hover:bg-neutral-200"
+                                                            onClick={handleRemoveImage}
+                                                            className="absolute top-1 right-1 hidden rounded-full  p-1 text-black transition hover:bg-neutral-200 group-hover:flex"
                                                             title="Remove"
                                                         >
                                                             <X className="h-3 w-3" />
                                                         </button>
                                                     </div>
                                                 )}
+
                                                 {!imagePreview && (
                                                     <div className="group relative h-9 w-12">
                                                         <input
@@ -382,6 +394,10 @@ export default function CreateOrder({ products, companyDetails, customers, userO
                                                             <ImageIcon className="h-4 w-4" />
                                                         </label>
                                                     </div>
+                                                )}
+
+                                                {errorMessage && (
+                                                    <div className="text-sm text-red-500">{errorMessage}</div>
                                                 )}
                                             </div>
 
