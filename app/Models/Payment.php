@@ -14,6 +14,7 @@ class Payment extends Model
         'order_id',
         'payment_amount',
         'payment_type',
+        'status'
     ];
 
     protected $casts = [
