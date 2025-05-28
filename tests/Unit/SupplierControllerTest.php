@@ -24,7 +24,7 @@ class SupplierControllerTest extends TestCase
         $response->assertStatus(200);
         $response->assertInertia(fn ($page) =>
         $page->component('suppliers/index')
-            ->has('suppliers.data', 5)
+            ->has('suppliers.data', 10)
             ->where('suppliers.current_page', 1)
             ->where('suppliers.data.0.id', $suppliers[0]->id)
             ->where('suppliers.data.0.name', $suppliers[0]->name)
