@@ -4,6 +4,8 @@ import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import printJS from 'print-js';
+import axios from 'axios';
+import { toast } from 'sonner';
 
 export interface OrderMeta {
     tax_type?: string;
@@ -14,7 +16,7 @@ export interface OrderMeta {
     discount_description?: string;
 }
 
-export default function View({ customer, items, companyDetails, orderId, discountTotal, taxTotal, meta}: PageProps<{
+export default function View({ customer, items, companyDetails, orderId, discountTotal, taxTotal, meta, initialStatus}: PageProps<{
     customer: Customer;
     items: OrderItem[];
     companyDetails: CompanyDetails,
@@ -80,7 +82,25 @@ export default function View({ customer, items, companyDetails, orderId, discoun
         });
 
     };
+    const [isPaid, setIsPaid] = useState(initialStatus === 'paid');
+    const [loading, setLoading] = useState(false);
 
+    const markAsPaid = async () => {
+        setLoading(true);
+        try {
+            const response = await axios.post(`/orders/${orderId}/mark-as-paid`);
+            if (response.data.order_status === 'paid') {
+                setIsPaid(true);
+                toast.success('Order marked as paid successfully!', {
+                    position: "top-right",
+                });
+            }
+        } catch {
+            toast.error('Failed to mark as paid:');
+        } finally {
+            setLoading(false);
+        }
+    };
     return (
         <AppLayout>
             <Head title="Confirm Order" />
@@ -184,7 +204,8 @@ export default function View({ customer, items, companyDetails, orderId, discoun
                                 {companyDetails?.logo ? (
                                     <img src={companyDetails.logo} alt="Logo" className="h-12 w-12 object-contain" />
                                 ) : (
-                                    <div className="flex h-8 w-8 items-center justify-center rounded bg-gray-200 text-xs">No Logo</div>
+                                    // <div className="flex h-8 w-8 items-center justify-center rounded bg-gray-200 text-xs">No Logo</div>
+                                    <div className=""></div>
                                 )}
                                 <h2 className="text-lg font-semibold">{companyDetails?.company_name}</h2>
                             </div>
@@ -295,12 +316,22 @@ export default function View({ customer, items, companyDetails, orderId, discoun
                                     Create Another Order
                                 </button>
 
-                                <button className="no-print cursor-pointer rounded border border-gray-400 px-4 py-2 text-sm text-black hover:bg-gray-100 dark:text-white dark:hover:bg-black">
+                                <button
+                                    className="no-print cursor-pointer rounded border border-gray-400 px-4 py-2 text-sm text-black hover:bg-gray-100 dark:text-white dark:hover:bg-black">
                                     Schedule Delivery
                                 </button>
-                                <button className="no-print cursor-pointer rounded border border-gray-400 px-4 py-2 text-sm text-black hover:bg-gray-100 dark:text-white dark:hover:bg-black">
-                                    Mark as Paid
+                                <button
+                                    onClick={markAsPaid}
+                                    disabled={isPaid || loading}
+                                    className={`no-print rounded border border-gray-400 px-4 py-2 text-sm ${
+                                        isPaid
+                                            ? 'bg-green-800 text-white cursor-not-allowed'
+                                            : 'text-black hover:bg-gray-100 dark:text-white dark:hover:bg-black cursor-pointer'
+                                    }`}
+                                >
+                                    {isPaid ? 'Paid' : (loading ? 'Processing...' : 'Mark as Paid')}
                                 </button>
+
                                 <button
                                     className="no-print cursor-pointer rounded border border-gray-400 bg-black px-4 py-2 text-sm text-white hover:bg-gray-100 hover:text-black dark:bg-white dark:text-black"
                                     onClick={handlePrint}

@@ -10,6 +10,7 @@ use App\Models\Customer;
 use App\Models\Option;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\Payment;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -271,6 +272,28 @@ class OrderController extends Controller
     {
         session()->forget('temp_tax_discount');
         return response()->json(['message' => 'Temporary tax and discount session cleared.']);
+    }
+
+    public function markAsPaid(Order $order, Request $request)
+    {
+
+        $payment = Payment::create([
+            'order_id' => $order->id,
+            'payment_amount' => $order->grand_total,
+            'payment_type' => 'cash',
+            'status' => 'paid',
+        ]);
+
+
+        $order->update([
+            'status' => 'paid',
+            'payments_total' => $order->payments_total + $payment->payment_amount,
+        ]);
+
+        return response()->json([
+            'message' => 'Order marked as paid successfully!',
+            'order_status' => $order->status,
+        ]);
     }
 
 }
