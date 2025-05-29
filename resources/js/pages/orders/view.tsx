@@ -88,7 +88,7 @@ export default function View({ customer, items, companyDetails, orderId, discoun
     const markAsPaid = async () => {
         setLoading(true);
         try {
-            const response = await axios.post(`/orders/${orderId}/mark-as-paid`);
+            const response = await axios.post(route('orders.markAsPaid', { order: orderId }));
             if (response.data.order_status === 'paid') {
                 setIsPaid(true);
                 toast.success('Order marked as paid successfully!', {

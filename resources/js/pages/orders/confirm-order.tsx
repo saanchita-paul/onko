@@ -191,7 +191,6 @@ export default function ConfirmOrder({ customer, items, companyDetails, orderId,
                                 {companyDetails?.logo ? (
                                     <img src={companyDetails.logo} alt="Logo" className="h-12 w-12 object-contain" />
                                 ) : (
-                                    // <div className="h-8 w-8 bg-gray-200 rounded flex items-center justify-center text-xs">No Logo</div>
                                     <div className=""></div>
                                 )}
                                 <h2 className="text-lg font-semibold">{companyDetails?.company_name}</h2>
