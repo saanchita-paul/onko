@@ -57,7 +57,7 @@ class DatabaseSeeder extends Seeder
             ->create();
 
         Payment::factory()
-            ->count(10)
+            ->count(100)
             ->create();
     }
 }
