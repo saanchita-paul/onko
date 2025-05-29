@@ -7,9 +7,12 @@ use App\Http\Requests\SaveTempTaxDiscountRequest;
 use App\Models\ConsignmentItem;
 use App\Models\Option;
 use App\Models\Order;
+use App\Models\Payment;
 use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Redirector;
 use Illuminate\Support\Carbon;
+use Mockery;
 use Tests\TestCase;
 use App\Models\Product;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -248,4 +251,54 @@ class OrderControllerTest extends TestCase
                 'message' => 'Temporary tax and discount session cleared.',
             ]);
     }
+
+    public function test_mark_as_paid_creates_payment_and_updates_order()
+    {
+        $order = Mockery::mock(Order::class)->makePartial();
+        $order->id = 'order-uuid-1234';
+        $order->grand_total = 1000;
+        $order->payments_total = 500;
+
+        $paymentMock = Mockery::mock('alias:' . Payment::class);
+        $paymentInstance = new Payment([
+            'order_id' => $order->id,
+            'payment_amount' => $order->grand_total,
+            'payment_type' => 'cash',
+            'status' => 'paid',
+        ]);
+
+        $paymentInstance->payment_amount = $order->grand_total;
+
+        $paymentMock->shouldReceive('create')
+            ->once()
+            ->with([
+                'order_id' => $order->id,
+                'payment_amount' => $order->grand_total,
+                'payment_type' => 'cash',
+                'status' => 'paid',
+            ])
+            ->andReturn($paymentInstance);
+
+        $order->shouldReceive('update')
+            ->once()
+            ->with([
+                'status' => 'paid',
+                'payments_total' => $order->payments_total + $order->grand_total,
+            ])
+            ->andReturnUsing(function ($attributes) use ($order) {
+                $order->status = $attributes['status'];
+                $order->payments_total = $attributes['payments_total'];
+                return true;
+            });
+        $request = new Request();
+        $controller = new OrderController();
+        $response = $controller->markAsPaid($order, $request);
+
+        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertEquals([
+            'message' => 'Order marked as paid successfully!',
+            'order_status' => 'paid',
+        ], $response->getData(true));
+    }
+
 }

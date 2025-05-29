@@ -191,7 +191,7 @@ export default function ConfirmOrder({ customer, items, companyDetails, orderId,
                                 {companyDetails?.logo ? (
                                     <img src={companyDetails.logo} alt="Logo" className="h-12 w-12 object-contain" />
                                 ) : (
-                                    <div className="h-8 w-8 bg-gray-200 rounded flex items-center justify-center text-xs">No Logo</div>
+                                    <div className=""></div>
                                 )}
                                 <h2 className="text-lg font-semibold">{companyDetails?.company_name}</h2>
                             </div>
@@ -203,12 +203,13 @@ export default function ConfirmOrder({ customer, items, companyDetails, orderId,
                             {/*    /!*<p><strong>Date:</strong> {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</p>*!/*/}
                             <div className="grid grid-cols-[auto_1fr] gap-2 mb-3">
                                 <span className="font-medium">Date:</span>
-                                <span className="text-right">{companyDetails?.invoice_date &&
-                                    new Date(companyDetails.invoice_date).toLocaleDateString('en-GB', {
+                                <span className="text-right">
+                                    {new Date(companyDetails?.invoice_date || new Date()).toLocaleDateString('en-GB', {
                                         day: 'numeric',
                                         month: 'short',
                                         year: 'numeric',
-                                    })}</span>
+                                    })}
+                                </span>
                             </div>
                             <div className="grid grid-cols-[auto_1fr] gap-5 text-gray-600 order-id mb-38">
                                 <span className="font-medium text-black dark:text-white">Order</span>

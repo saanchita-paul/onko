@@ -214,7 +214,7 @@ export default function CreateOrder({ products, companyDetails, customers, userO
 
     const [showTaxField, setShowTaxField] = useState(false);
     const [showDiscountField, setShowDiscountField] = useState(false);
-
+    const [discountType, setDiscountType] = useState<'' | 'fixed' | 'percentage'>('fixed');
     useEffect(() => {
         if (tempTaxDiscount) {
             setTax(tempTaxDiscount.tax);
@@ -237,7 +237,7 @@ export default function CreateOrder({ products, companyDetails, customers, userO
     const [discountDescription, setDiscountDescription] = useState(tempTaxDiscount?.discount_description ?? '');
 
     const [discount, setDiscount] = useState(0);
-    const [discountType, setDiscountType] = useState<'fixed' | 'percentage'>('fixed');
+    // const [discountType, setDiscountType] = useState<'fixed' | 'percentage'>('fixed');
 
     const taxAmount = taxType === 'percentage' ? (subtotal * tax) / 100 : tax;
     const discountAmount = discountType === 'percentage' ? (subtotal * discount) / 100 : discount;

@@ -53,11 +53,11 @@ class DatabaseSeeder extends Seeder
             ->create();
 
         Supplier::factory()
-            ->count(100)
+            ->count(10)
             ->create();
 
         Payment::factory()
-            ->count(10)
+            ->count(100)
             ->create();
     }
 }

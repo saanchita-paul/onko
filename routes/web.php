@@ -39,6 +39,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/orders/temp-tax-discount', [OrderController::class, 'clearTempTaxDiscount']);
     Route::get('/suppliers', [SupplierController::class, 'index'])->name('suppliers.index');
     Route::delete('/options/logo', [OptionController::class, 'deleteLogo'])->name('options.logo.delete');
+    Route::post('/orders/{order}/mark-as-paid', [OrderController::class, 'markAsPaid'])->name('orders.markAsPaid');
 
 
 
