@@ -216,12 +216,11 @@ export default function View({ customer, items, companyDetails, orderId, discoun
                             <div className="mb-3 grid grid-cols-[auto_1fr] gap-2">
                                 <span className="font-medium">Date:</span>
                                 <span className="text-right">
-                                    {companyDetails?.invoice_date &&
-                                        new Date(companyDetails.invoice_date).toLocaleDateString('en-GB', {
-                                            day: 'numeric',
-                                            month: 'short',
-                                            year: 'numeric',
-                                        })}
+                                    {new Date(companyDetails?.invoice_date || new Date()).toLocaleDateString('en-GB', {
+                                        day: 'numeric',
+                                        month: 'short',
+                                        year: 'numeric',
+                                    })}
                                 </span>
                             </div>
                             <div className="order-id mb-38 grid grid-cols-[auto_1fr] gap-5 text-gray-600">
