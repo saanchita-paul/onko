@@ -39,6 +39,9 @@ interface Product {
     sku?: string;
     quantity: number;
     price: number;
+    variant_id?: string;
+    variant_name?: string;
+    variant_options?: string[];
 }
 interface TempTaxDiscount {
     tax: number;
@@ -349,7 +352,7 @@ export default function CreateOrder({ products, companyDetails, customers, userO
                                                         />
                                                         <button
                                                             onClick={handleRemoveImage}
-                                                            className="absolute top-1 right-1 hidden rounded-full  p-1 text-black transition hover:bg-neutral-200 group-hover:flex"
+                                                            className="absolute top-1 right-1 hidden rounded-full p-1 text-black transition group-hover:flex hover:bg-neutral-200"
                                                             title="Remove"
                                                         >
                                                             <X className="h-3 w-3" />
@@ -396,9 +399,7 @@ export default function CreateOrder({ products, companyDetails, customers, userO
                                                     </div>
                                                 )}
 
-                                                {errorMessage && (
-                                                    <div className="text-sm text-red-500">{errorMessage}</div>
-                                                )}
+                                                {errorMessage && <div className="text-sm text-red-500">{errorMessage}</div>}
                                             </div>
 
                                             <Input
@@ -534,7 +535,7 @@ export default function CreateOrder({ products, companyDetails, customers, userO
                                                 try {
                                                     const csrfToken =
                                                         document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
-                                                     await axios.delete('/orders/temp-tax-discount', {
+                                                    await axios.delete('/orders/temp-tax-discount', {
                                                         headers: {
                                                             'X-CSRF-TOKEN': csrfToken,
                                                         },
@@ -586,7 +587,7 @@ export default function CreateOrder({ products, companyDetails, customers, userO
                                                 try {
                                                     const csrfToken =
                                                         document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
-                                                     await axios.delete('/orders/temp-tax-discount', {
+                                                    await axios.delete('/orders/temp-tax-discount', {
                                                         headers: {
                                                             'X-CSRF-TOKEN': csrfToken,
                                                         },
@@ -618,26 +619,23 @@ export default function CreateOrder({ products, companyDetails, customers, userO
                                             />
                                             <select
                                                 value={discountType}
-                                            onChange={(e) => setDiscountType(e.target.value as 'fixed' | 'percentage')}
+                                                onChange={(e) => setDiscountType(e.target.value as 'fixed' | 'percentage')}
                                                 className="rounded border p-1"
                                             >
                                                 <option value="fixed">Fixed</option>
                                                 <option value="percentage">%</option>
                                             </select>
                                         </div>
-                                        {discountError && (
-                                            <p className="text-red-500 text-sm mt-1">{discountError}</p>
-                                        )}
+                                        {discountError && <p className="mt-1 text-sm text-red-500">{discountError}</p>}
                                     </div>
                                 )}
                                 {(showTaxField || showDiscountField) && (
-
                                     <div className="mt-4 flex justify-end p-4">
-                                        <Button onClick={handleSaveTaxDiscount}
-                                                disabled={
-                                                    (discountType === 'percentage' && discount > 100) ||
-                                                    (discountType === 'fixed' && discount > subtotal)
-                                                }
+                                        <Button
+                                            onClick={handleSaveTaxDiscount}
+                                            disabled={
+                                                (discountType === 'percentage' && discount > 100) || (discountType === 'fixed' && discount > subtotal)
+                                            }
                                         >
                                             {showTaxField && showDiscountField ? 'Save Tax & Discount' : showTaxField ? 'Save Tax' : 'Save Discount'}
                                         </Button>
@@ -695,32 +693,45 @@ export default function CreateOrder({ products, companyDetails, customers, userO
                                     </Tabs>
                                 </div>
                                 <div className="space-y-2">
-                                    {productList
-                                        .filter((product) => (selectedTab === 'all' ? true : product.quantity > 0))
-                                        .map((product) => (
-                                            <div key={product.id} className="flex items-center justify-between rounded-lg px-4 py-2">
-                                                <div>
-                                                    <div className="text-left leading-snug font-medium break-words">
-                                                        <span className="block">{product.name.split(' ').slice(0, 2).join(' ')}</span>
-                                                        <span className="block">{product.name.split(' ').slice(2).join(' ')}</span>
-                                                    </div>
-
-                                                    <div className="text-muted-foreground text-sm">৳ {product.price}</div>
+                                    {productList.map((product) => (
+                                        <div
+                                            key={product.id + (product.variant_id ?? '')}
+                                            className="flex items-center justify-between rounded-lg px-4 py-2"
+                                        >
+                                            <div>
+                                                <div className="text-left leading-snug font-medium break-words">
+                                                    <span className="block font-bold text-black">{product.name}</span>
+                                                    {product.variant_name && (
+                                                        <span className="block font-semibold text-blue-600">{product.variant_name}</span>
+                                                    )}
+                                                    {product.variant_options && typeof product.variant_options === 'object' && (
+                                                        <span className="block text-sm text-green-600">
+                                                            <div>
+                                                                {Object.entries(product.variant_options).map(([key, value]) => (
+                                                                    <span key={key} className="mr-2">
+                                                                        {key}: {value}
+                                                                    </span>
+                                                                ))}
+                                                            </div>
+                                                        </span>
+                                                    )}
                                                 </div>
-
-                                                <div className="flex w-24 items-center justify-center gap-4">
-                                                    <span className="w-4 text-center text-sm">{product.quantity}</span>
-                                                    <Button
-                                                        variant="outline"
-                                                        size="icon"
-                                                        className="ml-3"
-                                                        onClick={() => product.quantity > 0 && addItem(product)}
-                                                    >
-                                                        <Plus className="h-4 w-4" />
-                                                    </Button>
-                                                </div>
+                                                <div className="text-muted-foreground text-sm">৳ {product.price}</div>
                                             </div>
-                                        ))}
+
+                                            <div className="flex w-24 items-center justify-center gap-4">
+                                                <span className="w-4 text-center text-sm">{product.quantity}</span>
+                                                <Button
+                                                    variant="outline"
+                                                    size="icon"
+                                                    className="ml-3"
+                                                    onClick={() => product.quantity > 0 && addItem(product)}
+                                                >
+                                                    <Plus className="h-4 w-4" />
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
 
                                 <div className="border-t pt-4">
