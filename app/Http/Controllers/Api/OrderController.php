@@ -124,7 +124,7 @@ class OrderController extends Controller
     {
         $companyDetails = Option::companyDetails();
         $tempTaxDiscount = session('temp_tax_discount', null);
-        $orderOn = session('order_on' ?? now()->toDateString());
+
 
         return [
             'customer' => $request->input('customer'),
@@ -132,7 +132,6 @@ class OrderController extends Controller
             'companyDetails' => $companyDetails,
             'orderId' => '',
             'tempTaxDiscount' => $tempTaxDiscount,
-            'order_on' => $orderOn,
         ];
     }
 
@@ -143,11 +142,8 @@ class OrderController extends Controller
         $order = null;
 
         DB::transaction(function () use ($data, &$order) {
-            $orderOn = session('order_on') ?? now()->toDateString();
-
             $order = Order::create([
                 'customer_id' => $data['customer_id'],
-                'order_on' => $orderOn,
                 'sub_total' => $data['sub_total'],
                 'grand_total' => $data['grand_total'],
                 'discount_total' => 0,
@@ -217,7 +213,6 @@ class OrderController extends Controller
 
             $order->save();
 
-            session()->forget('order_on');
             session()->forget('temp_tax_discount');
         });
 
@@ -264,7 +259,7 @@ class OrderController extends Controller
             ];
         }
         $companyDetails = Option::companyDetails();
-        $orderOn = $order->order_on;
+
         return [
             'customer' => $customer,
             'items' => $items,
@@ -273,7 +268,6 @@ class OrderController extends Controller
             'discountTotal' => $order->discount_total,
             'taxTotal' => $order->tax_total,
             'meta' => json_decode($order->meta, true),
-            'order_on' => $orderOn
         ];
     }
 
@@ -281,7 +275,6 @@ class OrderController extends Controller
     {
         session()->forget('user_order_session');
         session()->forget('temp_tax_discount');
-        session()->forget('order_on');
 
         return [
             'message' => 'Order session has been reset.',
