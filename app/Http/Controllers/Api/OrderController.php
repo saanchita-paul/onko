@@ -85,7 +85,7 @@ class OrderController extends Controller
             ->select(
                 'products.id as id',
                 'products.name as name',
-                'products.price as price',
+                DB::raw('products.price / 100 as price'),
                 'consignment_items.qty as quantity',
                 'product_variants.id as variant_id',
                 'product_variants.name as variant_name',

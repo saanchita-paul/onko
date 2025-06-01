@@ -504,7 +504,7 @@ export default function CreateOrder({ products, companyDetails, customers, userO
                                             </div>
                                             <div className="flex sm:block sm:justify-end">
                                                 <span className="w-24 font-medium sm:hidden">Price:</span>
-                                                <span className="w-full rounded border px-2 py-1 pr-2 text-right">{item.price}</span>
+                                                <span className="w-full rounded border px-2 py-1 pr-2 text-right">{Math.round(item.price)}</span>
                                             </div>
                                             <div className="flex justify-between sm:block sm:justify-end">
                                                 <span className="w-24 font-medium sm:hidden">Total:</span>
@@ -716,7 +716,7 @@ export default function CreateOrder({ products, companyDetails, customers, userO
                                                         </span>
                                                     )}
                                                 </div>
-                                                <div className="text-muted-foreground text-sm">৳ {product.price}</div>
+                                                <div className="text-muted-foreground text-sm">৳ {Math.round(product.price)}</div>
                                             </div>
 
                                             <div className="flex w-24 items-center justify-center gap-4">
