@@ -22,7 +22,8 @@ class ConsignmentController extends Controller
         return $consignments;
     }
 
-    public function store(StoreConsignmentRequest $request){
+    public function store(StoreConsignmentRequest $request)
+    {
         DB::beginTransaction();
 
         try {
@@ -37,16 +38,20 @@ class ConsignmentController extends Controller
                 throw new \Exception('Error saving consignment');
             }
 
-            foreach ($request->items as $item){
-                $consignmentItem = new ConsignmentItem();
+            $consignmentItems = [];
+
+            foreach ($request->items as $item) {
                 $cost_price = (int) $item['price'] * 100;
-                $consignmentItem->consignment_id = $consignment->id;
-                $consignmentItem->product_id = $item['product'];
-                $consignmentItem->product_variant_id = $item['variant'];
-                $consignmentItem->qty = $item['quantity'];
-                $consignmentItem->cost_price = $cost_price;
-                $consignmentItem->save();
+
+                $consignmentItems[] = new ConsignmentItem([
+                    'product_id' => $item['product'],
+                    'product_variant_id' => $item['variant'],
+                    'qty' => $item['quantity'],
+                    'cost_price' => $cost_price,
+                ]);
             }
+
+            $consignment->consignmentItems()->saveMany($consignmentItems);
 
             DB::commit();
 

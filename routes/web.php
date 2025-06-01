@@ -6,6 +6,7 @@ use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\OptionController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\Api\ProductController as ApiProductController;
 use App\Http\Controllers\SalesController;
 use App\Http\Controllers\SupplierController;
 use Illuminate\Support\Facades\Route;
@@ -22,8 +23,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/products', [ProductController::class, 'index'])->name('products.index');
     Route::post('/products', [ProductController::class, 'store'])->name('products.store');
-    Route::get('/api/products/search', [ProductController::class, 'search']);
-    Route::get('/api/products/{product}/variants', [ProductController::class, 'variants']);
+    Route::get('/api/products/search', [ApiProductController::class, 'search'])->name('products.search');
+    Route::get('/api/products/{product}/variants', [ApiProductController::class, 'variants'])->name('products.variants');
     Route::get('/customers', [CustomerController::class, 'index'])->name('customers.index');
     Route::get('/orders/create', [OrderController::class, 'create'])->name('orders.create');
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');

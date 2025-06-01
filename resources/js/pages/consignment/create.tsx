@@ -64,13 +64,13 @@ export default function CreateConsignment() {
     };
 
     const fetchProducts = async (query: string) => {
-        const res = await axios.get('/api/products/search', { params: { q: query } });
+        const res = await axios.get(route('products.search'), { params: { q: query } });
         setProductOptions(res.data);
     };
 
     const fetchVariants = async (productId: string, index: number) => {
         if (!productId) return;
-        const res = await axios.get(`/api/products/${productId}/variants`);
+        const res = await axios.get(route('products.variants', { product: productId }));
         const variants = res.data;
         const copy = [...variantOptions];
         copy[index] = variants;

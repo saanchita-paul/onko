@@ -34,33 +34,4 @@ class ProductController extends ApiController
 
         return back()->with('error', 'Something went wrong');
     }
-
-    public function withVariants()
-    {
-        $products = Product::get(['id', 'name']);
-        $productVariants = ProductVariant::get(['id', 'name', 'product_id']);
-
-        return response()->json([
-            'products' => $products,
-            'productVariants' => $productVariants
-        ]);
-    }
-
-    public function search(Request $request)
-    {
-        $query = $request->get('q', '');
-        $products = Product::query()
-            ->select('id', 'name')
-            ->where('name', 'like', "%{$query}%")
-            ->limit(20)
-            ->get();
-
-        return response()->json($products);
-    }
-
-    public function variants(Product $product)
-    {
-        $variants = $product->productVariants()->select('id', 'name', 'product_id')->get();
-        return response()->json($variants);
-    }
 }
