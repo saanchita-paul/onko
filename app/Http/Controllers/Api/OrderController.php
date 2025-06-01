@@ -124,132 +124,147 @@ class OrderController extends Controller
     {
         $companyDetails = Option::companyDetails();
         $tempTaxDiscount = session('temp_tax_discount', null);
+        $orderOn = session('order_on' ?? now()->toDateString());
+
         return [
             'customer' => $request->input('customer'),
             'items' => $request->input('items'),
             'companyDetails' => $companyDetails,
             'orderId' => '',
             'tempTaxDiscount' => $tempTaxDiscount,
+            'order_on' => $orderOn,
         ];
     }
 
-    public function storeOrder(StoreOrderRequest $request)
+    public function store(StoreOrderRequest $request)
     {
         $data = $request->validated();
 
-        try {
-            $order = null;
+        $order = null;
 
-            DB::transaction(function () use ($data, &$order) {
-                $order = Order::create([
-                    'customer_id' => $data['customer_id'],
-                    'sub_total' => $data['sub_total'],
-                    'grand_total' => $data['grand_total'],
-                    'discount_total' => 0,
-                    'tax_total' => 0,
-                    'payments_total' => 0,
+        DB::transaction(function () use ($data, &$order) {
+            $orderOn = session('order_on') ?? now()->toDateString();
+
+            $order = Order::create([
+                'customer_id' => $data['customer_id'],
+                'order_on' => $orderOn,
+                'sub_total' => $data['sub_total'],
+                'grand_total' => $data['grand_total'],
+                'discount_total' => 0,
+                'tax_total' => 0,
+                'payments_total' => 0,
+                'status' => 'pending',
+                'meta' => null,
+            ]);
+
+            foreach ($data['items'] as $item) {
+                $productId = $item['id'];
+                $variantId = $item['variant_id'] ?? null;
+                $requestedQty = $item['qty'];
+
+                $consignmentItemQuery = ConsignmentItem::where('product_id', $productId);
+
+                if ($variantId) {
+                    $consignmentItemQuery->where('product_variant_id', $variantId);
+                }
+
+                $consignmentItem = $consignmentItemQuery
+                    ->whereRaw('(qty - qty_sold - qty_waste) >= ?', [$requestedQty])
+                    ->first();
+
+                if (!$consignmentItem) {
+                    $variantInfo = $variantId ? " and variant ID: {$variantId}" : "";
+                    throw new \Exception("Consignment item not found for product ID: {$productId}{$variantInfo} or not enough available quantity.");
+                }
+
+                OrderItem::create([
+                    'order_id' => $order->id,
+                    'consignment_item_id' => $consignmentItem->id,
+                    'unit_price' => $item['price'],
+                    'qty' => $requestedQty,
                     'status' => 'pending',
-                    'meta' => null,
                 ]);
 
+                $consignmentItem->increment('qty_sold', $requestedQty);
+                $consignmentItem->decrement('qty', $requestedQty);
+            }
 
-                foreach ($data['items'] as $item) {
-                    $consignmentItem = ConsignmentItem::where('product_id', $item['id'])->first();
-
-
-                    if (!$consignmentItem) {
-                        throw new \Exception("Consignment item not found for product ID: {$item['id']}");
-                    }
-
-                    if ($consignmentItem->qty < $item['qty']) {
-                        throw new \Exception("Not enough consignment quantity for product ID: {$item['id']}");
-                    }
-                    OrderItem::create([
-                        'order_id' => $order->id,
-                        'consignment_item_id' => $consignmentItem->id,
-                        'unit_price' => $item['price'],
-                        'qty' => $item['qty'],
-                        'status' => 'pending',
-                    ]);
-
-                    $consignmentItem->decrement('qty', $item['qty']);
-                    $consignmentItem->increment('qty_sold', $item['qty']);
-
-                    $product = Product::find($item['id']);
-                    if ($product) {
-                        if ($product->quantity < $item['qty']) {
-                            throw new \Exception("Not enough product quantity for product ID: {$item['id']}");
-                        }
-                        $product->decrement('quantity', $item['qty']);
-                    } else {
-                        throw new \Exception("Product not found with ID: {$item['id']}");
-                    }
-                }
             if (session()->has('temp_tax_discount')) {
                 $temp = session('temp_tax_discount');
-
                 $subTotal = $order->sub_total;
 
-                if (($temp['tax_type'] ?? null) === 'percentage') {
-                    $taxAmount = $subTotal * ($temp['tax'] / 100);
-                } else {
-                    $taxAmount = $temp['tax'] ?? 0;
-                }
+                $taxAmount = ($temp['tax_type'] ?? null) === 'percentage'
+                    ? $subTotal * ($temp['tax'] / 100)
+                    : ($temp['tax'] ?? 0);
 
-                if (($temp['discount_type'] ?? null) === 'percentage') {
-                    $discountAmount = $subTotal * ($temp['discount'] / 100);
-                } else {
-                    $discountAmount = $temp['discount'] ?? 0;
-                }
+                $discountAmount = ($temp['discount_type'] ?? null) === 'percentage'
+                    ? $subTotal * ($temp['discount'] / 100)
+                    : ($temp['discount'] ?? 0);
 
                 $order->tax_total = $taxAmount;
                 $order->discount_total = $discountAmount;
+                $order->grand_total = $subTotal + $taxAmount - $discountAmount;
 
-                $order->grand_total = $order->sub_total + $taxAmount - $discountAmount;
                 $order->meta = [
                     'tax_description' => $temp['tax_description'] ?? '',
                     'tax_type' => $temp['tax_type'] ?? null,
                     'tax_percentage' => ($temp['tax_type'] ?? null) === 'percentage' ? $temp['tax'] : null,
                     'discount_description' => $temp['discount_description'] ?? '',
                     'discount_type' => $temp['discount_type'] ?? null,
-                    'discount_percentage' => $temp['discount_type'] === 'percentage' ? $temp['discount'] : null,
+                    'discount_percentage' => ($temp['discount_type'] ?? null) === 'percentage' ? $temp['discount'] : null,
                 ];
-                $order->save();
-
-                session()->forget('temp_tax_discount');
-            } else {
-                $order->save();
             }
+
+            $order->save();
+
+            session()->forget('order_on');
+            session()->forget('temp_tax_discount');
         });
-            return $order;
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Failed to save order: ' . $e->getMessage())->withInput();
-        }
+
+        return $order;
     }
 
-    public function showOrder(Order $order)
+    public function show(Order $order)
     {
         $customer = $order->customer;
         $productIds = [];
         $productsQtyMap = [];
+        $variantMap = [];
+
         foreach ($order->orderItems as $orderItem) {
-            $productIds[] = $orderItem->consignmentItem->product_id;
-            $productsQtyMap[$orderItem->consignmentItem->product_id] = $orderItem->qty;
+            $consignmentItem = $orderItem->consignmentItem;
+            $productId = $consignmentItem->product_id;
+            $variantId = $consignmentItem->product_variant_id;
+
+            $productIds[] = $productId;
+            $productsQtyMap["{$productId}_{$variantId}"] = $orderItem->qty;
+            $variantMap[$productId] = $variantId;
+
         }
         $items = [];
         $products = Product::whereIn('id', $productIds)->get();
         foreach ($products as $product) {
+            $variantId = $variantMap[$product->id] ?? null;
+            $consignmentItemQuery = ConsignmentItem::where('product_id', $product->id);
+            if ($variantId) {
+                $consignmentItemQuery->where('product_variant_id', $variantId);
+            }
+            $consignmentItem = $consignmentItemQuery->first();
+
+            $availableQty = $consignmentItem
+                ? ($consignmentItem->qty - $consignmentItem->qty_sold - $consignmentItem->qty_waste)
+                : 0;
             $items[] = [
                 'id' => $product->id,
                 'name' => $product->name,
-                'quantity' => $product->quantity,
+                'quantity' => $availableQty,
                 'short_id' => $product->short_id,
                 'price' => $product->price,
-                'qty' => $productsQtyMap[$product->id]
+                'qty' => $productsQtyMap["{$product->id}_{$variantId}"] ?? 0
             ];
         }
         $companyDetails = Option::companyDetails();
-
+        $orderOn = $order->order_on;
         return [
             'customer' => $customer,
             'items' => $items,
@@ -258,13 +273,16 @@ class OrderController extends Controller
             'discountTotal' => $order->discount_total,
             'taxTotal' => $order->tax_total,
             'meta' => json_decode($order->meta, true),
+            'order_on' => $orderOn
         ];
     }
 
-    public function resetSession()
+    public function reset()
     {
         session()->forget('user_order_session');
         session()->forget('temp_tax_discount');
+        session()->forget('order_on');
+
         return [
             'message' => 'Order session has been reset.',
         ];
