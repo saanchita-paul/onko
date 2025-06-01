@@ -4,8 +4,10 @@ namespace Tests\Unit;
 
 use App\Http\Controllers\OrderController;
 use App\Http\Requests\SaveTempTaxDiscountRequest;
+use App\Http\Requests\StoreOrderRequest;
 use App\Models\Consignment;
 use App\Models\ConsignmentItem;
+use App\Models\Customer;
 use App\Models\Option;
 use App\Models\Order;
 use App\Models\Payment;
@@ -14,6 +16,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Redirector;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Mockery;
 use Tests\TestCase;
 use App\Models\Product;
@@ -336,5 +339,66 @@ class OrderControllerTest extends TestCase
             'order_status' => 'paid',
         ], $response->getData(true));
     }
+
+    public function test_store_creates_order_with_items_and_applies_tax_discount()
+    {
+        $customer = Customer::factory()->create();
+        $product = Product::factory()->create();
+        $productVariant = ProductVariant::factory()->create();
+        $consignment = \App\Models\Consignment::factory()->create();
+
+        $consignmentItem = ConsignmentItem::factory()->create([
+            'product_id' => $product->id,
+            'product_variant_id' => $productVariant->id,
+            'qty' => 10,
+            'qty_sold' => 0,
+            'qty_waste' => 0,
+            'consignment_id' => $consignment->id,
+        ]);
+
+        session()->put('temp_tax_discount', [
+            'tax' => 10,
+            'tax_type' => 'percentage',
+            'tax_description' => '10% Tax',
+            'discount' => 5,
+            'discount_type' => 'percentage',
+            'discount_description' => '5% Discount',
+        ]);
+
+        $requestData = [
+            'customer_id' => $customer->id,
+            'sub_total' => 100,
+            'grand_total' => 100,
+            'items' => [
+                [
+                    'id' => $product->id,
+                    'variant_id' => $productVariant->id,
+                    'qty' => 2,
+                    'price' => 50,
+                ],
+            ],
+        ];
+
+        $request = Mockery::mock(StoreOrderRequest::class);
+        $request->shouldReceive('validated')->andReturn($requestData);
+
+        $controller = app(\App\Http\Controllers\OrderController::class);
+        $response = $controller->store($request);
+
+        $this->assertInstanceOf(\Illuminate\Http\RedirectResponse::class, $response);
+
+        $order = Order::where('customer_id', $customer->id)->latest()->first();
+        $this->assertNotNull($order, 'Order was not created');
+
+        $this->assertEquals(10, $order->tax_total);
+        $this->assertEquals(5, $order->discount_total);
+        $this->assertEquals(105, $order->grand_total);
+        $this->assertCount(1, $order->orderItems);
+        $this->assertEquals($consignmentItem->id, $order->orderItems->first()->consignment_item_id);
+        $this->assertEquals(2, $order->orderItems->first()->qty);
+        $this->assertEquals(50, $order->orderItems->first()->unit_price);
+    }
+
+
 
 }
