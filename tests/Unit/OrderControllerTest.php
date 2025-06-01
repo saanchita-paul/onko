@@ -397,6 +397,9 @@ class OrderControllerTest extends TestCase
         $this->assertEquals($consignmentItem->id, $order->orderItems->first()->consignment_item_id);
         $this->assertEquals(2, $order->orderItems->first()->qty);
         $this->assertEquals(50, $order->orderItems->first()->unit_price);
+        $consignmentItem->refresh();
+        $this->assertEquals(2, $consignmentItem->qty_sold, 'Consignment item qty_sold was not updated correctly.');
+
     }
 
 
