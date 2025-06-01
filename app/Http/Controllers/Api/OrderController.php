@@ -79,8 +79,26 @@ class OrderController extends Controller
 
     public function create(Request $request)
     {
-        $products = Product::select('id', 'name', 'quantity', 'price')
+        $products = ConsignmentItem::query()
+            ->join('products', 'products.id', '=', 'consignment_items.product_id')
+            ->join('product_variants', 'product_variants.id', '=', 'consignment_items.product_variant_id')
+            ->select(
+                'products.id as id',
+                'products.name as name',
+                DB::raw('products.price / 100 as price'),
+                'consignment_items.qty as quantity',
+                'product_variants.id as variant_id',
+                'product_variants.name as variant_name',
+                'product_variants.options as variant_options'
+            )
+            ->orderBy('products.name')
             ->paginate(5);
+
+        $products->getCollection()->transform(function ($item) {
+            $item->variant_options = json_decode($item->variant_options, true) ?? [];
+            return $item;
+        });
+
 
         $companyDetails = Option::whereIn('key', [
             'company_name',

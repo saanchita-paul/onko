@@ -4,10 +4,12 @@ namespace Tests\Unit;
 
 use App\Http\Controllers\OrderController;
 use App\Http\Requests\SaveTempTaxDiscountRequest;
+use App\Models\Consignment;
 use App\Models\ConsignmentItem;
 use App\Models\Option;
 use App\Models\Order;
 use App\Models\Payment;
+use App\Models\ProductVariant;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Redirector;
@@ -36,21 +38,55 @@ class OrderControllerTest extends TestCase
     /** @test */
     public function it_returns_paginated_products_in_create()
     {
-
         $user = User::factory()->create();
         $this->actingAs($user);
 
-        Product::factory()->count(25)->create();
+        $consignment = Consignment::factory()->create();
+
+        $products = Product::factory()->count(25)->create();
+
+        $variant = ProductVariant::factory()->create([
+            'product_id' => $products->first()->id,
+        ]);
+        foreach ($products as $product) {
+           ConsignmentItem::factory()->create([
+                'product_id' => $product->id,
+                'product_variant_id' => $variant->id,
+                'consignment_id' => $consignment->id,
+                'qty' => rand(1, 10),
+            ]);
+        }
+
+        ConsignmentItem::factory()->create([
+            'product_id' => $products->first()->id,
+            'product_variant_id' => $variant->id,
+            'consignment_id' => $consignment->id,
+            'qty' => 5,
+        ]);
 
         $response = $this->get('/orders/create');
 
         $response->assertStatus(200);
+
         $response->assertInertia(fn ($page) =>
         $page->component('orders/create')
             ->has('products.data', 5)
             ->where('products.current_page', 1)
+            ->has('products.data.0', fn ($product) =>
+            $product
+                ->hasAll([
+                    'id',
+                    'name',
+                    'price',
+                    'quantity',
+                    'variant_id',
+                    'variant_name',
+                    'variant_options',
+                ])
+            )
         );
     }
+
 
     public function test_reset_clears_session_and_redirects()
     {
