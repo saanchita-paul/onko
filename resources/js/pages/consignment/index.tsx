@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/pagination';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import AppLayout from '@/layouts/app-layout';
+import CreateConsignment from '@/pages/consignment/create';
 import { Consignment, LaravelPaginationItem, type BreadcrumbItem } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
@@ -52,15 +53,13 @@ export const columns: ColumnDef<Consignment>[] = [
     {
         accessorKey: 'total_items',
         header: () => <div className="w-full text-center">Total Items</div>,
-        cell: ({ row }) => (
-            <div className="text-muted-foreground w-full text-center">{row.getValue('total_items')}</div>
-        ),
+        cell: ({ row }) => <div className="text-muted-foreground w-full text-center">{row.getValue('total_items')}</div>,
     },
     {
         accessorKey: 'value',
         header: () => <div className="w-full text-right">Value</div>,
         cell: ({ row }) => {
-            const value = (parseInt(row.getValue('value')))/100;
+            const value = parseInt(row.getValue('value')) / 100;
             const [whole, decimal] = value.toFixed(2).split('.');
             return (
                 <div className="text-muted-foreground flex w-full justify-end">
@@ -123,14 +122,17 @@ export default function Index({ consignments }: Props) {
             <Head title="Consignments" />
             <div className="relative flex flex-1 flex-col gap-4 rounded-xl p-4">
                 <Tabs value={tab} onValueChange={handleTabChange} className="w-full">
-                    <TabsList className="mb-4 px-1 py-1">
-                        <TabsTrigger value="todys-highlights" className={tabTriggerClass}>
-                            Today's Highlights
-                        </TabsTrigger>
-                        <TabsTrigger value="all-consignments" className={tabTriggerClass}>
-                            All Consignments
-                        </TabsTrigger>
-                    </TabsList>
+                    <div className="flex w-full justify-between">
+                        <TabsList className="mb-4 px-1 py-1">
+                            <TabsTrigger value="todys-highlights" className={tabTriggerClass}>
+                                Today's Highlights
+                            </TabsTrigger>
+                            <TabsTrigger value="all-consignments" className={tabTriggerClass}>
+                                All Consignments
+                            </TabsTrigger>
+                        </TabsList>
+                        <CreateConsignment />
+                    </div>
 
                     <TabsContent value="todys-highlights"></TabsContent>
 
