@@ -12,7 +12,7 @@ class ConsignmentControllerTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+
     public function test_it_creates_a_consignment_with_items()
     {
         $this->withoutExceptionHandling();
@@ -56,7 +56,7 @@ class ConsignmentControllerTest extends TestCase
         ]);
     }
 
-    /** @test */
+
     public function test_it_requires_required_fields()
     {
         $user = User::factory()->create();
@@ -69,7 +69,7 @@ class ConsignmentControllerTest extends TestCase
         $response->assertSessionHasErrors(['items']);
     }
 
-    /** @test */
+
     public function test_it_requires_at_least_one_item()
     {
         $user = User::factory()->create();
@@ -86,7 +86,7 @@ class ConsignmentControllerTest extends TestCase
         $response->assertSessionHasErrors(['items']);
     }
 
-    /** @test */
+
     public function test_it_fails_if_value_does_not_match_total()
     {
         $user = User::factory()->create();
@@ -115,7 +115,7 @@ class ConsignmentControllerTest extends TestCase
         $this->assertDatabaseCount('consignment_items', 0);
     }
 
-    /** @test */
+
     public function test_it_requires_quantity_and_price_to_be_numeric_and_positive()
     {
         $user = User::factory()->create();
