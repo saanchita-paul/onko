@@ -81,7 +81,7 @@ class OrderController extends Controller
     {
         $products = ConsignmentItem::query()
             ->join('products', 'products.id', '=', 'consignment_items.product_id')
-            ->leftJoin('product_variants', 'product_variants.id', '=', 'consignment_items.product_variant_id')
+            ->join('product_variants', 'product_variants.id', '=', 'consignment_items.product_variant_id')
             ->select(
                 'products.id as id',
                 'products.name as name',
