@@ -86,7 +86,7 @@ class OrderController extends Controller
                 'products.id as id',
                 'products.name as name',
                 DB::raw('products.price / 100 as price'),
-                'consignment_items.qty as quantity',
+                DB::raw('(consignment_items.qty - consignment_items.qty_sold - consignment_items.qty_waste) as quantity'),
                 'product_variants.id as variant_id',
                 'product_variants.name as variant_name',
                 'product_variants.options as variant_options'
@@ -153,6 +153,8 @@ class OrderController extends Controller
                 'meta' => null,
             ]);
 
+            $items = collect([]);
+
             foreach ($data['items'] as $item) {
                 $productId = $item['id'];
                 $variantId = $item['variant_id'] ?? null;
@@ -173,16 +175,14 @@ class OrderController extends Controller
                     throw new \Exception("Consignment item not found for product ID: {$productId}{$variantInfo} or not enough available quantity.");
                 }
 
-                OrderItem::create([
-                    'order_id' => $order->id,
+                $items->push(new OrderItem([
                     'consignment_item_id' => $consignmentItem->id,
                     'unit_price' => $item['price'],
                     'qty' => $requestedQty,
                     'status' => 'pending',
-                ]);
+                ]));
 
                 $consignmentItem->increment('qty_sold', $requestedQty);
-                $consignmentItem->decrement('qty', $requestedQty);
             }
 
             if (session()->has('temp_tax_discount')) {
@@ -212,6 +212,7 @@ class OrderController extends Controller
             }
 
             $order->save();
+            $order->orderItems()->saveMany($items);
 
             session()->forget('temp_tax_discount');
         });
