@@ -78,7 +78,6 @@ export default function CreateConsignment() {
     };
 
     const handleSubmit = (e: FormEvent) => {
-        console.log(data)
         e.preventDefault();
         post(route('consignments.store'), {
             onSuccess: (data: InertiaResponse) => {
