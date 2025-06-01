@@ -242,11 +242,11 @@ export default function ConfirmOrder({ customer, items, companyDetails, orderId,
                             const total = item.qty * item.price;
                             return (
                                 <tr key={i} className="border-b dark:text-gray-100">
-                                    <td className="py-2 px-2">{i + 1}</td>
-                                    <td className="py-2 px-2">{item.name}</td>
-                                    <td className="py-2 px-2">{item.qty}</td>
-                                    <td className="py-2 px-2">{item.price.toFixed(2)}/-</td>
-                                    <td className="py-2 px-2 text-right">{total.toFixed(2)}/-</td>
+                                    <td className="px-2 py-2">{i + 1}</td>
+                                    <td className="px-2 py-2">{item.name}</td>
+                                    <td className="px-2 py-2">{item.qty}</td>
+                                    <td className="px-2 py-2">{Math.round(item.price)}/-</td>
+                                    <td className="px-2 py-2 text-right">{total}/-</td>
                                 </tr>
                             );
                         })}
@@ -263,7 +263,7 @@ export default function ConfirmOrder({ customer, items, companyDetails, orderId,
                             <span className="font-medium text-black dark:text-white">
                               Tax ({tempTaxDiscount?.tax_description || tempTaxDiscount?.tax_type})
                             </span>
-                            <span className="text-black dark:text-white">{taxAmount.toFixed(2)}/-</span>
+                            <span className="text-black dark:text-white">{taxAmount}/-</span>
                         </div>
                     )}
 
@@ -272,7 +272,7 @@ export default function ConfirmOrder({ customer, items, companyDetails, orderId,
                             <span className="font-medium text-black dark:text-white">
                               Discount ({tempTaxDiscount?.discount_description || tempTaxDiscount?.discount_type})
                             </span>
-                            <span className="text-black dark:text-white">-{discountAmount.toFixed(2)}/-</span>
+                            <span className="text-black dark:text-white">-{discountAmount}/-</span>
                         </div>
                     )}
 

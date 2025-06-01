@@ -18,12 +18,4 @@ class CustomerController extends ApiCustomerController
             'customers' => $response
         ]);
     }
-
-    public function store(SaveCustomerDetailsRequest $request)
-    {
-        $validated = $request->validated();
-        Customer::create($validated);
-
-        return redirect()->back()->with('success', 'Customer created successfully');
-    }
 }

@@ -37,9 +37,14 @@ class OrderController extends ApiOrderController
 
     public function confirm(Request $request)
     {
-        $sessionData = parent::getConfirmData($request);
-        session(['user_order_session' => $sessionData]);
-        return Inertia::render('orders/confirm-order', $sessionData);
+        try{
+            $sessionData = parent::getConfirmData($request);
+            session(['user_order_session' => $sessionData]);
+            return Inertia::render('orders/confirm-order', $sessionData);
+        }catch (\Exception $exception){
+            return $exception;
+        }
+
 
     }
 
