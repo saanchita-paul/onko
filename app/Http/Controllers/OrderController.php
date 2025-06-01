@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\SaveTempTaxDiscountRequest;
 use App\Http\Requests\StoreOrderRequest;
 use App\Models\Order;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use App\Http\Controllers\Api\OrderController as ApiOrderController;
 use Illuminate\Http\Request;
@@ -38,11 +39,12 @@ class OrderController extends ApiOrderController
     public function confirm(Request $request)
     {
         try{
-            $sessionData = parent::getConfirmData($request);
+            $sessionData = parent::confirm($request);
             session(['user_order_session' => $sessionData]);
             return Inertia::render('orders/confirm-order', $sessionData);
-        }catch (\Exception $exception){
-            return $exception;
+        }catch (\Exception $e){
+            Log::error('confirm::error occurred', [$e->getMessage(), $e->getTrace()]);
+            return redirect()->back()->withErrors(['error' => 'An error occurred while confirming the order. Please try again later.']);
         }
 
 

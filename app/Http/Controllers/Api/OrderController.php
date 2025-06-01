@@ -120,7 +120,7 @@ class OrderController extends Controller
         ];
     }
 
-    public function getConfirmData(Request $request)
+    public function confirm(Request $request)
     {
         $companyDetails = Option::companyDetails();
         $tempTaxDiscount = session('temp_tax_discount', null);
