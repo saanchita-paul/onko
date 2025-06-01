@@ -11,7 +11,8 @@ import { Search, Smile, ChevronRight, BadgeCheckIcon } from 'lucide-react';
 import { Dispatch, SetStateAction, useState } from "react"
 import { useForm, router } from '@inertiajs/react'
 import { toast } from 'sonner';
-import { CompanyDetails, Customer, InertiaResponse, OrderItem } from '@/types';
+import { CompanyDetails, Customer, OrderItem } from '@/types';
+import axios from 'axios';
 
 export interface PaginatedCustomers {
     data: Customer[]
@@ -33,7 +34,7 @@ interface OrderFormProps {
 }
 
 export function OrderForm({ open, onOpenChange, customers, orderItems, companyDetails}: OrderFormProps) {
-    const { data, setData, post, processing, errors, reset } = useForm({
+    const { data, setData, processing, errors, reset } = useForm({
         name: '',
         email: '',
         phone: ''
@@ -44,38 +45,56 @@ export function OrderForm({ open, onOpenChange, customers, orderItems, companyDe
 
     const isFormEmpty = !data.name.trim() && !data.email.trim() && !data.phone.trim();
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault()
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
 
-        post(route('customers.store'), {
-            onSuccess: (data: InertiaResponse) => {
+
+        try {
+            const response = await axios.post(route('customers.store'), data);
+
+
+            if (response.data.success) {
                 reset();
                 onOpenChange(false);
-                if (data.props.flash?.success) {
-                    toast.custom(() => (
-                        <div className="flex h-[100px] w-[350px] items-start gap-2 rounded-xl border border-blue-700 bg-white p-4 shadow-lg dark:border-gray-200 dark:bg-zinc-900">
-                            <BadgeCheckIcon className="h-5 w-5 text-blue-600" />
-                            <div>
-                                <p className="text-sm font-semibold text-blue-600">Customer Created</p>
-                                <p className="text-sm text-zinc-700 dark:text-zinc-300">
-                                    {data.props.flash?.success}
-                                </p>
-                                <div className="mt-3 flex justify-start gap-4 text-sm text-blue-600">
-                                </div>
-                            </div>
+
+
+                const newCustomer = response.data.customer;
+
+
+                toast.custom(() => (
+                    <div className="flex h-[100px] w-[350px] items-start gap-2 rounded-xl border border-blue-700 bg-white p-4 shadow-lg dark:border-gray-200 dark:bg-zinc-900">
+                        <BadgeCheckIcon className="h-5 w-5 text-blue-600" />
+                        <div>
+                            <p className="text-sm font-semibold text-blue-600">Customer Created</p>
+                            <p className="text-sm text-zinc-700 dark:text-zinc-300">
+                                {response.data.message}
+                            </p>
                         </div>
-                    ));
+                    </div>
+                ));
 
-                } else if (data.props.flash?.error) {
-                    toast.error(data.props.flash.error);
-                }
-            },
-            onError: (error) => {
-                toast.error(Object.values(error)[0]);
-            },
-        });
 
-    }
+                router.post(route('orders.confirm'), {
+                    customer: newCustomer,
+                    items: orderItems,
+                    companyDetails: companyDetails,
+                }, {
+                    preserveState: true,
+                });
+
+
+            } else {
+                toast.error('Failed to create customer');
+            }
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                toast.error(`Something went wrong: ${error.message}`);
+            } else {
+                toast.error('Something went wrong');
+            }
+        }
+    };
+
 
     const handlePaginationClick = (url: string | null) => {
         if (url) {

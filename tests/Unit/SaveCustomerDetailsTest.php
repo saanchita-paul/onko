@@ -19,13 +19,19 @@ class SaveCustomerDetailsTest extends TestCase
             'name' => 'Customer Name',
         ];
 
-        $response = $this->post(route('customers.store'), $payload);
+        $response = $this->postJson(route('customers.store'), $payload);
 
-        $response->assertRedirect();
+        $response->assertStatus(200);
+        $response->assertJson([
+            'success' => true,
+            'customer' => [
+                'name' => 'Customer Name',
+            ],
+            'message' => 'Customer created successfully',
+        ]);
 
         $this->assertDatabaseHas('customers', [
             'name' => 'Customer Name',
         ]);
-
     }
 }
