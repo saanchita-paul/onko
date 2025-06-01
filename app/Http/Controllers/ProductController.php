@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreProductRequest;
 use App\Models\Product;
 use App\Http\Controllers\Api\ProductController as ApiController;
+use App\Models\ProductVariant;
 use Inertia\Inertia;
 
 class ProductController extends ApiController
@@ -31,5 +32,16 @@ class ProductController extends ApiController
         }
 
         return back()->with('error', 'Something went wrong');
+    }
+
+    public function withVariants()
+    {
+        $products = Product::get(['id', 'name']);
+        $productVariants = ProductVariant::get(['id', 'name', 'product_id']);
+
+        return response()->json([
+            'products' => $products,
+            'productVariants' => $productVariants
+        ]);
     }
 }
