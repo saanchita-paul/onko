@@ -27,6 +27,10 @@ class OrderController extends Controller
         $query = Order::query();
 
         if ($range && $range !== 'all'){
+            if ($request->has('date_range')) {
+                $start = $request->input('date_range.from');
+                $end = $request->input('date_range.to');
+            }
             $today = Carbon::today();
             switch ($range) {
                 case 'today':
@@ -58,6 +62,10 @@ class OrderController extends Controller
                     $date = $today->copy()->addYears($offset);
                     $currentFrom = $date->copy()->startOfYear();
                     $currentTo = $date->copy()->endOfYear();
+                    break;
+                case 'custom':
+                    $currentFrom = Carbon::parse($start)->startOfDay();
+                    $currentTo = Carbon::parse($end)->endOfDay();
                     break;
 
                 default:

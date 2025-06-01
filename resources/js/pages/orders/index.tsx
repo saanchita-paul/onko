@@ -188,11 +188,12 @@ export default function Index({ orders } : Props) {
         Inertia.visit(`${window.location.pathname}?${params.toString()}`, { preserveScroll: true, preserveState: true });
     };
 
-    const handleRangeChange = (value: string, offset = 0) => {
+    const handleRangeChange = (value: string, offset = 0, dateRange?: DateRange) => {
         setOffset(offset);
         router.get(
             route('orders.index'),
             {
+                date_range: dateRange,
                 offset: offset,
                 range: value,
             },
@@ -232,28 +233,26 @@ export default function Index({ orders } : Props) {
                                         <TabsTrigger value="month" className={tabTriggerClass}>Month</TabsTrigger>
                                         <TabsTrigger value="quarter" className={tabTriggerClass}>Quarter</TabsTrigger>
                                         <TabsTrigger value="year" className={tabTriggerClass}>Year</TabsTrigger>
+
                                     </TabsList>
                                     <DateRangePicker
                                         from={dateRange?.from}
                                         to={dateRange?.to}
-                                        onChange={(newRange) => setDateRange(newRange)}
+                                        onChange={(newRange) => {
+                                            setRange('custom');
+                                            handleRangeChange('custom', 0, newRange);
+                                            setDateRange(newRange);
+                                        }}
                                     />
                                 </div>
                                 <OrderFilterSheet />
                             </div>
 
-                            <div className="mt-4">
-                                <p>
-                                    Selected:{" "}
-                                    {dateRange?.from
-                                        ? `${dateRange.from.toDateString()} ${
-                                            dateRange.to ? `→ ${dateRange.to.toDateString()}` : ''
-                                        }`
-                                        : 'None'}
-                                </p>
-                            </div>
-
                             <TabsContent value="all">
+                                <DataTable columns={columns} data={orders.data} />
+                            </TabsContent>
+
+                            <TabsContent value="custom">
                                 <DataTable columns={columns} data={orders.data} />
                             </TabsContent>
 
