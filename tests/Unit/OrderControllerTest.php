@@ -345,7 +345,7 @@ class OrderControllerTest extends TestCase
         $customer = Customer::factory()->create();
         $product = Product::factory()->create();
         $productVariant = ProductVariant::factory()->create();
-        $consignment = \App\Models\Consignment::factory()->create();
+        $consignment = Consignment::factory()->create();
 
         $consignmentItem = ConsignmentItem::factory()->create([
             'product_id' => $product->id,
@@ -382,10 +382,10 @@ class OrderControllerTest extends TestCase
         $request = Mockery::mock(StoreOrderRequest::class);
         $request->shouldReceive('validated')->andReturn($requestData);
 
-        $controller = app(\App\Http\Controllers\OrderController::class);
+        $controller = app(OrderController::class);
         $response = $controller->store($request);
 
-        $this->assertInstanceOf(\Illuminate\Http\RedirectResponse::class, $response);
+        $this->assertInstanceOf(RedirectResponse::class, $response);
 
         $order = Order::where('customer_id', $customer->id)->latest()->first();
         $this->assertNotNull($order, 'Order was not created');
