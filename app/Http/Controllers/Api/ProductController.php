@@ -12,6 +12,7 @@ class ProductController extends Controller
 {
     public function store(StoreProductRequest $request)
     {
+        DB::beginTransaction();
         try {
             $product = new Product();
             $product->name = $request->product_name;

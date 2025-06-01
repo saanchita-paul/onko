@@ -22,13 +22,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/products', [ProductController::class, 'index'])->name('products.index');
     Route::post('/products', [ProductController::class, 'store'])->name('products.store');
-    Route::get('/products-with-variants', [ProductController::class, 'withVariants']);
+    Route::get('/api/products/search', [ProductController::class, 'search']);
+    Route::get('/api/products/{product}/variants', [ProductController::class, 'variants']);
     Route::get('/customers', [CustomerController::class, 'index'])->name('customers.index');
     Route::get('/orders/create', [OrderController::class, 'create'])->name('orders.create');
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/employees', [EmployeeController::class, 'index'])->name('employees.index');
     Route::post('/employees', [EmployeeController::class, 'store'])->name('employees.store');
     Route::get('/consignments', [ConsignmentController::class, 'index'])->name('consignments.index');
+    Route::post('/consignments', [ConsignmentController::class, 'store'])->name('consignments.store');
     Route::get('/sales', [SalesController::class, 'index'])->name('sales.index');
     Route::post('/customers', [CustomerController::class, 'store'])->name('customers.store');
     Route::post('/options', [OptionController::class, 'store'])->name('options.store');

@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreConsignmentRequest;
 use App\Models\Consignment;
 use App\Http\Controllers\Api\ConsignmentController as ApiConsignmentController;
 use App\Models\ConsignmentItem;
-use http\Env\Request;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
@@ -20,33 +21,19 @@ class ConsignmentController extends ApiConsignmentController
         ]);
     }
 
-    public function store(Request $request){
-        $consignment = new Consignment();
-        try {
-            if($request->id){
-                $consignment->id = $request->id;
-            }
-            $consignment->lc_num = $request->lc_num;
+    public function store(StoreConsignmentRequest $request){
+        $response = parent::store($request);
 
-            if(!$consignment->save()){
-                throw new \Exception('Error saving consignment');
-            }
-
-            foreach ($request->items as $item){
-                $consignmentItem = new ConsignmentItem();
-                $consignmentItem->product_id = $item->product_id;
-                $consignmentItem->product_variant_id = $item->product_variant_id;
-                $consignmentItem->qty = $item->qty;
-                $consignmentItem->cost_price = $item->price;
-
-                $consignmentItem->save();
-            }
-
-            DB::commit();
+        if ($response->getData()->status === 'success')
+        {
+            return redirect()->route('consignments.index')->with('success', $response->getData()->message);
         }
-        catch (\Exception $exception){
-            DB::rollBack();
-            abort(500, $exception->getMessage());
+
+        elseif ($response->getData()->status === 'error')
+        {
+            return back()->with('error', $response->getData()->message);
         }
+
+        return back()->with('error', 'Something went wrong');
     }
 }

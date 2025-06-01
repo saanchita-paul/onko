@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Requests\StoreConsignmentRequest;
 use App\Models\Consignment;
+use App\Models\ConsignmentItem;
+use Illuminate\Support\Facades\DB;
 
 class ConsignmentController extends Controller
 {
@@ -17,5 +20,51 @@ class ConsignmentController extends Controller
         });
 
         return $consignments;
+    }
+
+    public function store(StoreConsignmentRequest $request){
+        DB::beginTransaction();
+
+        try {
+            $consignment = new Consignment();
+            if($request->id){
+                $consignment->id = $request->id;
+            }
+            $consignment->lc_num = $request->lc_num;
+            $consignment->value = (int) $request->value * 100;
+
+            if(!$consignment->save()){
+                throw new \Exception('Error saving consignment');
+            }
+
+            foreach ($request->items as $item){
+                $consignmentItem = new ConsignmentItem();
+                $cost_price = (int) $item['price'] * 100;
+                $consignmentItem->consignment_id = $consignment->id;
+                $consignmentItem->product_id = $item['product'];
+                $consignmentItem->product_variant_id = $item['variant'];
+                $consignmentItem->qty = $item['quantity'];
+                $consignmentItem->cost_price = $cost_price;
+                $consignmentItem->save();
+            }
+
+            DB::commit();
+
+            return response()->json(
+                [
+                    'status' => 'success',
+                    'message' => 'Consignment Added Successfully'
+                ]
+            );
+        }
+        catch (\Exception $e){
+            DB::rollBack();
+            return response()->json(
+                [
+                    'status' => 'error',
+                    'message' => $e->getMessage()
+                ]
+            );
+        }
     }
 }

@@ -6,6 +6,7 @@ use App\Http\Requests\StoreProductRequest;
 use App\Models\Product;
 use App\Http\Controllers\Api\ProductController as ApiController;
 use App\Models\ProductVariant;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class ProductController extends ApiController
@@ -43,5 +44,23 @@ class ProductController extends ApiController
             'products' => $products,
             'productVariants' => $productVariants
         ]);
+    }
+
+    public function search(Request $request)
+    {
+        $query = $request->get('q', '');
+        $products = Product::query()
+            ->select('id', 'name')
+            ->where('name', 'like', "%{$query}%")
+            ->limit(20)
+            ->get();
+
+        return response()->json($products);
+    }
+
+    public function variants(Product $product)
+    {
+        $variants = $product->productVariants()->select('id', 'name', 'product_id')->get();
+        return response()->json($variants);
     }
 }
