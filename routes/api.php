@@ -2,4 +2,4 @@
 
 use App\Http\Controllers\StockController;
 
-Route::get('/orders/create', [StockController::class, 'index'])->name('stock.index');
+Route::get('/stock', [StockController::class, 'index'])->name('stock.index');
