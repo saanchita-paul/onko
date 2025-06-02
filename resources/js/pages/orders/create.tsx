@@ -68,9 +68,9 @@ interface Item extends Product {
     qty: number;
 }
 
-
 export default function CreateOrder({ companyDetails, customers, userOrderSession, isReset, tempTaxDiscount }: InertiaProps) {
     const [productList, setProductList] = useState<Product[]>([]);
+    const [productListAll, setProductListAll] = useState<Product[]>([]);
 
     const [pagination, setPagination] = useState<{
         current_page: number;
@@ -83,7 +83,7 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
     });
 
     const fetchProducts = (page = 1) => {
-        const url = route('stock.index', { page });
+        const url = route('stock.index', { page: page, stock_only: 1 });
         axios.get(url)
             .then(response => {
                 const resData = response.data.products.data;
@@ -100,8 +100,27 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
             });
     };
 
+    const fetchProductsAll = (page = 1) => {
+        const url = route('stock.index', { page });
+        axios.get(url)
+            .then(response => {
+                const resData = response.data.products.data;
+                setProductListAll(Array.isArray(resData) ? resData : []);
+                setPagination({
+                    current_page: response.data.products.current_page,
+                    last_page: response.data.products.last_page,
+                    links: response.data.products.links,
+                });
+            })
+            .catch(error => {
+                const errorMessage = error?.response?.data?.message || "Failed to fetch products.";
+                toast.error(errorMessage);
+            });
+    };
+
     useEffect(() => {
         fetchProducts();
+        fetchProductsAll();
     }, []);
 
 
@@ -120,13 +139,8 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
         }
     }, [isReset]);
 
-
-
     const [items, setItems] = useRemember<Item[]>([], 'order_items');
 
-    // if (!items.length && userOrderSession?.items?.length){
-    //     setItems(userOrderSession.items)
-    // }
     const addItem = (product: Product) => {
         setItems((prevItems) => {
 
@@ -141,6 +155,13 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
         });
 
         setProductList((prev) =>
+            prev.map((p) => {
+                    return (p.id === product.id && p.variant_id === product.variant_id) ? { ...p, quantity: p.quantity - 1 } : p
+                }
+            )
+        );
+
+        setProductListAll((prev) =>
             prev.map((p) => {
                     return (p.id === product.id && p.variant_id === product.variant_id) ? { ...p, quantity: p.quantity - 1 } : p
                 }
@@ -166,7 +187,12 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
 
         setProductList((prev) =>
             prev.map((p) =>
-                p.id === item.id ? { ...p, quantity: p.quantity - delta } : p
+                (p.id === item.id && p.variant_id === item.variant_id) ? { ...p, quantity: p.quantity - delta } : p
+            )
+        );
+        setProductListAll((prev) =>
+            prev.map((p) =>
+                (p.id === item.id && p.variant_id === item.variant_id) ? { ...p, quantity: p.quantity - delta } : p
             )
         );
     };
@@ -176,7 +202,12 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
         const removed = items[index];
         setProductList((prev) =>
             prev.map((p) =>
-                p.id === removed.id ? { ...p, quantity: p.quantity + removed.qty } : p
+                (p.id === removed.id && p.variant_id === removed.variant_id) ? { ...p, quantity: p.quantity + removed.qty } : p
+            )
+        );
+        setProductListAll((prev) =>
+            prev.map((p) =>
+                (p.id === removed.id && p.variant_id === removed.variant_id) ? { ...p, quantity: p.quantity + removed.qty } : p
             )
         );
         setItems((prev) => prev.filter((_, i) => i !== index));
@@ -339,7 +370,6 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
             toast.error('Error deleting logo');
         }
     };
-
     return (
         <AppLayout>
             <Head title="Create Order" />
@@ -728,8 +758,9 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
                                         </TabsList>
                                     </Tabs>
                                 </div>
+
                                 <div className="space-y-2">
-                                    {productList.map((product) => (
+                                    {selectedTab === 'in-stock' ? productList.map((product) => (
                                         <div
                                             key={product.id + (product.variant_id ?? '')}
                                             className="flex items-center justify-between rounded-lg px-4 py-2"
@@ -769,7 +800,49 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
                                                 </Button>
                                             </div>
                                         </div>
-                                    ))}
+                                    ))
+                                    : productListAll.map((product) => (
+                                            <div
+                                                key={product.id + (product.variant_id ?? '')}
+                                                className="flex items-center justify-between rounded-lg px-4 py-2"
+                                            >
+                                                <div>
+                                                    <div className="text-left leading-snug font-medium break-words">
+                                                        <span className="block font-bold text-black">{product.name}</span>
+                                                        {product.variant_name && (
+                                                            <span
+                                                                className="block font-semibold text-blue-600">{product.variant_name}</span>
+                                                        )}
+                                                        {product.variant_options && typeof product.variant_options === 'object' && (
+                                                            <span className="block text-sm text-green-600">
+                                                            <div>
+                                                                {Object.entries(product.variant_options).map(([key, value]) => (
+                                                                    <span key={key} className="mr-2">
+                                                                        {key}: {value}
+                                                                    </span>
+                                                                ))}
+                                                            </div>
+                                                        </span>
+                                                        )}
+                                                    </div>
+                                                    <div
+                                                        className="text-muted-foreground text-sm">৳ {Math.round(product.price)}</div>
+                                                </div>
+
+                                                <div className="flex w-24 items-center justify-center gap-4">
+                                                    <span className="w-4 text-center text-sm">{product.quantity}</span>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="icon"
+                                                        className="ml-3"
+                                                        onClick={() => product.quantity > 0 && addItem(product)}
+                                                    >
+                                                        <Plus className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        ))
+                                    }
                                 </div>
 
                                 <div className="border-t pt-4">

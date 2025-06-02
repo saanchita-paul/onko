@@ -12,7 +12,9 @@ class StockController extends Controller
 {
     public function index(Request $request)
     {
-        $products = ConsignmentItem::query()
+        $stockOnly = (int)$request->get('stock_only');
+
+        $productBuilder = ConsignmentItem::query()
             ->join('products', 'products.id', '=', 'consignment_items.product_id')
             ->join('product_variants', 'product_variants.id', '=', 'consignment_items.product_variant_id')
             ->select(
@@ -31,8 +33,13 @@ class StockController extends Controller
                 'product_variants.id',
                 'product_variants.name',
                 'product_variants.options'
-            )
-            ->orderBy('products.created_at', 'desc')
+            );
+
+        if($stockOnly){
+            $productBuilder->having('quantity','>','0');
+        }
+
+        $products = $productBuilder->orderBy('products.created_at', 'desc')
             ->paginate(5);
 
         $products->getCollection()->transform(function ($item) {
