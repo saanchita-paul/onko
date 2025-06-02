@@ -130,7 +130,6 @@ export function AddProductForm() {
             },
             onError: (error) => {
                 setOnVariationPage(false);
-                setShowAdvanced(true);
                 toast.error(Object.values(error)[0]);
             },
         });
