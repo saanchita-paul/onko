@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\SaveTempTaxDiscountRequest;
 use App\Http\Requests\StoreOrderRequest;
 use App\Models\Order;
 use Illuminate\Support\Facades\Log;
@@ -24,14 +23,22 @@ class OrderController extends ApiOrderController
     {
         $response = parent::create($request);
 
+        $userOrderSession = session('user_order_session', []);
+        $userOrderSession['order_on'] = session('order_on');
+
         $data = [
-                'products' => $response['products'],
-                'companyDetails' => $response['companyDetails'],
-                'customers' => $response['customers'],
-                'isReset' => session('isReset', false),
-                'tempTaxDiscount' => session('temp_tax_discount')
-            ];
+            'products' => $response['products'],
+            'companyDetails' => $response['companyDetails'],
+            'customers' => $response['customers'],
+            'isReset' => session('isReset', false),
+            'tempTaxDiscount' => session('temp_tax_discount'),
+        ];
+        if(!empty($request->get('editSession'))){
             $data['userOrderSession'] = session('user_order_session');
+        }else{
+            session()->forget('user_order_session');
+            session()->forget('temp_tax_discount');
+        }
 
         return Inertia::render('orders/create', $data);
     }
@@ -53,27 +60,28 @@ class OrderController extends ApiOrderController
     public function store(StoreOrderRequest $request)
     {
         try {
-            $order = parent::storeOrder($request);
+            $order = parent::store($request);
 
             session()->forget('user_order_session');
             session()->forget('isReset');
 
             return redirect()->route('orders.show', $order->id);
         } catch (\Exception $e) {
+            Log::error('storeOrder::error occurred', [$e->getMessage(), $e->getTrace()]);
             return redirect()->back()->with('error', 'Failed to save order: ' . $e->getMessage())->withInput();
         }
     }
 
     public function show(Order $order)
     {
-        $orderData = parent::showOrder($order);
+        $orderData = parent::show($order);
         return Inertia::render('orders/view', $orderData);
     }
 
 
     public function reset()
     {
-        parent::resetSession();
+        parent::reset();
         return redirect()->route('orders.create')->with('isReset', true);
     }
 

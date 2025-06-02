@@ -254,8 +254,8 @@ export default function View({ customer, items, companyDetails, orderId, discoun
                                         <td className="px-2 py-2">{i + 1}</td>
                                         <td className="px-2 py-2">{item.name}</td>
                                         <td className="px-2 py-2">{item.qty}</td>
-                                        <td className="px-2 py-2">{item.price.toFixed(2)}/-</td>
-                                        <td className="px-2 py-2 text-right">{total.toFixed(2)}/-</td>
+                                        <td className="px-2 py-2">{item.price}/-</td>
+                                        <td className="px-2 py-2 text-right">{total}/-</td>
                                     </tr>
                                 );
                             })}
@@ -271,7 +271,7 @@ export default function View({ customer, items, companyDetails, orderId, discoun
                             <span className="font-medium">
                                 Discount {meta?.discount_type === 'percentage' ? `(${meta?.discount_percentage}%)` : ''}
                             </span>
-                            <span>-{discountTotal.toFixed(2)}/-</span>
+                            <span>-{discountTotal}/-</span>
                         </div>
                     )}
 
@@ -281,13 +281,13 @@ export default function View({ customer, items, companyDetails, orderId, discoun
                                 Tax {meta?.tax_type ? `(${meta?.tax_type})` : ''}
                                 {meta?.tax_percentage ? ` (${meta?.tax_percentage}%)` : ''}
                             </span>
-                            <span>{taxTotal.toFixed(2)}/-</span>
+                            <span>{taxTotal}/-</span>
                         </div>
                     )}
                     <div className="text-sm text-gray-700">
                         <div className="mt-50 flex justify-between border-t pt-2 font-bold text-black">
                             <span className="dark:text-white">Grand Total</span>
-                            <span>{(subtotal - discountTotal + taxTotal).toFixed(2)}/-</span>
+                            <span>{(subtotal - discountTotal + taxTotal)}/-</span>
                         </div>
                     </div>
                     <div className="mt-8 flex justify-end gap-2">
