@@ -85,6 +85,7 @@ export default function View({ customer, items, companyDetails, orderId, discoun
     const [isPaid, setIsPaid] = useState(initialStatus === 'paid');
     const [loading, setLoading] = useState(false);
 
+
     const markAsPaid = async () => {
         setLoading(true);
         try {
@@ -101,6 +102,7 @@ export default function View({ customer, items, companyDetails, orderId, discoun
             setLoading(false);
         }
     };
+
     return (
         <AppLayout>
             <Head title="Confirm Order" />
