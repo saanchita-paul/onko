@@ -82,7 +82,8 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
     });
 
     const fetchProducts = (page = 1) => {
-        axios.get(`/api/orders/create?page=${page}`)
+        const url = route('stock.index', { page });
+        axios.get(url)
             .then(response => {
                 const resData = response.data.products.data;
                 setProductList(Array.isArray(resData) ? resData : []);
@@ -92,7 +93,10 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
                     links: response.data.products.links,
                 });
             })
-            .catch(console.error);
+            .catch(error => {
+                const errorMessage = error?.response?.data?.message || "Failed to fetch products.";
+                toast.error(errorMessage);
+            });
     };
 
     useEffect(() => {

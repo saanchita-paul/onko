@@ -1,5 +1,5 @@
 <?php
 
-use App\Http\Controllers\Api\OrderController;
+use App\Http\Controllers\StockController;
 
-Route::get('/orders/create', [OrderController::class, 'create'])->name('orders.create');
+Route::get('/orders/create', [StockController::class, 'index'])->name('stock.index');
