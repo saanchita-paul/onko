@@ -295,6 +295,7 @@ export function AddProductForm() {
                                 <Card key={index} className="relative mt-2">
                                     <CardContent className="pt-6 pb-4">
                                         <button
+                                            type="button"
                                             className="text-muted-foreground absolute top-2 right-2 hover:text-red-500"
                                             onClick={() => removeVariation(index)}
                                         >
