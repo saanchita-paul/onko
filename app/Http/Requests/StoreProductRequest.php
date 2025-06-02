@@ -21,14 +21,20 @@ class StoreProductRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
+        $rules = [
             'product_name' => 'required|string|max:255',
             'product_description' => 'required|string|max:255',
-            'variants' => 'required|array|min:1',
-            'variants.*.name' => 'required|string|max:255',
-            'variants.*.options' => 'required|array|min:1',
-            'variants.*.options.*' => 'required|string|max:255',
-            'combinations' => 'required|array|min:1',
+            'has_variations' => 'required|boolean',
         ];
+
+        if ($this->input('has_variations')) {
+            $rules['variants'] = 'required|array|min:1';
+            $rules['variants.*.name'] = 'required|string|max:255';
+            $rules['variants.*.options'] = 'required|array|min:1';
+            $rules['variants.*.options.*'] = 'required|string|max:255';
+            $rules['combinations'] = 'required|array|min:1';
+        }
+        return $rules;
     }
+
 }

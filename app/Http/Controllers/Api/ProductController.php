@@ -24,20 +24,35 @@ class ProductController extends Controller
                 throw new \Exception('Product Not Saved');
             }
 
-            foreach ($request->variants as $variant) {
+            if($request->has_variations){
+                foreach ($request->variants as $variant) {
+                    $productAttribute = new ProductAttribute();
+                    $productAttribute->product_id = $product->id;
+                    $productAttribute->name = $variant['name'];
+                    $productAttribute->options = $variant['options'];
+                    $productAttribute->save();
+                }
+
+                foreach ($request->combinations as $combination) {
+                    $variationName = $request->product_name . ' ' . implode(' ', array_values((array)$combination));
+                    $productVariant = new ProductVariant();
+                    $productVariant->product_id = $product->id;
+                    $productVariant->name = $variationName;
+                    $productVariant->options = $combination;
+                    $productVariant->save();
+                }
+            }
+            else{
                 $productAttribute = new ProductAttribute();
                 $productAttribute->product_id = $product->id;
-                $productAttribute->name = $variant['name'];
-                $productAttribute->options = $variant['options'];
+                $productAttribute->name = $product->name;
+                $productAttribute->options = [];
                 $productAttribute->save();
-            }
 
-            foreach ($request->combinations as $combination) {
-                $variationName = $request->product_name . ' ' . implode(' ', array_values((array)$combination));
                 $productVariant = new ProductVariant();
                 $productVariant->product_id = $product->id;
-                $productVariant->name = $variationName;
-                $productVariant->options = $combination;
+                $productVariant->name = $product->name;
+                $productVariant->options = [];
                 $productVariant->save();
             }
 

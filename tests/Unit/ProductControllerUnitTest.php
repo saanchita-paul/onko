@@ -10,8 +10,8 @@ class ProductControllerUnitTest extends TestCase
     use RefreshDatabase;
 
 
-    /** @test */
-    public function it_creates_a_product_with_variants_and_combinations()
+
+    public function test_it_creates_a_product_with_variants_and_combinations()
     {
         $user = User::factory()->create();
         $this->actingAs($user);
@@ -52,8 +52,8 @@ class ProductControllerUnitTest extends TestCase
 
 
 
-    /** @test */
-    public function it_handles_product_save_failure_due_to_missing_name()
+
+    public function test_it_handles_product_save_failure_due_to_missing_name()
     {
         $user = User::factory()->create();
         $this->actingAs($user);
@@ -72,8 +72,8 @@ class ProductControllerUnitTest extends TestCase
             ->assertSessionHasErrors(['product_name']);
     }
 
-    /** @test */
-    public function it_handles_product_save_failure_due_to_missing_product_description()
+
+    public function test_it_handles_product_save_failure_due_to_missing_product_description()
     {
         $user = User::factory()->create();
         $this->actingAs($user);
@@ -91,4 +91,31 @@ class ProductControllerUnitTest extends TestCase
         $response->assertRedirect()
             ->assertSessionHasErrors(['product_description']);
     }
+
+
+    public function test_it_creates_a_product_without_variants_and_combinations()
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $payload = [
+            'product_name' => 'Simple Product',
+            'product_description' => 'A product without variations',
+            'has_variations' => false,
+            'variants' => [],
+            'combinations' => [],
+        ];
+
+        $response = $this->post(route('products.store'), $payload);
+
+        $response->assertRedirect(route('products.index'));
+
+        $product = Product::where('name', 'Simple Product')->first();
+        $this->assertNotNull($product);
+        $this->assertEquals('A product without variations', $product->description);
+
+        $this->assertEquals(1, $product->productAttributes()->count());
+        $this->assertEquals(1, $product->productVariants()->count());
+    }
+
 }
