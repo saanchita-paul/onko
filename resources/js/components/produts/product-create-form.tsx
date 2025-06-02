@@ -6,11 +6,11 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { InertiaResponse } from '@/types';
 import { useForm } from '@inertiajs/react';
 import { BadgeCheckIcon, ChevronLeft, LoaderCircle, Shapes, Trash2, X } from 'lucide-react';
 import { FormEvent, useState } from 'react';
 import { toast } from 'sonner';
-import { InertiaResponse } from '@/types';
 
 export function AddProductForm() {
     const [showAdvanced, setShowAdvanced] = useState(false);
@@ -25,7 +25,7 @@ export function AddProductForm() {
     }>({
         product_name: '',
         product_description: '',
-        has_variations: true,
+        has_variations: false,
         variants: [{ name: '', options: [''] }],
         combinations: [],
     });
@@ -98,7 +98,8 @@ export function AddProductForm() {
 
     const openVariationForm = () => {
         setOnVariationPage(true);
-        setData('combinations', getCombinations(data.variants));
+        if(data.has_variations)
+            setData('combinations', getCombinations(data.variants));
     };
 
     const handleSubmit = (e: FormEvent) => {
@@ -108,32 +109,29 @@ export function AddProductForm() {
             onSuccess: (data: InertiaResponse) => {
                 reset();
                 setShowAdvanced(false);
-                setOnVariationPage(false)
+                setOnVariationPage(false);
                 if (data.props.flash?.success) {
                     toast.custom(() => (
-                        <div
-                            className="flex h-[100px] w-[350px] items-start gap-2 rounded-xl border border-blue-700 bg-white p-4 shadow-lg dark:border-gray-200 dark:bg-zinc-900">
-                            <BadgeCheckIcon className="text-blue-600 h-5 w-5" />
+                        <div className="flex h-[100px] w-[350px] items-start gap-2 rounded-xl border border-blue-700 bg-white p-4 shadow-lg dark:border-gray-200 dark:bg-zinc-900">
+                            <BadgeCheckIcon className="h-5 w-5 text-blue-600" />
                             <div>
                                 <p className="text-sm font-semibold text-blue-600">Product Created</p>
                                 <p className="text-sm text-zinc-700 dark:text-zinc-300">{data.props.flash?.success}</p>
                                 <div className="mt-3 flex justify-start gap-4 text-sm text-blue-600">
                                     <button className="hover:underline">Add another</button>
-                                    <button className="text-zinc-500 hover:underline dark:text-zinc-400">Details
-                                    </button>
+                                    <button className="text-zinc-500 hover:underline dark:text-zinc-400">Details</button>
                                 </div>
                             </div>
                         </div>
                     ));
-                }
-                else if(data.props.flash?.error){
+                } else if (data.props.flash?.error) {
                     toast.error(data.props.flash.error);
                 }
             },
             onError: (error) => {
                 setOnVariationPage(false);
                 setShowAdvanced(true);
-                toast.error(Object.values(error)[0])
+                toast.error(Object.values(error)[0]);
             },
         });
     };
@@ -213,7 +211,11 @@ export function AddProductForm() {
                                     <Label>Variations</Label>
                                     <Select
                                         value={String(data.has_variations)}
-                                        onValueChange={(value) => setData('has_variations', value === 'true')}
+                                        onValueChange={(value) => {
+                                            setData('has_variations', value === 'true');
+                                            setData('variants', [{ name: '', options: [''] }])
+                                            setData('combinations', [])
+                                        }}
                                     >
                                         <SelectTrigger className="w-full">
                                             <SelectValue placeholder="Has Product Variations" />
@@ -226,59 +228,62 @@ export function AddProductForm() {
                                     <InputError message={errors.has_variations} />
                                 </div>
 
-                                {data.variants.map((variant, vIdx) => (
-                                    <div key={vIdx} className="space-y-2 rounded border p-2">
-                                        <div className="flex items-center gap-2">
-                                            <Input
-                                                placeholder="Variant Name"
-                                                value={variant.name}
-                                                onChange={(e) => updateVariantName(vIdx, e.target.value)}
-                                                disabled={processing}
-                                            />
-                                            <Button type="button" variant="ghost" size="icon" onClick={() => removeVariant(vIdx)}>
-                                                <X className="h-4 w-4" />
-                                            </Button>
-                                        </div>
-                                        <InputError message={(errors as Record<string, string>)[`variants.${vIdx}.name`]} />
-
-                                        <Label className="text-muted-foreground">Options</Label>
-                                        {variant.options.map((opt, oIdx) => (
-                                            <div key={oIdx} className="flex items-center gap-2">
+                                {data.has_variations &&
+                                    data.variants.map((variant, vIdx) => (
+                                        <div key={vIdx} className="space-y-2 rounded border p-2">
+                                            <div className="flex items-center gap-2">
                                                 <Input
-                                                    placeholder="Option Name"
-                                                    value={opt}
-                                                    onChange={(e) => updateOption(vIdx, oIdx, e.target.value)}
+                                                    placeholder="Variant Name"
+                                                    value={variant.name}
+                                                    onChange={(e) => updateVariantName(vIdx, e.target.value)}
                                                     disabled={processing}
                                                 />
-                                                <Button type="button" variant="ghost" size="icon" onClick={() => removeOption(vIdx, oIdx)}>
+                                                <Button type="button" variant="ghost" size="icon" onClick={() => removeVariant(vIdx)}>
                                                     <X className="h-4 w-4" />
                                                 </Button>
                                             </div>
-                                        ))}
-                                        {variant.options.map((_, oIdx) => (
-                                            <InputError message={(errors as Record<string, string>)[`variants.${vIdx}.options.${oIdx}`]} />
-                                        ))}
+                                            <InputError message={(errors as Record<string, string>)[`variants.${vIdx}.name`]} />
 
-                                        <button
-                                            type="button"
-                                            onClick={() => addOption(vIdx)}
-                                            className="cursor-pointer text-sm text-blue-600 hover:underline"
-                                        >
-                                            + Add Option
-                                        </button>
-                                    </div>
-                                ))}
+                                            <Label className="text-muted-foreground">Options</Label>
+                                            {variant.options.map((opt, oIdx) => (
+                                                <div key={oIdx} className="flex items-center gap-2">
+                                                    <Input
+                                                        placeholder="Option Name"
+                                                        value={opt}
+                                                        onChange={(e) => updateOption(vIdx, oIdx, e.target.value)}
+                                                        disabled={processing}
+                                                    />
+                                                    <Button type="button" variant="ghost" size="icon" onClick={() => removeOption(vIdx, oIdx)}>
+                                                        <X className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
+                                            ))}
+                                            {variant.options.map((_, oIdx) => (
+                                                <InputError message={(errors as Record<string, string>)[`variants.${vIdx}.options.${oIdx}`]} />
+                                            ))}
 
-                                <button type="button" onClick={addVariant} className="cursor-pointer text-sm text-blue-600 hover:underline">
-                                    + Add Product Variant
-                                </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => addOption(vIdx)}
+                                                className="cursor-pointer text-sm text-blue-600 hover:underline"
+                                            >
+                                                + Add Option
+                                            </button>
+                                        </div>
+                                    ))}
+
+                                {data.has_variations && (
+                                    <button type="button" onClick={addVariant} className="cursor-pointer text-sm text-blue-600 hover:underline">
+                                        + Add Product Variant
+                                    </button>
+                                )}
                             </div>
 
                             <Separator />
                         </>
                     )}
 
-                    {onVariationPage && (
+                    {onVariationPage && data.has_variations && (
                         <Label className="text-sm text-gray-500">Confirm {data.combinations.length} product variations and create</Label>
                     )}
 
