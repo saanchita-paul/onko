@@ -291,6 +291,7 @@ class OrderControllerTest extends TestCase
             ]);
     }
 
+
     public function test_mark_as_paid_creates_payment_and_updates_order()
     {
         $order = Mockery::mock(Order::class)->makePartial();
@@ -339,6 +340,7 @@ class OrderControllerTest extends TestCase
             'order_status' => 'paid',
         ], $response->getData(true));
     }
+
 
 
     public function test_store_creates_order_with_items_and_applies_tax_discount()
