@@ -6,12 +6,14 @@ use App\Http\Requests\StoreProductRequest;
 use App\Models\Product;
 use App\Models\ProductAttribute;
 use App\Models\ProductVariant;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
     public function store(StoreProductRequest $request)
     {
+        DB::beginTransaction();
         try {
             $product = new Product();
             $product->name = $request->product_name;
@@ -57,5 +59,23 @@ class ProductController extends Controller
                 ]
             );
         }
+    }
+
+    public function search(Request $request)
+    {
+        $query = $request->get('q', '');
+        $products = Product::query()
+            ->select('id', 'name')
+            ->where('name', 'like', "%{$query}%")
+            ->limit(20)
+            ->get();
+
+        return response()->json($products);
+    }
+
+    public function variants(Product $product)
+    {
+        $variants = $product->productVariants()->select('id', 'name', 'product_id')->get();
+        return response()->json($variants);
     }
 }

@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreProductRequest;
 use App\Models\Product;
 use App\Http\Controllers\Api\ProductController as ApiController;
+use App\Models\ProductVariant;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class ProductController extends ApiController

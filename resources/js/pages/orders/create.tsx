@@ -76,6 +76,14 @@ interface Item extends Product {
 
 export default function CreateOrder({ products, companyDetails, customers, userOrderSession, isReset, tempTaxDiscount }: InertiaProps) {
     const [productList, setProductList] = useState<Product[]>(products.data);
+
+    useEffect(() => {
+        axios.get('/api/orders/create')
+            .then(response => {
+                console.log('response',response.data);
+            })
+    }, []);
+
     useEffect(() => {
     }, [userOrderSession]);
 
@@ -85,17 +93,20 @@ export default function CreateOrder({ products, companyDetails, customers, userO
         }
     }, [isReset]);
 
-    useEffect(() => {
-        setProductList(products.data);
-    }, [products.data]);
+    // useEffect(() => {
+    //     setProductList(products.data);
+    // }, [products.data]);
+
     const [items, setItems] = useRemember<Item[]>([], 'order_items');
 
     if (!items.length && userOrderSession?.items?.length){
         setItems(userOrderSession.items)
     }
     const addItem = (product: Product) => {
+        console.log('addItem' , product, productList);
         setItems((prevItems) => {
-            const existingIndex = prevItems.findIndex(item => item.id === product.id);
+
+            const existingIndex = prevItems.findIndex(item => item.id === product.id && item.variant_id === product.variant_id);
             if (existingIndex !== -1) {
                 const updatedItems = [...prevItems];
                 updatedItems[existingIndex].qty += 1;
@@ -106,13 +117,16 @@ export default function CreateOrder({ products, companyDetails, customers, userO
         });
 
         setProductList((prev) =>
-            prev.map((p) =>
-                p.id === product.id ? { ...p, quantity: p.quantity - 1 } : p
+            prev.map((p) => {
+                console.log('prev', p.id === product.id ,p.variant_id === product.variant_id, prev, p, product);
+                    return (p.id === product.id && p.variant_id === product.variant_id) ? { ...p, quantity: p.quantity - 1 } : p
+                }
             )
         );
     };
 
     const updateQty = (index: number, newQty: number) => {
+        console.log('gggagagag');
         if (isNaN(newQty) || newQty < 1) return;
 
         const item = items[index];
@@ -201,16 +215,16 @@ export default function CreateOrder({ products, companyDetails, customers, userO
         }
     }, [data.logo, data.invoice_date]);
 
-    useEffect(() => {
-        const adjustedProducts = products.data.map(product => {
-            const reservedQty = items.find(item => item.id === product.id)?.qty ?? 0;
-            return {
-                ...product,
-                quantity: Math.max(product.quantity - reservedQty, 0),
-            };
-        });
-        setProductList(adjustedProducts);
-    }, [products.data, items]);
+    // useEffect(() => {
+    //     const adjustedProducts = products.data.map(product => {
+    //         const reservedQty = items.find(item => item.id === product.id && item.variant_id === product.variant_id)?.qty ?? 0;
+    //         return {
+    //             ...product,
+    //             quantity: Math.max(product.quantity - reservedQty, 0),
+    //         };
+    //     });
+    //     setProductList(adjustedProducts);
+    // }, [products.data, items]);
 
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -486,7 +500,7 @@ export default function CreateOrder({ products, companyDetails, customers, userO
                                             </div>
                                             <div className="flex justify-between sm:block">
                                                 <span className="w-24 font-medium sm:hidden">Item:</span>
-                                                <span className="text-right sm:text-left">{item.name}</span>
+                                                <span className="text-right sm:text-left">{item.variant_name}</span>
                                             </div>
                                             <div className="flex justify-between sm:block sm:justify-center">
                                                 <span className="w-24 font-medium sm:hidden">Qty:</span>

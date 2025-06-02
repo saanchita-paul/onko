@@ -340,6 +340,7 @@ class OrderControllerTest extends TestCase
         ], $response->getData(true));
     }
 
+
     public function test_store_creates_order_with_items_and_applies_tax_discount()
     {
         $customer = Customer::factory()->create();
@@ -402,6 +403,41 @@ class OrderControllerTest extends TestCase
 
     }
 
+
+
+
+    public function test_it_returns_orders_in_custom_date_range()
+    {
+        $from = Carbon::parse('2025-04-30T18:00:00.000Z');
+        $to = Carbon::parse('2025-05-16T18:00:00.000Z');
+
+        Order::factory()->count(5)->create([
+            'created_at' => $from->copy()->addDays(1),
+        ]);
+
+        Order::factory()->count(2)->create([
+            'created_at' => $from->copy()->subDays(1),
+        ]);
+
+        Order::factory()->count(3)->create([
+            'created_at' => $to->copy()->addDays(1),
+        ]);
+
+        $response = $this->get('/orders?' . http_build_query([
+                'range' => 'custom',
+                'offset' => 0,
+                'date_range' => [
+                    'from' => $from->toIso8601String(),
+                    'to' => $to->toIso8601String(),
+                ],
+            ]));
+
+        $response->assertStatus(200);
+        $response->assertInertia(fn ($page) =>
+        $page->component('orders/index')
+            ->has('orders.data', 5)
+        );
+    }
 
 
 }

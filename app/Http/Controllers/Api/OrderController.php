@@ -59,6 +59,17 @@ class OrderController extends Controller
                     $currentFrom = $date->copy()->startOfYear();
                     $currentTo = $date->copy()->endOfYear();
                     break;
+                case 'custom':
+                    if ($request->has('date_range')) {
+                        $start = $request->input('date_range.from');
+                        $end = $request->input('date_range.to');
+                        $currentFrom = Carbon::parse($start)->startOfDay();
+                        $currentTo = Carbon::parse($end)->endOfDay();
+                        break;
+                    }
+                    $currentFrom = null;
+                    $currentTo = null;
+                    break;
 
                 default:
                     $currentFrom = null;
@@ -86,12 +97,20 @@ class OrderController extends Controller
                 'products.id as id',
                 'products.name as name',
                 DB::raw('products.price / 100 as price'),
-                DB::raw('(consignment_items.qty - consignment_items.qty_sold - consignment_items.qty_waste) as quantity'),
+                DB::raw('SUM(consignment_items.qty - consignment_items.qty_sold - consignment_items.qty_waste) as quantity'),
                 'product_variants.id as variant_id',
                 'product_variants.name as variant_name',
                 'product_variants.options as variant_options'
             )
-            ->orderBy('products.name')
+            ->groupBy(
+                'products.id',
+                'products.name',
+                'products.price',
+                'product_variants.id',
+                'product_variants.name',
+                'product_variants.options'
+            )
+            ->orderBy('products.created_at', 'desc')
             ->paginate(5);
 
         $products->getCollection()->transform(function ($item) {
