@@ -46,13 +46,13 @@ class ProductController extends Controller
                 $productAttribute = new ProductAttribute();
                 $productAttribute->product_id = $product->id;
                 $productAttribute->name = $product->name;
-                $productAttribute->options = json_encode(['Default']);
+                $productAttribute->options = [];
                 $productAttribute->save();
 
                 $productVariant = new ProductVariant();
                 $productVariant->product_id = $product->id;
                 $productVariant->name = $product->name;
-                $productVariant->options = json_encode(['Default']);
+                $productVariant->options = [];
                 $productVariant->save();
             }
 
