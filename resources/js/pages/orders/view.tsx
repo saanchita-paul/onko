@@ -16,7 +16,7 @@ export interface OrderMeta {
     discount_description?: string;
 }
 
-export default function View({ customer, items, companyDetails, orderId, discountTotal, taxTotal, meta, initialStatus}: PageProps<{
+export default function View({ customer, items, companyDetails, orderId, discountTotal, taxTotal, meta, initialStatus, order_on}: PageProps<{
     customer: Customer;
     items: OrderItem[];
     companyDetails: CompanyDetails,
@@ -77,11 +77,11 @@ export default function View({ customer, items, companyDetails, orderId, discoun
     const handleEdit = () => {
         router.visit(route('orders.create'), {
             data: {
-                items
+                editSession: true
             },
         });
-
     };
+
     const [isPaid, setIsPaid] = useState(initialStatus === 'paid');
     const [loading, setLoading] = useState(false);
 
@@ -218,7 +218,7 @@ export default function View({ customer, items, companyDetails, orderId, discoun
                             <div className="mb-3 grid grid-cols-[auto_1fr] gap-2">
                                 <span className="font-medium">Date:</span>
                                 <span className="text-right">
-                                    {new Date(companyDetails?.invoice_date || new Date()).toLocaleDateString('en-GB', {
+                                    {new Date(order_on || new Date()).toLocaleDateString('en-GB', {
                                         day: 'numeric',
                                         month: 'short',
                                         year: 'numeric',
@@ -289,7 +289,7 @@ export default function View({ customer, items, companyDetails, orderId, discoun
                     <div className="text-sm text-gray-700">
                         <div className="mt-50 flex justify-between border-t pt-2 font-bold text-black">
                             <span className="dark:text-white">Grand Total</span>
-                            <span>{(subtotal - discountTotal + taxTotal)}/-</span>
+                            <span>{subtotal - discountTotal + taxTotal}/-</span>
                         </div>
                     </div>
                     <div className="mt-8 flex justify-end gap-2">
@@ -317,8 +317,7 @@ export default function View({ customer, items, companyDetails, orderId, discoun
                                     Create Another Order
                                 </button>
 
-                                <button
-                                    className="no-print cursor-pointer rounded border border-gray-400 px-4 py-2 text-sm text-black hover:bg-gray-100 dark:text-white dark:hover:bg-black">
+                                <button className="no-print cursor-pointer rounded border border-gray-400 px-4 py-2 text-sm text-black hover:bg-gray-100 dark:text-white dark:hover:bg-black">
                                     Schedule Delivery
                                 </button>
                                 <button
@@ -326,11 +325,11 @@ export default function View({ customer, items, companyDetails, orderId, discoun
                                     disabled={isPaid || loading}
                                     className={`no-print rounded border border-gray-400 px-4 py-2 text-sm ${
                                         isPaid
-                                            ? 'bg-green-800 text-white cursor-not-allowed'
-                                            : 'text-black hover:bg-gray-100 dark:text-white dark:hover:bg-black cursor-pointer'
+                                            ? 'cursor-not-allowed bg-green-800 text-white'
+                                            : 'cursor-pointer text-black hover:bg-gray-100 dark:text-white dark:hover:bg-black'
                                     }`}
                                 >
-                                    {isPaid ? 'Paid' : (loading ? 'Processing...' : 'Mark as Paid')}
+                                    {isPaid ? 'Paid' : loading ? 'Processing...' : 'Mark as Paid'}
                                 </button>
 
                                 <button

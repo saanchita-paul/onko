@@ -60,6 +60,7 @@ interface InertiaProps extends PageProps {
         items: Item[];
         companyDetails: CompanyDetails;
         orderId: string;
+        order_on: string;
     };
     tempTaxDiscount?: TempTaxDiscount;
 }
@@ -105,7 +106,13 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
 
 
     useEffect(() => {
-    }, [userOrderSession]);
+        if (!items.length && userOrderSession?.items?.length){
+            setItems(userOrderSession.items)
+        }
+        if (userOrderSession?.order_on) {
+            setData('order_on', userOrderSession.order_on);
+        }
+    }, []);
 
     useEffect(() => {
         if (isReset) {
@@ -117,9 +124,9 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
 
     const [items, setItems] = useRemember<Item[]>([], 'order_items');
 
-    if (!items.length && userOrderSession?.items?.length){
-        setItems(userOrderSession.items)
-    }
+    // if (!items.length && userOrderSession?.items?.length){
+    //     setItems(userOrderSession.items)
+    // }
     const addItem = (product: Product) => {
         setItems((prevItems) => {
 
@@ -189,17 +196,19 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
         setSelectedTab(tabValue);
     };
 
-
+    const today = format(new Date(), 'yyyy-MM-dd');
     const { data, setData } = useForm<{
         company_name: string;
         company_address: string;
         invoice_date: string | null;
         logo: string | File | null;
+        order_on: string;
     }>({
         company_name: companyDetails?.company_name ?? '',
         company_address: companyDetails?.company_address ?? '',
         invoice_date: companyDetails?.invoice_date ?? null,
         logo: companyDetails?.logo ?? null,
+        order_on: userOrderSession?.order_on ?? today,
     });
 
 
@@ -448,20 +457,29 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
                                                         type="button"
                                                         className={cn(
                                                             'flex w-full items-center justify-between rounded-md border px-3 py-2 text-left text-sm',
-                                                            !data.invoice_date && 'text-muted-foreground',
+                                                            !data.order_on && 'text-muted-foreground',
                                                         )}
                                                     >
-                                                        {data.invoice_date ? format(data.invoice_date, 'dd-MM-yyyy') : 'Pick a date'}
+                                                        {data.order_on
+                                                            ? format(new Date(data.order_on), 'dd-MM-yyyy')
+                                                            : 'Pick a date'}
                                                         <CalendarIcon className="text-muted-foreground ml-2 h-4 w-4" />
                                                     </button>
                                                 </PopoverTrigger>
                                                 <PopoverContent className="w-auto p-0">
                                                     <Calendar
                                                         mode="single"
+                                                        selected={new Date(data.order_on)}
                                                         onSelect={(date) => {
                                                             if (date) {
                                                                 const formatted = format(date, 'yyyy-MM-dd');
-                                                                setData('invoice_date', formatted);
+                                                                setData('order_on', formatted);
+
+                                                                router.post(route('orders.setDateSession'), {
+                                                                    order_on: formatted,
+                                                                }, {
+                                                                    preserveScroll: true,
+                                                                });
                                                             }
                                                         }}
                                                     />
