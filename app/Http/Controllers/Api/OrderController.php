@@ -323,6 +323,7 @@ class OrderController extends Controller
         return response()->json(['message' => 'Temporary tax and discount session cleared.']);
     }
 
+
     public function markAsPaid(Order $order, Request $request)
     {
 
@@ -344,6 +345,7 @@ class OrderController extends Controller
             'order_status' => $order->status,
         ]);
     }
+
 
 
 }
