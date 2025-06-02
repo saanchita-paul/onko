@@ -86,10 +86,7 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
         axios.get(url)
             .then(response => {
                 const resData = response.data.products.data;
-                const filteredProducts = Array.isArray(resData)
-                    ? resData.filter(product => product.quantity > 0)
-                    : [];
-                setProductList(filteredProducts);
+                setProductList(Array.isArray(resData) ? resData : []);
                 setPagination({
                     current_page: response.data.products.current_page,
                     last_page: response.data.products.last_page,
