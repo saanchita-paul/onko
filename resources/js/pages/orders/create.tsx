@@ -85,10 +85,6 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
         axios.get(`/api/orders/create?page=${page}`)
             .then(response => {
                 const resData = response.data.products.data;
-                console.log('response data products:', response.data.products);
-                console.log(' resData.current_page',  response.data.products.current_page);
-                console.log(' resData.last_page',  response.data.products.last_page);
-                console.log(' resData.links',  response.data.products.links);
                 setProductList(Array.isArray(resData) ? resData : []);
                 setPagination({
                     current_page: response.data.products.current_page,
@@ -121,7 +117,6 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
         setItems(userOrderSession.items)
     }
     const addItem = (product: Product) => {
-        console.log('addItem' , product, productList);
         setItems((prevItems) => {
 
             const existingIndex = prevItems.findIndex(item => item.id === product.id && item.variant_id === product.variant_id);
@@ -136,7 +131,6 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
 
         setProductList((prev) =>
             prev.map((p) => {
-                console.log('prev', p.id === product.id ,p.variant_id === product.variant_id, prev, p, product);
                     return (p.id === product.id && p.variant_id === product.variant_id) ? { ...p, quantity: p.quantity - 1 } : p
                 }
             )
