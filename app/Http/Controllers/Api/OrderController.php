@@ -59,6 +59,17 @@ class OrderController extends Controller
                     $currentFrom = $date->copy()->startOfYear();
                     $currentTo = $date->copy()->endOfYear();
                     break;
+                case 'custom':
+                    if ($request->has('date_range')) {
+                        $start = $request->input('date_range.from');
+                        $end = $request->input('date_range.to');
+                        $currentFrom = Carbon::parse($start)->startOfDay();
+                        $currentTo = Carbon::parse($end)->endOfDay();
+                        break;
+                    }
+                    $currentFrom = null;
+                    $currentTo = null;
+                    break;
 
                 default:
                     $currentFrom = null;
