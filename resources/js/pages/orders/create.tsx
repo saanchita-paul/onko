@@ -52,12 +52,6 @@ interface TempTaxDiscount {
     discount_description: string;
 }
 interface InertiaProps extends PageProps {
-    products: {
-        data: Product[];
-        current_page: number;
-        last_page: number;
-        links: LaravelPaginationItem[];
-    };
     companyDetails?: CompanyDetails | null;
     customers: PaginatedCustomers;
     orderItems: [],
@@ -74,15 +68,41 @@ interface Item extends Product {
 }
 
 
-export default function CreateOrder({ products, companyDetails, customers, userOrderSession, isReset, tempTaxDiscount }: InertiaProps) {
-    const [productList, setProductList] = useState<Product[]>(products.data);
+export default function CreateOrder({ companyDetails, customers, userOrderSession, isReset, tempTaxDiscount }: InertiaProps) {
+    const [productList, setProductList] = useState<Product[]>([]);
+
+    const [pagination, setPagination] = useState<{
+        current_page: number;
+        last_page: number;
+        links: LaravelPaginationItem[];
+    }>({
+        current_page: 1,
+        last_page: 1,
+        links: [],
+    });
+
+    const fetchProducts = (page = 1) => {
+        axios.get(`/api/orders/create?page=${page}`)
+            .then(response => {
+                const resData = response.data.products.data;
+                console.log('response data products:', response.data.products);
+                console.log(' resData.current_page',  response.data.products.current_page);
+                console.log(' resData.last_page',  response.data.products.last_page);
+                console.log(' resData.links',  response.data.products.links);
+                setProductList(Array.isArray(resData) ? resData : []);
+                setPagination({
+                    current_page: response.data.products.current_page,
+                    last_page: response.data.products.last_page,
+                    links: response.data.products.links,
+                });
+            })
+            .catch(console.error);
+    };
 
     useEffect(() => {
-        axios.get('/api/orders/create')
-            .then(response => {
-                console.log('response',response.data);
-            })
+        fetchProducts();
     }, []);
+
 
     useEffect(() => {
     }, [userOrderSession]);
@@ -93,9 +113,7 @@ export default function CreateOrder({ products, companyDetails, customers, userO
         }
     }, [isReset]);
 
-    // useEffect(() => {
-    //     setProductList(products.data);
-    // }, [products.data]);
+
 
     const [items, setItems] = useRemember<Item[]>([], 'order_items');
 
@@ -126,7 +144,6 @@ export default function CreateOrder({ products, companyDetails, customers, userO
     };
 
     const updateQty = (index: number, newQty: number) => {
-        console.log('gggagagag');
         if (isNaN(newQty) || newQty < 1) return;
 
         const item = items[index];
@@ -214,17 +231,6 @@ export default function CreateOrder({ products, companyDetails, customers, userO
             submit();
         }
     }, [data.logo, data.invoice_date]);
-
-    // useEffect(() => {
-    //     const adjustedProducts = products.data.map(product => {
-    //         const reservedQty = items.find(item => item.id === product.id && item.variant_id === product.variant_id)?.qty ?? 0;
-    //         return {
-    //             ...product,
-    //             quantity: Math.max(product.quantity - reservedQty, 0),
-    //         };
-    //     });
-    //     setProductList(adjustedProducts);
-    // }, [products.data, items]);
 
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -716,7 +722,8 @@ export default function CreateOrder({ products, companyDetails, customers, userO
                                                 <div className="text-left leading-snug font-medium break-words">
                                                     <span className="block font-bold text-black">{product.name}</span>
                                                     {product.variant_name && (
-                                                        <span className="block font-semibold text-blue-600">{product.variant_name}</span>
+                                                        <span
+                                                            className="block font-semibold text-blue-600">{product.variant_name}</span>
                                                     )}
                                                     {product.variant_options && typeof product.variant_options === 'object' && (
                                                         <span className="block text-sm text-green-600">
@@ -730,7 +737,8 @@ export default function CreateOrder({ products, companyDetails, customers, userO
                                                         </span>
                                                     )}
                                                 </div>
-                                                <div className="text-muted-foreground text-sm">৳ {Math.round(product.price)}</div>
+                                                <div
+                                                    className="text-muted-foreground text-sm">৳ {Math.round(product.price)}</div>
                                             </div>
 
                                             <div className="flex w-24 items-center justify-center gap-4">
@@ -750,7 +758,7 @@ export default function CreateOrder({ products, companyDetails, customers, userO
 
                                 <div className="border-t pt-4">
                                     <div className="flex flex-wrap items-center justify-center gap-2">
-                                        {products.links.map((link, idx) => (
+                                        {pagination.links.map((link, idx) => (
                                             <Button
                                                 key={idx}
                                                 variant={link.active ? 'default' : 'outline'}
@@ -758,11 +766,10 @@ export default function CreateOrder({ products, companyDetails, customers, userO
                                                 disabled={!link.url}
                                                 onClick={() => {
                                                     if (link.url) {
-                                                        router.visit(link.url, {
-                                                            preserveState: true,
-                                                            preserveScroll: true,
-                                                            only: ['products'],
-                                                        });
+                                                        const url = new URL(link.url);
+                                                        const pageParam = url.searchParams.get('page');
+                                                        const page = pageParam ? parseInt(pageParam, 10) : 1;
+                                                        fetchProducts(page);
                                                     }
                                                 }}
                                                 dangerouslySetInnerHTML={{ __html: link.label ?? '' }}
@@ -775,6 +782,7 @@ export default function CreateOrder({ products, companyDetails, customers, userO
                                         ))}
                                     </div>
                                 </div>
+
                             </CardContent>
                         </Card>
                     </div>
