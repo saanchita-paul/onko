@@ -165,23 +165,6 @@ export function AddSupplierForm() {
                                         );
                                     })}
                                 </div>
-
-                                {selectedProducts.length > 0 && (
-                                    <div className="mt-2 flex flex-wrap gap-1">
-                                        {selectedProducts.map((product) => (
-                                            <span key={product.id} className="bg-muted flex items-center gap-1 rounded-full px-2 py-1 text-sm">
-                                                {product.name}
-                                                <button
-                                                    type="button"
-                                                    onClick={() => removeProduct(product.id)}
-                                                    className="text-muted-foreground ml-1 hover:text-red-500"
-                                                >
-                                                    ×
-                                                </button>
-                                            </span>
-                                        ))}
-                                    </div>
-                                )}
                             </PopoverContent>
                         </Popover>
 
