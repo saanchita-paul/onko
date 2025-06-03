@@ -29,6 +29,7 @@ import {
     TabsList,
     TabsTrigger,
 } from "@/components/ui/tabs";
+import { AddSupplierForm } from '@/pages/suppliers/create';
 
 const tabTriggerClass =
     "data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-md " +
@@ -91,6 +92,7 @@ export default function Index({ suppliers } : Props) {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Suppliers" />
+            <AddSupplierForm/>
             <div className="flex flex-1 flex-col gap-4 rounded-xl p-4 relative">
                 <h1 className="text-5xl font-bold">Suppliers</h1>
                 <Tabs defaultValue="active" className="w-full">
