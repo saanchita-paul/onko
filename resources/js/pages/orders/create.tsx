@@ -391,8 +391,8 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
                 </div>
                 <h1 className="text-2xl font-bold">New Invoice</h1>
                 <p className="text-muted-foreground mb-4">Create a new Invoice or Sales Receipt</p>
-                <div className="flex flex-col gap-6 lg:flex-row">
-                    <div className="w-full space-y-4 lg:flex-1">
+                <div className="flex flex-col gap-6 lg:flex-row custom-break">
+                    <div className="w-full lg:max-w-lvw space-y-4">
                         <Card>
                             <CardContent className="space-y-4 p-6 sm:p-6">
                                 <div className="grid grid-cols-2 gap-4">
@@ -535,8 +535,8 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
                                     <span>#</span>
                                     <span>Item</span>
                                     <span className="text-center">Qty</span>
-                                    <span className="text-center">Price</span>
-                                    <span className="text-center">Total</span>
+                                    <span className="text-right">Price</span>
+                                    <span className="text-right">Total</span>
                                     <span></span>
                                 </div>
                                 {items
@@ -550,12 +550,12 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
                                                 <span className="w-24 font-medium sm:hidden">#</span>
                                                 <span className="text-right sm:text-left">{index + 1}</span>
                                             </div>
-                                            <div className="flex justify-between sm:block">
+                                            <div className="flex flex-col justify-between sm:block">
                                                 <span className="w-24 font-medium sm:hidden">Item:</span>
                                                 <span className="text-right sm:text-left">{item.variant_name}</span>
                                             </div>
-                                            <div className="flex justify-between sm:block sm:justify-center">
-                                                <span className="w-24 font-medium sm:hidden">Qty:</span>
+                                            <div className="flex flex-col items-end sm:flex-row sm:items-center sm:justify-center">
+                                                <span className="w-24 text-left font-medium sm:hidden">Qty:</span>
                                                 <Input
                                                     type="number"
                                                     value={item.qty}
@@ -569,12 +569,14 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
                                                 />
                                             </div>
                                             <div className="flex sm:block sm:justify-end">
-                                                <span className="w-24 font-medium sm:hidden">Price:</span>
-                                                <span className="w-full rounded border px-2 py-1 pr-2 text-right">{Math.round(item.price)}</span>
+                                                <span className="w-24 text-left font-medium sm:hidden">Price:</span>
+                                                <span className="flex w-auto justify-end">
+                                                    <p className=" w-max rounded border p-1">{Math.round(item.price)}</p>
+                                                </span>
                                             </div>
                                             <div className="flex justify-between sm:block sm:justify-end">
-                                                <span className="w-24 font-medium sm:hidden">Total:</span>
-                                                <span className="w-full text-right">{item.qty * item.price}/-</span>
+                                                <span className="float-right w-24 text-right font-medium sm:hidden">Total:</span>
+                                                <span className="block w-full text-right">{item.qty * item.price}/-</span>
                                             </div>
                                             <div className="flex justify-end">
                                                 <Button variant="ghost" size="icon" onClick={() => removeItem(index)}>
@@ -767,10 +769,9 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
                                         >
                                             <div>
                                                 <div className="text-left leading-snug font-medium break-words">
-                                                    <span className="block font-bold text-black">{product.name}</span>
+                                                    <span className="block font-bold">{product.name}</span>
                                                     {product.variant_name && (
-                                                        <span
-                                                            className="block font-semibold text-blue-600">{product.variant_name}</span>
+                                                        <span className="block font-semibold text-blue-600">{product.variant_name}</span>
                                                     )}
                                                     {product.variant_options && typeof product.variant_options === 'object' && (
                                                         <span className="block text-sm text-green-600">
@@ -784,8 +785,7 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
                                                         </span>
                                                     )}
                                                 </div>
-                                                <div
-                                                    className="text-muted-foreground text-sm">৳ {Math.round(product.price)}</div>
+                                                <div className="text-muted-foreground text-sm">৳ {Math.round(product.price)}</div>
                                             </div>
 
                                             <div className="flex w-24 items-center justify-center gap-4">
@@ -871,7 +871,6 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
                                         ))}
                                     </div>
                                 </div>
-
                             </CardContent>
                         </Card>
                     </div>

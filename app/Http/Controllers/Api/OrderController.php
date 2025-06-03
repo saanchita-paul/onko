@@ -143,8 +143,7 @@ class OrderController extends Controller
     {
         $companyDetails = Option::companyDetails();
         $tempTaxDiscount = session('temp_tax_discount', null);
-        $orderOn = session('order_on' ?? now()->toDateString());
-
+        $orderOn = session('order_on') ?? now()->toDateString();
         return [
             'customer' => $request->input('customer'),
             'items' => $request->input('items'),
