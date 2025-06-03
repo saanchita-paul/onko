@@ -391,7 +391,7 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
                 </div>
                 <h1 className="text-2xl font-bold">New Invoice</h1>
                 <p className="text-muted-foreground mb-4">Create a new Invoice or Sales Receipt</p>
-                <div className="flex flex-col gap-6 lg:flex-row">
+                <div className="flex flex-col gap-6 lg:flex-row custom-break">
                     <div className="w-full lg:max-w-lvw space-y-4">
                         <Card>
                             <CardContent className="space-y-4 p-6 sm:p-6">

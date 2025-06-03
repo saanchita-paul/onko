@@ -172,3 +172,8 @@
     gap: 1.5rem;
 }
 
+@media (min-width: 1024px) and (max-width: 1280px) {
+    .custom-break {
+        flex-direction: column !important;
+    }
+}
