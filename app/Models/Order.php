@@ -21,7 +21,8 @@ class Order extends Model
         'grand_total',
         'payments_total',
         'status',
-        'meta'
+        'meta',
+        'order_on'
     ];
 
     public function customer(): BelongsTo

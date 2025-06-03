@@ -60,6 +60,7 @@ interface InertiaProps extends PageProps {
         items: Item[];
         companyDetails: CompanyDetails;
         orderId: string;
+        order_on: string;
     };
     tempTaxDiscount?: TempTaxDiscount;
 }
@@ -67,9 +68,9 @@ interface Item extends Product {
     qty: number;
 }
 
-
 export default function CreateOrder({ companyDetails, customers, userOrderSession, isReset, tempTaxDiscount }: InertiaProps) {
     const [productList, setProductList] = useState<Product[]>([]);
+    const [productListAll, setProductListAll] = useState<Product[]>([]);
 
     const [pagination, setPagination] = useState<{
         current_page: number;
@@ -82,7 +83,7 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
     });
 
     const fetchProducts = (page = 1) => {
-        const url = route('stock.index', { page });
+        const url = route('stock.index', { page: page, stock_only: 1 });
         axios.get(url)
             .then(response => {
                 const resData = response.data.products.data;
@@ -99,13 +100,38 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
             });
     };
 
+    const fetchProductsAll = (page = 1) => {
+        const url = route('stock.index', { page });
+        axios.get(url)
+            .then(response => {
+                const resData = response.data.products.data;
+                setProductListAll(Array.isArray(resData) ? resData : []);
+                setPagination({
+                    current_page: response.data.products.current_page,
+                    last_page: response.data.products.last_page,
+                    links: response.data.products.links,
+                });
+            })
+            .catch(error => {
+                const errorMessage = error?.response?.data?.message || "Failed to fetch products.";
+                toast.error(errorMessage);
+            });
+    };
+
     useEffect(() => {
         fetchProducts();
+        fetchProductsAll();
     }, []);
 
 
     useEffect(() => {
-    }, [userOrderSession]);
+        if (!items.length && userOrderSession?.items?.length){
+            setItems(userOrderSession.items)
+        }
+        if (userOrderSession?.order_on) {
+            setData('order_on', userOrderSession.order_on);
+        }
+    }, []);
 
     useEffect(() => {
         if (isReset) {
@@ -113,13 +139,8 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
         }
     }, [isReset]);
 
-
-
     const [items, setItems] = useRemember<Item[]>([], 'order_items');
 
-    if (!items.length && userOrderSession?.items?.length){
-        setItems(userOrderSession.items)
-    }
     const addItem = (product: Product) => {
         setItems((prevItems) => {
 
@@ -134,6 +155,13 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
         });
 
         setProductList((prev) =>
+            prev.map((p) => {
+                    return (p.id === product.id && p.variant_id === product.variant_id) ? { ...p, quantity: p.quantity - 1 } : p
+                }
+            )
+        );
+
+        setProductListAll((prev) =>
             prev.map((p) => {
                     return (p.id === product.id && p.variant_id === product.variant_id) ? { ...p, quantity: p.quantity - 1 } : p
                 }
@@ -159,7 +187,12 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
 
         setProductList((prev) =>
             prev.map((p) =>
-                p.id === item.id ? { ...p, quantity: p.quantity - delta } : p
+                (p.id === item.id && p.variant_id === item.variant_id) ? { ...p, quantity: p.quantity - delta } : p
+            )
+        );
+        setProductListAll((prev) =>
+            prev.map((p) =>
+                (p.id === item.id && p.variant_id === item.variant_id) ? { ...p, quantity: p.quantity - delta } : p
             )
         );
     };
@@ -169,7 +202,12 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
         const removed = items[index];
         setProductList((prev) =>
             prev.map((p) =>
-                p.id === removed.id ? { ...p, quantity: p.quantity + removed.qty } : p
+                (p.id === removed.id && p.variant_id === removed.variant_id) ? { ...p, quantity: p.quantity + removed.qty } : p
+            )
+        );
+        setProductListAll((prev) =>
+            prev.map((p) =>
+                (p.id === removed.id && p.variant_id === removed.variant_id) ? { ...p, quantity: p.quantity + removed.qty } : p
             )
         );
         setItems((prev) => prev.filter((_, i) => i !== index));
@@ -189,17 +227,19 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
         setSelectedTab(tabValue);
     };
 
-
+    const today = format(new Date(), 'yyyy-MM-dd');
     const { data, setData } = useForm<{
         company_name: string;
         company_address: string;
         invoice_date: string | null;
         logo: string | File | null;
+        order_on: string;
     }>({
         company_name: companyDetails?.company_name ?? '',
         company_address: companyDetails?.company_address ?? '',
         invoice_date: companyDetails?.invoice_date ?? null,
         logo: companyDetails?.logo ?? null,
+        order_on: userOrderSession?.order_on ?? today,
     });
 
 
@@ -330,7 +370,6 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
             toast.error('Error deleting logo');
         }
     };
-
     return (
         <AppLayout>
             <Head title="Create Order" />
@@ -448,20 +487,29 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
                                                         type="button"
                                                         className={cn(
                                                             'flex w-full items-center justify-between rounded-md border px-3 py-2 text-left text-sm',
-                                                            !data.invoice_date && 'text-muted-foreground',
+                                                            !data.order_on && 'text-muted-foreground',
                                                         )}
                                                     >
-                                                        {data.invoice_date ? format(data.invoice_date, 'dd-MM-yyyy') : 'Pick a date'}
+                                                        {data.order_on
+                                                            ? format(new Date(data.order_on), 'dd-MM-yyyy')
+                                                            : 'Pick a date'}
                                                         <CalendarIcon className="text-muted-foreground ml-2 h-4 w-4" />
                                                     </button>
                                                 </PopoverTrigger>
                                                 <PopoverContent className="w-auto p-0">
                                                     <Calendar
                                                         mode="single"
+                                                        selected={new Date(data.order_on)}
                                                         onSelect={(date) => {
                                                             if (date) {
                                                                 const formatted = format(date, 'yyyy-MM-dd');
-                                                                setData('invoice_date', formatted);
+                                                                setData('order_on', formatted);
+
+                                                                router.post(route('orders.setDateSession'), {
+                                                                    order_on: formatted,
+                                                                }, {
+                                                                    preserveScroll: true,
+                                                                });
                                                             }
                                                         }}
                                                     />
@@ -710,8 +758,9 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
                                         </TabsList>
                                     </Tabs>
                                 </div>
+
                                 <div className="space-y-2">
-                                    {productList.map((product) => (
+                                    {selectedTab === 'in-stock' ? productList.map((product) => (
                                         <div
                                             key={product.id + (product.variant_id ?? '')}
                                             className="flex items-center justify-between rounded-lg px-4 py-2"
@@ -751,7 +800,49 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
                                                 </Button>
                                             </div>
                                         </div>
-                                    ))}
+                                    ))
+                                    : productListAll.map((product) => (
+                                            <div
+                                                key={product.id + (product.variant_id ?? '')}
+                                                className="flex items-center justify-between rounded-lg px-4 py-2"
+                                            >
+                                                <div>
+                                                    <div className="text-left leading-snug font-medium break-words">
+                                                        <span className="block font-bold text-black">{product.name}</span>
+                                                        {product.variant_name && (
+                                                            <span
+                                                                className="block font-semibold text-blue-600">{product.variant_name}</span>
+                                                        )}
+                                                        {product.variant_options && typeof product.variant_options === 'object' && (
+                                                            <span className="block text-sm text-green-600">
+                                                            <div>
+                                                                {Object.entries(product.variant_options).map(([key, value]) => (
+                                                                    <span key={key} className="mr-2">
+                                                                        {key}: {value}
+                                                                    </span>
+                                                                ))}
+                                                            </div>
+                                                        </span>
+                                                        )}
+                                                    </div>
+                                                    <div
+                                                        className="text-muted-foreground text-sm">৳ {Math.round(product.price)}</div>
+                                                </div>
+
+                                                <div className="flex w-24 items-center justify-center gap-4">
+                                                    <span className="w-4 text-center text-sm">{product.quantity}</span>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="icon"
+                                                        className="ml-3"
+                                                        onClick={() => product.quantity > 0 && addItem(product)}
+                                                    >
+                                                        <Plus className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        ))
+                                    }
                                 </div>
 
                                 <div className="border-t pt-4">
