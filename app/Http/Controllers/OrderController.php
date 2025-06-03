@@ -38,6 +38,7 @@ class OrderController extends ApiOrderController
         }else{
             session()->forget('user_order_session');
             session()->forget('temp_tax_discount');
+            session()->forget('order_on');
         }
 
         return Inertia::render('orders/create', $data);

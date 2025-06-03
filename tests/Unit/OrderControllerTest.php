@@ -96,6 +96,7 @@ class OrderControllerTest extends TestCase
         $session = \Mockery::mock(SessionStore::class);
         $session->shouldReceive('forget')->once()->with('user_order_session');
         $session->shouldReceive('forget')->once()->with('temp_tax_discount');
+        $session->shouldReceive('forget')->once()->with('order_on');
         $session->shouldReceive('get')->andReturn([]);
 
         $this->app->make(Redirector::class);

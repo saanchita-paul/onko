@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('customer_id')->references('id')->on('customers')->nullable();
+            $table->date('order_on')->nullable();
             $table->integer('sub_total');
             $table->integer('discount_total')->default(0);
             $table->integer('tax_total')->default(0);

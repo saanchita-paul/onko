@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import printJS from 'print-js';
 
-export default function ConfirmOrder({ customer, items, companyDetails, orderId, tempTaxDiscount}: PageProps<{ customer: Customer; items: OrderItem[];  companyDetails: CompanyDetails, orderId: string }>) {
+export default function ConfirmOrder({ customer, items, companyDetails, orderId, tempTaxDiscount, order_on}: PageProps<{ customer: Customer; items: OrderItem[];  companyDetails: CompanyDetails, orderId: string, order_on: string;}>) {
     const [isConfirmed, setIsConfirmed] = useState(false);
     const [orderItems] = useState<OrderItem[]>(items);
     const subtotal = (() => {
@@ -76,11 +76,9 @@ export default function ConfirmOrder({ customer, items, companyDetails, orderId,
     const handleEdit = () => {
         router.visit(route('orders.create'), {
             data: {
-                items,
-                tempTaxDiscount
+                editSession: true
             },
         });
-
     };
 
     return (
@@ -204,7 +202,7 @@ export default function ConfirmOrder({ customer, items, companyDetails, orderId,
                             <div className="grid grid-cols-[auto_1fr] gap-2 mb-3">
                                 <span className="font-medium">Date:</span>
                                 <span className="text-right">
-                                    {new Date(companyDetails?.invoice_date || new Date()).toLocaleDateString('en-GB', {
+                                    {new Date(order_on || new Date()).toLocaleDateString('en-GB', {
                                         day: 'numeric',
                                         month: 'short',
                                         year: 'numeric',
