@@ -27,7 +27,6 @@ class OrderController extends ApiOrderController
         $userOrderSession['order_on'] = session('order_on');
 
         $data = [
-            'products' => $response['products'],
             'companyDetails' => $response['companyDetails'],
             'customers' => $response['customers'],
             'isReset' => session('isReset', false),

@@ -3,6 +3,7 @@
 namespace Tests\Unit;
 
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\StockController;
 use App\Http\Requests\SaveTempTaxDiscountRequest;
 use App\Http\Requests\StoreOrderRequest;
 use App\Models\Consignment;
@@ -14,6 +15,7 @@ use App\Models\Payment;
 use App\Models\ProductVariant;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Routing\Redirector;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -39,7 +41,7 @@ class OrderControllerTest extends TestCase
     }
 
     /** @test */
-    public function it_returns_paginated_products_in_create()
+    public function test_it_returns_paginated_products()
     {
         $user = User::factory()->create();
         $this->actingAs($user);
@@ -51,12 +53,15 @@ class OrderControllerTest extends TestCase
         $variant = ProductVariant::factory()->create([
             'product_id' => $products->first()->id,
         ]);
+
         foreach ($products as $product) {
-           ConsignmentItem::factory()->create([
+            ConsignmentItem::factory()->create([
                 'product_id' => $product->id,
                 'product_variant_id' => $variant->id,
                 'consignment_id' => $consignment->id,
                 'qty' => rand(1, 10),
+                'qty_sold' => 0,
+                'qty_waste' => 0,
             ]);
         }
 
@@ -65,31 +70,82 @@ class OrderControllerTest extends TestCase
             'product_variant_id' => $variant->id,
             'consignment_id' => $consignment->id,
             'qty' => 5,
+            'qty_sold' => 0,
+            'qty_waste' => 0,
         ]);
 
-        $response = $this->get('/orders/create');
+        $response = $this->getJson('/api/stock');
 
         $response->assertStatus(200);
 
-        $response->assertInertia(fn ($page) =>
-        $page->component('orders/create')
-            ->has('products.data', 5)
-            ->where('products.current_page', 1)
-            ->has('products.data.0', fn ($product) =>
-            $product
-                ->hasAll([
-                    'id',
-                    'name',
-                    'price',
-                    'quantity',
-                    'variant_id',
-                    'variant_name',
-                    'variant_options',
-                ])
-            )
-        );
+        $response->assertJsonStructure([
+            'products' => [
+                'current_page',
+                'data' => [
+                    '*' => [
+                        'id',
+                        'name',
+                        'price',
+                        'quantity',
+                        'variant_id',
+                        'variant_name',
+                        'variant_options',
+                    ],
+                ],
+                'first_page_url',
+                'from',
+                'last_page',
+                'last_page_url',
+                'links',
+                'next_page_url',
+                'path',
+                'per_page',
+                'prev_page_url',
+                'to',
+                'total',
+            ],
+        ]);
+
+        $firstProduct = $response->json('products.data.0');
+
+        $this->assertArrayHasKey('id', $firstProduct);
+        $this->assertArrayHasKey('name', $firstProduct);
+        $this->assertArrayHasKey('price', $firstProduct);
+        $this->assertArrayHasKey('quantity', $firstProduct);
+        $this->assertArrayHasKey('variant_id', $firstProduct);
+        $this->assertArrayHasKey('variant_name', $firstProduct);
+        $this->assertArrayHasKey('variant_options', $firstProduct);
+
+        $variantOptions = $firstProduct['variant_options'];
+        $this->assertTrue(is_array($variantOptions) || is_string($variantOptions));
+
+        if (is_string($variantOptions)) {
+            $decoded = json_decode($variantOptions, true);
+            $this->assertIsArray($decoded);
+        }
     }
 
+
+    public function test_create_returns_company_details_and_customers()
+    {
+        Option::insert([
+            ['key' => 'company_name', 'value' => 'Test Company'],
+            ['key' => 'company_address', 'value' => '123 Test St'],
+            ['key' => 'logo', 'value' => 'logo.png'],
+        ]);
+
+        Customer::factory()->count(3)->create(['name' => 'John Doe']);
+
+        $response = $this->get('/orders/create');
+
+        $response->assertStatus(200)
+            ->assertInertia(fn ($page) => $page
+                ->where('companyDetails.company_name', 'Test Company')
+                ->where('companyDetails.company_address', '123 Test St')
+                ->where('companyDetails.logo', 'logo.png')
+                ->has('customers.data', 2)
+            );
+    }
 
     public function test_reset_clears_session_and_redirects()
     {
