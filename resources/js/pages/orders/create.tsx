@@ -1,5 +1,5 @@
 import AppLayout from '@/layouts/app-layout';
-import { Head, router, useForm, useRemember } from '@inertiajs/react';
+import { Head, router, useForm } from '@inertiajs/react';
 import { OrderForm } from '@/pages/orders/order-form';
 import {
     Card,
@@ -140,7 +140,7 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
         }
     }, [isReset]);
 
-    const [items, setItems] = useRemember<Item[]>([], 'order_items');
+    const [items, setItems] = useState<Item[]>([]);
 
     const addItem = (product: Product) => {
         setItems((prevItems) => {
