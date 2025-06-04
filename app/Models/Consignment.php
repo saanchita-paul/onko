@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Consignment extends Model
 {
@@ -18,6 +19,11 @@ class Consignment extends Model
     public function consignmentItems(): HasMany
     {
         return $this->hasMany(ConsignmentItem::class);
+    }
+
+    public function expenses(): MorphMany
+    {
+        return $this->morphMany(Expense::class, 'expensable');
     }
 
 }

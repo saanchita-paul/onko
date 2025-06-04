@@ -2,25 +2,24 @@
 
 namespace Database\Factories;
 
-use App\Models\Order;
+use App\Models\Expense;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
-/**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Expense>
- */
 class ExpenseFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
+    protected $model = Expense::class;
+
     public function definition(): array
     {
         return [
-            'expensable_id' => Order::factory(),
-            'expensable_type' => Order::class,
-            'amount' => rand(1000, 500000),
+            'id' => (string) Str::uuid(),
+            'description' => $this->faker->sentence(3),
+            'amount' => $this->faker->randomFloat(2, 10, 1000),
+            'expense_date' => $this->faker->date(),
+            'status' => $this->faker->randomElement(['pending', 'approved', 'rejected']),
+            'expensable_id' => null,
+            'expensable_type' => null,
         ];
     }
 }

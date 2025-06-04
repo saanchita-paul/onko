@@ -31,24 +31,7 @@ class DatabaseSeeder extends Seeder
             ))
             ->create();
 
-        $rand = rand(1, 15);
-
-        for($i = 0; $i < $rand; $i++)
-        {
-            $order = $orders->random();
-            $consignment = $consignments->random();
-
-            Expense::factory()->create([
-                'expensable_id' => $order->id
-            ]);
-
-            Expense::factory()->create([
-                'expensable_id' => $consignment->id,
-                'expensable_type' => Consignment::class,
-            ]);
-        }
-
-        Employee::factory()
+        $employees = Employee::factory()
             ->count(10)
             ->create();
 
@@ -59,5 +42,24 @@ class DatabaseSeeder extends Seeder
         Payment::factory()
             ->count(100)
             ->create();
+
+        $rand = rand(10, 20);
+
+        for ($i = 0; $i < $rand; $i++) {
+            Expense::factory()->create([
+                'expensable_id' => $orders->random()->id,
+                'expensable_type' => Order::class,
+            ]);
+
+            Expense::factory()->create([
+                'expensable_id' => $consignments->random()->id,
+                'expensable_type' => Consignment::class,
+            ]);
+
+            Expense::factory()->create([
+                'expensable_id' => $employees->random()->id,
+                'expensable_type' => Employee::class,
+            ]);
+        }
     }
 }
