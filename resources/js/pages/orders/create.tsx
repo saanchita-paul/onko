@@ -33,6 +33,7 @@ import { format } from 'date-fns';
 import type {  PaginatedCustomers } from '@/pages/orders/order-form';
 import axios from 'axios';
 import { toast } from 'sonner';
+import CustomPagination from '@/components/custom/CustomPagination';
 interface Product {
     id: string;
     name: string;
@@ -225,6 +226,11 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
 
     const handleTabChange = (tabValue: string) => {
         setSelectedTab(tabValue);
+        if (tabValue === 'in-stock') {
+            fetchProducts(1);
+        } else {
+            fetchProductsAll(1);
+        }
     };
 
     const today = format(new Date(), 'yyyy-MM-dd');
@@ -369,34 +375,6 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
         } catch {
             toast.error('Error deleting logo');
         }
-    };
-
-    const renderCustomPagination = () => {
-        const { current_page, last_page } = pagination;
-        const pages: (number | string)[] = [];
-
-        pages.push(1);
-
-        if (current_page > 4) {
-            pages.push('...');
-        }
-
-        const start = Math.max(2, current_page - 1);
-        const end = Math.min(last_page - 1, current_page + 1);
-
-        for (let i = start; i <= end; i++) {
-            pages.push(i);
-        }
-
-        if (current_page < last_page - 3) {
-            pages.push('...');
-        }
-
-        if (last_page > 1) {
-            pages.push(last_page);
-        }
-
-        return pages;
     };
 
     return (
@@ -873,130 +851,143 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
                                               </div>
                                           ))}
                                 </div>
+        {/*                        {selectedTab === 'in-stock' ? (*/}
+        {/*                            <div className="border-t pt-4">*/}
+        {/*                                <div className="flex flex-wrap items-center justify-center gap-2">*/}
+
+        {/*                                    <Button*/}
+        {/*                                        size="sm"*/}
+        {/*                                        variant="outline"*/}
+        {/*                                        disabled={pagination.current_page === 1}*/}
+        {/*                                        onClick={() => fetchProducts(1)}*/}
+        {/*                                    >*/}
+        {/*                                        &laquo;*/}
+        {/*                                    </Button>*/}
+        {/*                                    <Button*/}
+        {/*                                        size="sm"*/}
+        {/*                                        variant="outline"*/}
+        {/*                                        disabled={pagination.current_page === 1}*/}
+        {/*                                        onClick={() => fetchProducts(pagination.current_page - 1)}*/}
+        {/*                                    >*/}
+        {/*                                        &lsaquo;*/}
+        {/*                                    </Button>*/}
+
+
+        {/*                                    {renderCustomPagination().map((item, idx) =>*/}
+        {/*                                        item === '...' ? (*/}
+        {/*                                            <span key={idx} className="px-2 text-gray-500">*/}
+        {/*                                                ...*/}
+        {/*                                            </span>*/}
+        {/*                                        ) : (*/}
+        {/*                                            <Button*/}
+        {/*                                                key={idx}*/}
+        {/*                                                size="sm"*/}
+        {/*                                                variant={item === pagination.current_page ? 'default' : 'outline'}*/}
+        {/*                                                onClick={() => fetchProducts(item as number)}*/}
+        {/*                                                className={`rounded px-3 py-1 text-sm ${*/}
+        {/*                                                    item === pagination.current_page*/}
+        {/*                                                        ? 'bg-black text-white dark:bg-white dark:text-black'*/}
+        {/*                                                        : 'text-black hover:bg-gray-100 dark:text-white dark:hover:bg-gray-800'*/}
+        {/*                                                }`}*/}
+        {/*                                            >*/}
+        {/*                                                {item}*/}
+        {/*                                            </Button>*/}
+        {/*                                        ),*/}
+        {/*                                    )}*/}
+
+
+        {/*                                    <Button*/}
+        {/*                                        size="sm"*/}
+        {/*                                        variant="outline"*/}
+        {/*                                        disabled={pagination.current_page === pagination.last_page}*/}
+        {/*                                        onClick={() => fetchProducts(pagination.current_page + 1)}*/}
+        {/*                                    >*/}
+        {/*                                        &rsaquo;*/}
+        {/*                                    </Button>*/}
+        {/*                                    <Button*/}
+        {/*                                        size="sm"*/}
+        {/*                                        variant="outline"*/}
+        {/*                                        disabled={pagination.current_page === pagination.last_page}*/}
+        {/*                                        onClick={() => fetchProducts(pagination.last_page)}*/}
+        {/*                                    >*/}
+        {/*                                        &raquo;*/}
+        {/*                                    </Button>*/}
+        {/*                                </div>*/}
+        {/*                            </div>*/}
+        {/*                        ) : (*/}
+        {/*                            <div className="border-t pt-4">*/}
+        {/*                                <div className="flex flex-wrap items-center justify-center gap-2">*/}
+        {/*                                    <Button*/}
+        {/*                                        size="sm"*/}
+        {/*                                        variant="outline"*/}
+        {/*                                        disabled={pagination.current_page === 1}*/}
+        {/*                                        onClick={() => fetchProductsAll(1)}*/}
+        {/*                                    >*/}
+        {/*                                        &laquo;*/}
+        {/*                                    </Button>*/}
+        {/*                                    <Button*/}
+        {/*                                        size="sm"*/}
+        {/*                                        variant="outline"*/}
+        {/*                                        disabled={pagination.current_page === 1}*/}
+        {/*                                        onClick={() => fetchProductsAll(pagination.current_page - 1)}*/}
+        {/*                                    >*/}
+        {/*                                        &lsaquo;*/}
+        {/*                                    </Button>*/}
+
+        {/*                                    {renderCustomPagination().map((item, idx) =>*/}
+        {/*                                            item === '...' ? (*/}
+        {/*                                                <span key={idx} className="px-2 text-gray-500">*/}
+        {/*  ...*/}
+        {/*</span>*/}
+        {/*                                            ) : (*/}
+        {/*                                                <Button*/}
+        {/*                                                    key={idx}*/}
+        {/*                                                    size="sm"*/}
+        {/*                                                    variant={item === pagination.current_page ? 'default' : 'outline'}*/}
+        {/*                                                    onClick={() => fetchProductsAll(item as number)}*/}
+        {/*                                                    className={`rounded px-3 py-1 text-sm ${*/}
+        {/*                                                        item === pagination.current_page*/}
+        {/*                                                            ? 'bg-black text-white dark:bg-white dark:text-black'*/}
+        {/*                                                            : 'text-black hover:bg-gray-100 dark:text-white dark:hover:bg-gray-800'*/}
+        {/*                                                    }`}*/}
+        {/*                                                >*/}
+        {/*                                                    {item}*/}
+        {/*                                                </Button>*/}
+        {/*                                            )*/}
+        {/*                                    )}*/}
+
+        {/*                                    <Button*/}
+        {/*                                        size="sm"*/}
+        {/*                                        variant="outline"*/}
+        {/*                                        disabled={pagination.current_page === pagination.last_page}*/}
+        {/*                                        onClick={() => fetchProductsAll(pagination.current_page + 1)}*/}
+        {/*                                    >*/}
+        {/*                                        &rsaquo;*/}
+        {/*                                    </Button>*/}
+        {/*                                    <Button*/}
+        {/*                                        size="sm"*/}
+        {/*                                        variant="outline"*/}
+        {/*                                        disabled={pagination.current_page === pagination.last_page}*/}
+        {/*                                        onClick={() => fetchProductsAll(pagination.last_page)}*/}
+        {/*                                    >*/}
+        {/*                                        &raquo;*/}
+        {/*                                    </Button>*/}
+        {/*                                </div>*/}
+        {/*                            </div>*/}
+
+        {/*                        )}*/}
                                 {selectedTab === 'in-stock' ? (
-                                    <div className="border-t pt-4">
-                                        <div className="flex flex-wrap items-center justify-center gap-2">
-
-                                            <Button
-                                                size="sm"
-                                                variant="outline"
-                                                disabled={pagination.current_page === 1}
-                                                onClick={() => fetchProducts(1)}
-                                            >
-                                                &laquo;
-                                            </Button>
-                                            <Button
-                                                size="sm"
-                                                variant="outline"
-                                                disabled={pagination.current_page === 1}
-                                                onClick={() => fetchProducts(pagination.current_page - 1)}
-                                            >
-                                                &lsaquo;
-                                            </Button>
-
-
-                                            {renderCustomPagination().map((item, idx) =>
-                                                item === '...' ? (
-                                                    <span key={idx} className="px-2 text-gray-500">
-                                                        ...
-                                                    </span>
-                                                ) : (
-                                                    <Button
-                                                        key={idx}
-                                                        size="sm"
-                                                        variant={item === pagination.current_page ? 'default' : 'outline'}
-                                                        onClick={() => fetchProducts(item as number)}
-                                                        className={`rounded px-3 py-1 text-sm ${
-                                                            item === pagination.current_page
-                                                                ? 'bg-black text-white dark:bg-white dark:text-black'
-                                                                : 'text-black hover:bg-gray-100 dark:text-white dark:hover:bg-gray-800'
-                                                        }`}
-                                                    >
-                                                        {item}
-                                                    </Button>
-                                                ),
-                                            )}
-
-
-                                            <Button
-                                                size="sm"
-                                                variant="outline"
-                                                disabled={pagination.current_page === pagination.last_page}
-                                                onClick={() => fetchProducts(pagination.current_page + 1)}
-                                            >
-                                                &rsaquo;
-                                            </Button>
-                                            <Button
-                                                size="sm"
-                                                variant="outline"
-                                                disabled={pagination.current_page === pagination.last_page}
-                                                onClick={() => fetchProducts(pagination.last_page)}
-                                            >
-                                                &raquo;
-                                            </Button>
-                                        </div>
-                                    </div>
+                                    <CustomPagination
+                                        currentPage={pagination.current_page}
+                                        lastPage={pagination.last_page}
+                                        onPageChange={(page) => fetchProducts(page)}
+                                    />
                                 ) : (
-                                    <div className="border-t pt-4">
-                                        <div className="flex flex-wrap items-center justify-center gap-2">
-                                            <Button
-                                                size="sm"
-                                                variant="outline"
-                                                disabled={pagination.current_page === 1}
-                                                onClick={() => fetchProductsAll(1)}
-                                            >
-                                                &laquo;
-                                            </Button>
-                                            <Button
-                                                size="sm"
-                                                variant="outline"
-                                                disabled={pagination.current_page === 1}
-                                                onClick={() => fetchProductsAll(pagination.current_page - 1)}
-                                            >
-                                                &lsaquo;
-                                            </Button>
-
-                                            {renderCustomPagination().map((item, idx) =>
-                                                    item === '...' ? (
-                                                        <span key={idx} className="px-2 text-gray-500">
-          ...
-        </span>
-                                                    ) : (
-                                                        <Button
-                                                            key={idx}
-                                                            size="sm"
-                                                            variant={item === pagination.current_page ? 'default' : 'outline'}
-                                                            onClick={() => fetchProductsAll(item as number)}
-                                                            className={`rounded px-3 py-1 text-sm ${
-                                                                item === pagination.current_page
-                                                                    ? 'bg-black text-white dark:bg-white dark:text-black'
-                                                                    : 'text-black hover:bg-gray-100 dark:text-white dark:hover:bg-gray-800'
-                                                            }`}
-                                                        >
-                                                            {item}
-                                                        </Button>
-                                                    )
-                                            )}
-
-                                            <Button
-                                                size="sm"
-                                                variant="outline"
-                                                disabled={pagination.current_page === pagination.last_page}
-                                                onClick={() => fetchProductsAll(pagination.current_page + 1)}
-                                            >
-                                                &rsaquo;
-                                            </Button>
-                                            <Button
-                                                size="sm"
-                                                variant="outline"
-                                                disabled={pagination.current_page === pagination.last_page}
-                                                onClick={() => fetchProductsAll(pagination.last_page)}
-                                            >
-                                                &raquo;
-                                            </Button>
-                                        </div>
-                                    </div>
-
+                                    <CustomPagination
+                                        currentPage={pagination.current_page}
+                                        lastPage={pagination.last_page}
+                                        onPageChange={(page) => fetchProductsAll(page)}
+                                    />
                                 )}
                             </CardContent>
                         </Card>
