@@ -16,7 +16,7 @@ class ExpenseFactory extends Factory
         return [
             'id' => (string) Str::uuid(),
             'description' => $this->faker->sentence(3),
-            'amount' => $this->faker->randomFloat(2, 10, 1000),
+            'amount' => fake()->numberBetween(1000, 100000),
             'expense_date' => $this->faker->date(),
             'status' => $this->faker->randomElement(['pending', 'approved', 'rejected']),
             'expensable_id' => Order::factory(),

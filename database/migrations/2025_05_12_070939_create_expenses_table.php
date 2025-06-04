@@ -9,7 +9,7 @@ return new class extends Migration {
         Schema::create('expenses', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('description');
-            $table->decimal('amount', 15, 2);
+            $table->integer('amount');
             $table->uuidMorphs('expensable'); // ✅ for UUID-based polymorphic relation
             $table->date('expense_date');
             $table->string('status')->default('pending');
