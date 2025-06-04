@@ -370,6 +370,35 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
             toast.error('Error deleting logo');
         }
     };
+
+    const renderCustomPagination = () => {
+        const { current_page, last_page } = pagination;
+        const pages: (number | string)[] = [];
+
+        pages.push(1);
+
+        if (current_page > 4) {
+            pages.push('...');
+        }
+
+        const start = Math.max(2, current_page - 1);
+        const end = Math.min(last_page - 1, current_page + 1);
+
+        for (let i = start; i <= end; i++) {
+            pages.push(i);
+        }
+
+        if (current_page < last_page - 3) {
+            pages.push('...');
+        }
+
+        if (last_page > 1) {
+            pages.push(last_page);
+        }
+
+        return pages;
+    };
+
     return (
         <AppLayout>
             <Head title="Create Order" />
@@ -391,8 +420,8 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
                 </div>
                 <h1 className="text-2xl font-bold">New Invoice</h1>
                 <p className="text-muted-foreground mb-4">Create a new Invoice or Sales Receipt</p>
-                <div className="flex flex-col gap-6 lg:flex-row custom-break">
-                    <div className="w-full lg:max-w-lvw space-y-4">
+                <div className="custom-break flex flex-col gap-6 lg:flex-row">
+                    <div className="w-full space-y-4 lg:max-w-lvw">
                         <Card>
                             <CardContent className="space-y-4 p-6 sm:p-6">
                                 <div className="grid grid-cols-2 gap-4">
@@ -490,9 +519,7 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
                                                             !data.order_on && 'text-muted-foreground',
                                                         )}
                                                     >
-                                                        {data.order_on
-                                                            ? format(new Date(data.order_on), 'dd-MM-yyyy')
-                                                            : 'Pick a date'}
+                                                        {data.order_on ? format(new Date(data.order_on), 'dd-MM-yyyy') : 'Pick a date'}
                                                         <CalendarIcon className="text-muted-foreground ml-2 h-4 w-4" />
                                                     </button>
                                                 </PopoverTrigger>
@@ -505,11 +532,15 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
                                                                 const formatted = format(date, 'yyyy-MM-dd');
                                                                 setData('order_on', formatted);
 
-                                                                router.post(route('orders.setDateSession'), {
-                                                                    order_on: formatted,
-                                                                }, {
-                                                                    preserveScroll: true,
-                                                                });
+                                                                router.post(
+                                                                    route('orders.setDateSession'),
+                                                                    {
+                                                                        order_on: formatted,
+                                                                    },
+                                                                    {
+                                                                        preserveScroll: true,
+                                                                    },
+                                                                );
                                                             }
                                                         }}
                                                     />
@@ -571,7 +602,7 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
                                             <div className="flex sm:block sm:justify-end">
                                                 <span className="w-24 text-left font-medium sm:hidden">Price:</span>
                                                 <span className="flex w-auto justify-end">
-                                                    <p className=" w-max rounded border p-1">{Math.round(item.price)}</p>
+                                                    <p className="w-max rounded border p-1">{Math.round(item.price)}</p>
                                                 </span>
                                             </div>
                                             <div className="flex justify-between sm:block sm:justify-end">
@@ -762,115 +793,211 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
                                 </div>
 
                                 <div className="space-y-2">
-                                    {selectedTab === 'in-stock' ? productList.map((product) => (
-                                        <div
-                                            key={product.id + (product.variant_id ?? '')}
-                                            className="flex items-center justify-between rounded-lg px-4 py-2"
-                                        >
-                                            <div>
-                                                <div className="text-left leading-snug font-medium break-words">
-                                                    <span className="block font-bold">{product.name}</span>
-                                                    {product.variant_name && (
-                                                        <span className="block font-semibold text-blue-600">{product.variant_name}</span>
-                                                    )}
-                                                    {product.variant_options && typeof product.variant_options === 'object' && (
-                                                        <span className="block text-sm text-green-600">
-                                                            <div>
-                                                                {Object.entries(product.variant_options).map(([key, value]) => (
-                                                                    <span key={key} className="mr-2">
-                                                                        {key}: {value}
-                                                                    </span>
-                                                                ))}
-                                                            </div>
-                                                        </span>
-                                                    )}
-                                                </div>
-                                                <div className="text-muted-foreground text-sm">৳ {Math.round(product.price)}</div>
-                                            </div>
+                                    {selectedTab === 'in-stock'
+                                        ? productList.map((product) => (
+                                              <div
+                                                  key={product.id + (product.variant_id ?? '')}
+                                                  className="flex items-center justify-between rounded-lg px-4 py-2"
+                                              >
+                                                  <div>
+                                                      <div className="text-left leading-snug font-medium break-words">
+                                                          <span className="block font-bold">{product.name}</span>
+                                                          {product.variant_name && (
+                                                              <span className="block font-semibold text-blue-600">{product.variant_name}</span>
+                                                          )}
+                                                          {product.variant_options && typeof product.variant_options === 'object' && (
+                                                              <span className="block text-sm text-green-600">
+                                                                  <div>
+                                                                      {Object.entries(product.variant_options).map(([key, value]) => (
+                                                                          <span key={key} className="mr-2">
+                                                                              {key}: {value}
+                                                                          </span>
+                                                                      ))}
+                                                                  </div>
+                                                              </span>
+                                                          )}
+                                                      </div>
+                                                      <div className="text-muted-foreground text-sm">৳ {Math.round(product.price)}</div>
+                                                  </div>
 
-                                            <div className="flex w-24 items-center justify-center gap-4">
-                                                <span className="w-4 text-center text-sm">{product.quantity}</span>
-                                                <Button
-                                                    variant="outline"
-                                                    size="icon"
-                                                    className="ml-3"
-                                                    onClick={() => product.quantity > 0 && addItem(product)}
-                                                >
-                                                    <Plus className="h-4 w-4" />
-                                                </Button>
-                                            </div>
-                                        </div>
-                                    ))
-                                    : productListAll.map((product) => (
-                                            <div
-                                                key={product.id + (product.variant_id ?? '')}
-                                                className="flex items-center justify-between rounded-lg px-4 py-2"
-                                            >
-                                                <div>
-                                                    <div className="text-left leading-snug font-medium break-words">
-                                                        <span className="block font-bold text-black">{product.name}</span>
-                                                        {product.variant_name && (
-                                                            <span
-                                                                className="block font-semibold text-blue-600">{product.variant_name}</span>
-                                                        )}
-                                                        {product.variant_options && typeof product.variant_options === 'object' && (
-                                                            <span className="block text-sm text-green-600">
-                                                            <div>
-                                                                {Object.entries(product.variant_options).map(([key, value]) => (
-                                                                    <span key={key} className="mr-2">
-                                                                        {key}: {value}
-                                                                    </span>
-                                                                ))}
-                                                            </div>
-                                                        </span>
-                                                        )}
-                                                    </div>
-                                                    <div
-                                                        className="text-muted-foreground text-sm">৳ {Math.round(product.price)}</div>
-                                                </div>
+                                                  <div className="flex w-24 items-center justify-center gap-4">
+                                                      <span className="w-4 text-center text-sm">{product.quantity}</span>
+                                                      <Button
+                                                          variant="outline"
+                                                          size="icon"
+                                                          className="ml-3"
+                                                          onClick={() => product.quantity > 0 && addItem(product)}
+                                                      >
+                                                          <Plus className="h-4 w-4" />
+                                                      </Button>
+                                                  </div>
+                                              </div>
+                                          ))
+                                        : productListAll.map((product) => (
+                                              <div
+                                                  key={product.id + (product.variant_id ?? '')}
+                                                  className="flex items-center justify-between rounded-lg px-4 py-2"
+                                              >
+                                                  <div>
+                                                      <div className="text-left leading-snug font-medium break-words">
+                                                          <span className="block font-bold text-black">{product.name}</span>
+                                                          {product.variant_name && (
+                                                              <span className="block font-semibold text-blue-600">{product.variant_name}</span>
+                                                          )}
+                                                          {product.variant_options && typeof product.variant_options === 'object' && (
+                                                              <span className="block text-sm text-green-600">
+                                                                  <div>
+                                                                      {Object.entries(product.variant_options).map(([key, value]) => (
+                                                                          <span key={key} className="mr-2">
+                                                                              {key}: {value}
+                                                                          </span>
+                                                                      ))}
+                                                                  </div>
+                                                              </span>
+                                                          )}
+                                                      </div>
+                                                      <div className="text-muted-foreground text-sm">৳ {Math.round(product.price)}</div>
+                                                  </div>
 
-                                                <div className="flex w-24 items-center justify-center gap-4">
-                                                    <span className="w-4 text-center text-sm">{product.quantity}</span>
-                                                    <Button
-                                                        variant="outline"
-                                                        size="icon"
-                                                        className="ml-3"
-                                                        onClick={() => product.quantity > 0 && addItem(product)}
-                                                    >
-                                                        <Plus className="h-4 w-4" />
-                                                    </Button>
-                                                </div>
-                                            </div>
-                                        ))
-                                    }
+                                                  <div className="flex w-24 items-center justify-center gap-4">
+                                                      <span className="w-4 text-center text-sm">{product.quantity}</span>
+                                                      <Button
+                                                          variant="outline"
+                                                          size="icon"
+                                                          className="ml-3"
+                                                          onClick={() => product.quantity > 0 && addItem(product)}
+                                                      >
+                                                          <Plus className="h-4 w-4" />
+                                                      </Button>
+                                                  </div>
+                                              </div>
+                                          ))}
                                 </div>
+                                {selectedTab === 'in-stock' ? (
+                                    <div className="border-t pt-4">
+                                        <div className="flex flex-wrap items-center justify-center gap-2">
 
-                                <div className="border-t pt-4">
-                                    <div className="flex flex-wrap items-center justify-center gap-2">
-                                        {pagination.links.map((link, idx) => (
                                             <Button
-                                                key={idx}
-                                                variant={link.active ? 'default' : 'outline'}
                                                 size="sm"
-                                                disabled={!link.url}
-                                                onClick={() => {
-                                                    if (link.url) {
-                                                        const url = new URL(link.url);
-                                                        const pageParam = url.searchParams.get('page');
-                                                        const page = pageParam ? parseInt(pageParam, 10) : 1;
-                                                        fetchProducts(page);
-                                                    }
-                                                }}
-                                                dangerouslySetInnerHTML={{ __html: link.label ?? '' }}
-                                                className={`rounded border px-3 py-1 text-sm transition ${
-                                                    link.active
-                                                        ? 'bg-black text-white dark:bg-white dark:text-black'
-                                                        : 'border-gray-300 bg-transparent text-black hover:bg-gray-100 dark:border-gray-600 dark:text-white dark:hover:bg-gray-800'
-                                                } `}
-                                            />
-                                        ))}
+                                                variant="outline"
+                                                disabled={pagination.current_page === 1}
+                                                onClick={() => fetchProducts(1)}
+                                            >
+                                                &laquo;
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                disabled={pagination.current_page === 1}
+                                                onClick={() => fetchProducts(pagination.current_page - 1)}
+                                            >
+                                                &lsaquo;
+                                            </Button>
+
+
+                                            {renderCustomPagination().map((item, idx) =>
+                                                item === '...' ? (
+                                                    <span key={idx} className="px-2 text-gray-500">
+                                                        ...
+                                                    </span>
+                                                ) : (
+                                                    <Button
+                                                        key={idx}
+                                                        size="sm"
+                                                        variant={item === pagination.current_page ? 'default' : 'outline'}
+                                                        onClick={() => fetchProducts(item as number)}
+                                                        className={`rounded px-3 py-1 text-sm ${
+                                                            item === pagination.current_page
+                                                                ? 'bg-black text-white dark:bg-white dark:text-black'
+                                                                : 'text-black hover:bg-gray-100 dark:text-white dark:hover:bg-gray-800'
+                                                        }`}
+                                                    >
+                                                        {item}
+                                                    </Button>
+                                                ),
+                                            )}
+
+
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                disabled={pagination.current_page === pagination.last_page}
+                                                onClick={() => fetchProducts(pagination.current_page + 1)}
+                                            >
+                                                &rsaquo;
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                disabled={pagination.current_page === pagination.last_page}
+                                                onClick={() => fetchProducts(pagination.last_page)}
+                                            >
+                                                &raquo;
+                                            </Button>
+                                        </div>
                                     </div>
-                                </div>
+                                ) : (
+                                    <div className="border-t pt-4">
+                                        <div className="flex flex-wrap items-center justify-center gap-2">
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                disabled={pagination.current_page === 1}
+                                                onClick={() => fetchProductsAll(1)}
+                                            >
+                                                &laquo;
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                disabled={pagination.current_page === 1}
+                                                onClick={() => fetchProductsAll(pagination.current_page - 1)}
+                                            >
+                                                &lsaquo;
+                                            </Button>
+
+                                            {renderCustomPagination().map((item, idx) =>
+                                                    item === '...' ? (
+                                                        <span key={idx} className="px-2 text-gray-500">
+          ...
+        </span>
+                                                    ) : (
+                                                        <Button
+                                                            key={idx}
+                                                            size="sm"
+                                                            variant={item === pagination.current_page ? 'default' : 'outline'}
+                                                            onClick={() => fetchProductsAll(item as number)}
+                                                            className={`rounded px-3 py-1 text-sm ${
+                                                                item === pagination.current_page
+                                                                    ? 'bg-black text-white dark:bg-white dark:text-black'
+                                                                    : 'text-black hover:bg-gray-100 dark:text-white dark:hover:bg-gray-800'
+                                                            }`}
+                                                        >
+                                                            {item}
+                                                        </Button>
+                                                    )
+                                            )}
+
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                disabled={pagination.current_page === pagination.last_page}
+                                                onClick={() => fetchProductsAll(pagination.current_page + 1)}
+                                            >
+                                                &rsaquo;
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                disabled={pagination.current_page === pagination.last_page}
+                                                onClick={() => fetchProductsAll(pagination.last_page)}
+                                            >
+                                                &raquo;
+                                            </Button>
+                                        </div>
+                                    </div>
+
+                                )}
                             </CardContent>
                         </Card>
                     </div>
