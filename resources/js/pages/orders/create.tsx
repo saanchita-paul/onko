@@ -237,13 +237,11 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
     const { data, setData } = useForm<{
         company_name: string;
         company_address: string;
-        invoice_date: string | null;
         logo: string | File | null;
         order_on: string;
     }>({
         company_name: companyDetails?.company_name ?? '',
         company_address: companyDetails?.company_address ?? '',
-        invoice_date: companyDetails?.invoice_date ?? null,
         logo: companyDetails?.logo ?? null,
         order_on: userOrderSession?.order_on ?? today,
     });
@@ -253,7 +251,6 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
         const formData = new FormData();
         formData.append('company_name', data.company_name);
         formData.append('company_address', data.company_address);
-        formData.append('invoice_date', data.invoice_date ?? '');
 
         if (data.logo && typeof data.logo !== 'string') {
             formData.append('logo', data.logo);
@@ -271,10 +268,10 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
 
     useEffect(() => {
         const isLogoFile = typeof data.logo !== 'string' && data.logo instanceof File;
-        if (isLogoFile || data.invoice_date) {
+        if (isLogoFile) {
             submit();
         }
-    }, [data.logo, data.invoice_date]);
+    }, [data.logo]);
 
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 

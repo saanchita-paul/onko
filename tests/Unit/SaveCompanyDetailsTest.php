@@ -32,7 +32,6 @@ class SaveCompanyDetailsTest extends TestCase
         $payload = [
             'company_name' => 'Test Company',
             'company_address' => 'Test Address',
-            'invoice_date' => '2024-07-24',
             'logo' => $file,
         ];
 
@@ -47,10 +46,6 @@ class SaveCompanyDetailsTest extends TestCase
         $this->assertDatabaseHas('options', [
             'key' => 'company_address',
             'value' => 'Test Address',
-        ]);
-        $this->assertDatabaseHas('options', [
-            'key' => 'invoice_date',
-            'value' => '2024-07-24',
         ]);
 
         Storage::disk('public')->assertExists('company_logo/' . $file->hashName());

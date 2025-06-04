@@ -13,14 +13,12 @@ class Option extends Model
         $options = Option::whereIn('key', [
             'company_name',
             'company_address',
-            'invoice_date',
             'logo',
         ])->pluck('value', 'key');
 
         return [
             'company_name' => $options['company_name'] ?? null,
             'company_address' => $options['company_address'] ?? null,
-            'invoice_date' => $options['invoice_date'] ?? null,
             'logo' => $options['logo'] ?? null,
         ];
     }

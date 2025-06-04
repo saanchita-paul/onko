@@ -122,7 +122,6 @@ class OrderController extends Controller
         $companyDetails = Option::whereIn('key', [
             'company_name',
             'company_address',
-            'invoice_date',
             'logo'
         ])->pluck('value', 'key');
 

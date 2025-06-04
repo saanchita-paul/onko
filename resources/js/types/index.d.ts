@@ -102,7 +102,6 @@ type FlashMessages = {
 export interface CompanyDetails {
     company_name: string;
     company_address: string;
-    invoice_date: string;
     logo: string | null;
 }
 
