@@ -24,17 +24,6 @@ class Expense extends Model
     public $incrementing = false;
     protected $keyType = 'string';
 
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::creating(function ($model) {
-            if (empty($model->id)) {
-                $model->id = (string) Str::uuid();
-            }
-        });
-    }
-
     public function expensable(): MorphTo
     {
         return $this->morphTo();

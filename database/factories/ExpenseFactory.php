@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Expense;
+use App\Models\Order;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
@@ -18,8 +19,8 @@ class ExpenseFactory extends Factory
             'amount' => $this->faker->randomFloat(2, 10, 1000),
             'expense_date' => $this->faker->date(),
             'status' => $this->faker->randomElement(['pending', 'approved', 'rejected']),
-            'expensable_id' => null,
-            'expensable_type' => null,
+            'expensable_id' => Order::factory(),
+            'expensable_type' => Order::class,
         ];
     }
 }
