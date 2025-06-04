@@ -177,3 +177,17 @@
         flex-direction: column !important;
     }
 }
+
+.custom-subtotal{
+    margin-right: 10px;
+}
+
+.custom-grandtotal{
+    margin-right: 25px;
+}
+.custom-discount{
+    margin-right: 10px;
+}
+.custom-tax{
+    margin-right: 10px;
+}
