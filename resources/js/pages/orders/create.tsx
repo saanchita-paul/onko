@@ -33,6 +33,7 @@ import { format } from 'date-fns';
 import type {  PaginatedCustomers } from '@/pages/orders/order-form';
 import axios from 'axios';
 import { toast } from 'sonner';
+import CustomPagination from '@/components/custom/CustomPagination';
 interface Product {
     id: string;
     name: string;
@@ -225,6 +226,11 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
 
     const handleTabChange = (tabValue: string) => {
         setSelectedTab(tabValue);
+        if (tabValue === 'in-stock') {
+            fetchProducts(1);
+        } else {
+            fetchProductsAll(1);
+        }
     };
 
     const today = format(new Date(), 'yyyy-MM-dd');
@@ -370,6 +376,7 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
             toast.error('Error deleting logo');
         }
     };
+
     return (
         <AppLayout>
             <Head title="Create Order" />
@@ -391,8 +398,8 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
                 </div>
                 <h1 className="text-2xl font-bold">New Invoice</h1>
                 <p className="text-muted-foreground mb-4">Create a new Invoice or Sales Receipt</p>
-                <div className="flex flex-col gap-6 lg:flex-row custom-break">
-                    <div className="w-full lg:max-w-lvw space-y-4">
+                <div className="custom-break flex flex-col gap-6 lg:flex-row">
+                    <div className="w-full space-y-4 lg:max-w-lvw">
                         <Card>
                             <CardContent className="space-y-4 p-6 sm:p-6">
                                 <div className="grid grid-cols-2 gap-4">
@@ -490,9 +497,7 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
                                                             !data.order_on && 'text-muted-foreground',
                                                         )}
                                                     >
-                                                        {data.order_on
-                                                            ? format(new Date(data.order_on), 'dd-MM-yyyy')
-                                                            : 'Pick a date'}
+                                                        {data.order_on ? format(new Date(data.order_on), 'dd-MM-yyyy') : 'Pick a date'}
                                                         <CalendarIcon className="text-muted-foreground ml-2 h-4 w-4" />
                                                     </button>
                                                 </PopoverTrigger>
@@ -505,11 +510,15 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
                                                                 const formatted = format(date, 'yyyy-MM-dd');
                                                                 setData('order_on', formatted);
 
-                                                                router.post(route('orders.setDateSession'), {
-                                                                    order_on: formatted,
-                                                                }, {
-                                                                    preserveScroll: true,
-                                                                });
+                                                                router.post(
+                                                                    route('orders.setDateSession'),
+                                                                    {
+                                                                        order_on: formatted,
+                                                                    },
+                                                                    {
+                                                                        preserveScroll: true,
+                                                                    },
+                                                                );
                                                             }
                                                         }}
                                                     />
@@ -571,7 +580,7 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
                                             <div className="flex sm:block sm:justify-end">
                                                 <span className="w-24 text-left font-medium sm:hidden">Price:</span>
                                                 <span className="flex w-auto justify-end">
-                                                    <p className=" w-max rounded border p-1">{Math.round(item.price)}</p>
+                                                    <p className="w-max rounded border p-1">{Math.round(item.price)}</p>
                                                 </span>
                                             </div>
                                             <div className="flex justify-between sm:block sm:justify-end">
@@ -762,115 +771,99 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
                                 </div>
 
                                 <div className="space-y-2">
-                                    {selectedTab === 'in-stock' ? productList.map((product) => (
-                                        <div
-                                            key={product.id + (product.variant_id ?? '')}
-                                            className="flex items-center justify-between rounded-lg px-4 py-2"
-                                        >
-                                            <div>
-                                                <div className="text-left leading-snug font-medium break-words">
-                                                    <span className="block font-bold">{product.name}</span>
-                                                    {product.variant_name && (
-                                                        <span className="block font-semibold text-blue-600">{product.variant_name}</span>
-                                                    )}
-                                                    {product.variant_options && typeof product.variant_options === 'object' && (
-                                                        <span className="block text-sm text-green-600">
-                                                            <div>
-                                                                {Object.entries(product.variant_options).map(([key, value]) => (
-                                                                    <span key={key} className="mr-2">
-                                                                        {key}: {value}
-                                                                    </span>
-                                                                ))}
-                                                            </div>
-                                                        </span>
-                                                    )}
-                                                </div>
-                                                <div className="text-muted-foreground text-sm">৳ {Math.round(product.price)}</div>
-                                            </div>
+                                    {selectedTab === 'in-stock'
+                                        ? productList.map((product) => (
+                                              <div
+                                                  key={product.id + (product.variant_id ?? '')}
+                                                  className="flex items-center justify-between rounded-lg px-4 py-2"
+                                              >
+                                                  <div>
+                                                      <div className="text-left leading-snug font-medium break-words">
+                                                          <span className="block font-bold">{product.name}</span>
+                                                          {product.variant_name && (
+                                                              <span className="block font-semibold text-blue-600">{product.variant_name}</span>
+                                                          )}
+                                                          {product.variant_options && typeof product.variant_options === 'object' && (
+                                                              <span className="block text-sm text-green-600">
+                                                                  <div>
+                                                                      {Object.entries(product.variant_options).map(([key, value]) => (
+                                                                          <span key={key} className="mr-2">
+                                                                              {key}: {value}
+                                                                          </span>
+                                                                      ))}
+                                                                  </div>
+                                                              </span>
+                                                          )}
+                                                      </div>
+                                                      <div className="text-muted-foreground text-sm">৳ {Math.round(product.price)}</div>
+                                                  </div>
 
-                                            <div className="flex w-24 items-center justify-center gap-4">
-                                                <span className="w-4 text-center text-sm">{product.quantity}</span>
-                                                <Button
-                                                    variant="outline"
-                                                    size="icon"
-                                                    className="ml-3"
-                                                    onClick={() => product.quantity > 0 && addItem(product)}
-                                                >
-                                                    <Plus className="h-4 w-4" />
-                                                </Button>
-                                            </div>
-                                        </div>
-                                    ))
-                                    : productListAll.map((product) => (
-                                            <div
-                                                key={product.id + (product.variant_id ?? '')}
-                                                className="flex items-center justify-between rounded-lg px-4 py-2"
-                                            >
-                                                <div>
-                                                    <div className="text-left leading-snug font-medium break-words">
-                                                        <span className="block font-bold text-black">{product.name}</span>
-                                                        {product.variant_name && (
-                                                            <span
-                                                                className="block font-semibold text-blue-600">{product.variant_name}</span>
-                                                        )}
-                                                        {product.variant_options && typeof product.variant_options === 'object' && (
-                                                            <span className="block text-sm text-green-600">
-                                                            <div>
-                                                                {Object.entries(product.variant_options).map(([key, value]) => (
-                                                                    <span key={key} className="mr-2">
-                                                                        {key}: {value}
-                                                                    </span>
-                                                                ))}
-                                                            </div>
-                                                        </span>
-                                                        )}
-                                                    </div>
-                                                    <div
-                                                        className="text-muted-foreground text-sm">৳ {Math.round(product.price)}</div>
-                                                </div>
+                                                  <div className="flex w-24 items-center justify-center gap-4">
+                                                      <span className="w-4 text-center text-sm">{product.quantity}</span>
+                                                      <Button
+                                                          variant="outline"
+                                                          size="icon"
+                                                          className="ml-3"
+                                                          onClick={() => product.quantity > 0 && addItem(product)}
+                                                      >
+                                                          <Plus className="h-4 w-4" />
+                                                      </Button>
+                                                  </div>
+                                              </div>
+                                          ))
+                                        : productListAll.map((product) => (
+                                              <div
+                                                  key={product.id + (product.variant_id ?? '')}
+                                                  className="flex items-center justify-between rounded-lg px-4 py-2"
+                                              >
+                                                  <div>
+                                                      <div className="text-left leading-snug font-medium break-words">
+                                                          <span className="block font-bold text-black">{product.name}</span>
+                                                          {product.variant_name && (
+                                                              <span className="block font-semibold text-blue-600">{product.variant_name}</span>
+                                                          )}
+                                                          {product.variant_options && typeof product.variant_options === 'object' && (
+                                                              <span className="block text-sm text-green-600">
+                                                                  <div>
+                                                                      {Object.entries(product.variant_options).map(([key, value]) => (
+                                                                          <span key={key} className="mr-2">
+                                                                              {key}: {value}
+                                                                          </span>
+                                                                      ))}
+                                                                  </div>
+                                                              </span>
+                                                          )}
+                                                      </div>
+                                                      <div className="text-muted-foreground text-sm">৳ {Math.round(product.price)}</div>
+                                                  </div>
 
-                                                <div className="flex w-24 items-center justify-center gap-4">
-                                                    <span className="w-4 text-center text-sm">{product.quantity}</span>
-                                                    <Button
-                                                        variant="outline"
-                                                        size="icon"
-                                                        className="ml-3"
-                                                        onClick={() => product.quantity > 0 && addItem(product)}
-                                                    >
-                                                        <Plus className="h-4 w-4" />
-                                                    </Button>
-                                                </div>
-                                            </div>
-                                        ))
-                                    }
+                                                  <div className="flex w-24 items-center justify-center gap-4">
+                                                      <span className="w-4 text-center text-sm">{product.quantity}</span>
+                                                      <Button
+                                                          variant="outline"
+                                                          size="icon"
+                                                          className="ml-3"
+                                                          onClick={() => product.quantity > 0 && addItem(product)}
+                                                      >
+                                                          <Plus className="h-4 w-4" />
+                                                      </Button>
+                                                  </div>
+                                              </div>
+                                          ))}
                                 </div>
-
-                                <div className="border-t pt-4">
-                                    <div className="flex flex-wrap items-center justify-center gap-2">
-                                        {pagination.links.map((link, idx) => (
-                                            <Button
-                                                key={idx}
-                                                variant={link.active ? 'default' : 'outline'}
-                                                size="sm"
-                                                disabled={!link.url}
-                                                onClick={() => {
-                                                    if (link.url) {
-                                                        const url = new URL(link.url);
-                                                        const pageParam = url.searchParams.get('page');
-                                                        const page = pageParam ? parseInt(pageParam, 10) : 1;
-                                                        fetchProducts(page);
-                                                    }
-                                                }}
-                                                dangerouslySetInnerHTML={{ __html: link.label ?? '' }}
-                                                className={`rounded border px-3 py-1 text-sm transition ${
-                                                    link.active
-                                                        ? 'bg-black text-white dark:bg-white dark:text-black'
-                                                        : 'border-gray-300 bg-transparent text-black hover:bg-gray-100 dark:border-gray-600 dark:text-white dark:hover:bg-gray-800'
-                                                } `}
-                                            />
-                                        ))}
-                                    </div>
-                                </div>
+                                {selectedTab === 'in-stock' ? (
+                                    <CustomPagination
+                                        currentPage={pagination.current_page}
+                                        lastPage={pagination.last_page}
+                                        onPageChange={(page) => fetchProducts(page)}
+                                    />
+                                ) : (
+                                    <CustomPagination
+                                        currentPage={pagination.current_page}
+                                        lastPage={pagination.last_page}
+                                        onPageChange={(page) => fetchProductsAll(page)}
+                                    />
+                                )}
                             </CardContent>
                         </Card>
                     </div>
