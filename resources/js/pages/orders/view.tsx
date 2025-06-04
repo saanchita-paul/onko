@@ -266,14 +266,14 @@ export default function View({ customer, items, companyDetails, orderId, discoun
 
                     <div className="flex justify-between border-b">
                         <span className="font-medium">Subtotal</span>
-                        <span>{subtotal}/-</span>
+                        <span className="custom-subtotal">{subtotal}/-</span>
                     </div>
                     {discountTotal !== null && discountTotal > 0 && (
                         <div className="flex justify-between border-b">
                             <span className="font-medium">
                                 Discount {meta?.discount_type === 'percentage' ? `(${meta?.discount_percentage}%)` : ''}
                             </span>
-                            <span>-{discountTotal}/-</span>
+                            <span className="custom-discount mr-2">-{discountTotal}/-</span>
                         </div>
                     )}
 
@@ -283,13 +283,13 @@ export default function View({ customer, items, companyDetails, orderId, discoun
                                 Tax {meta?.tax_type ? `(${meta?.tax_type})` : ''}
                                 {meta?.tax_percentage ? ` (${meta?.tax_percentage}%)` : ''}
                             </span>
-                            <span>{taxTotal}/-</span>
+                            <span className="mr-2 custom-tax">{taxTotal}/-</span>
                         </div>
                     )}
                     <div className="text-sm text-gray-700">
                         <div className="mt-50 flex justify-between border-t pt-2 font-bold text-black">
                             <span className="dark:text-white">Grand Total</span>
-                            <span>{subtotal - discountTotal + taxTotal}/-</span>
+                            <span className="custom-grandtotal">{subtotal - discountTotal + taxTotal}/-</span>
                         </div>
                     </div>
                     <div className="mt-8 flex justify-end gap-2">
