@@ -87,8 +87,19 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
         const url = route('stock.index', { page: page, stock_only: 1 });
         axios.get(url)
             .then(response => {
-                const resData = response.data.products.data;
-                setProductList(Array.isArray(resData) ? resData : []);
+                const products = response.data.products.data;
+                const updatedProduct: Product[] = [];
+
+                products.forEach((product: Product) => {
+                    items.forEach((item) => {
+                        if(product.id === item.id && product.variant_id === item.variant_id){
+                            product.quantity = product.quantity - item.qty
+                        }
+                    })
+                    updatedProduct.push(product)
+                })
+
+                setProductList(Array.isArray(updatedProduct) ? updatedProduct : []);
                 setPagination({
                     current_page: response.data.products.current_page,
                     last_page: response.data.products.last_page,
@@ -105,8 +116,19 @@ export default function CreateOrder({ companyDetails, customers, userOrderSessio
         const url = route('stock.index', { page });
         axios.get(url)
             .then(response => {
-                const resData = response.data.products.data;
-                setProductListAll(Array.isArray(resData) ? resData : []);
+                const productsAll = response.data.products.data;
+                const updatedProductAll: Product[] = [];
+
+                productsAll.forEach((product: Product) => {
+                    items.forEach((item) => {
+                        if(product.id === item.id && product.variant_id === item.variant_id){
+                            product.quantity = product.quantity - item.qty
+                        }
+                    })
+                    updatedProductAll.push(product)
+                })
+
+                setProductListAll(Array.isArray(updatedProductAll) ? updatedProductAll : []);
                 setPagination({
                     current_page: response.data.products.current_page,
                     last_page: response.data.products.last_page,
