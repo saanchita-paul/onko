@@ -40,7 +40,7 @@ class OrderControllerTest extends TestCase
         $this->actingAs($this->user);
     }
 
-    /** @test */
+
     public function test_it_returns_paginated_products()
     {
         $user = User::factory()->create();
@@ -74,7 +74,7 @@ class OrderControllerTest extends TestCase
             'qty_waste' => 0,
         ]);
 
-        $response = $this->getJson('/api/stock');
+        $response = $this->getJson(route('stock.index'));
 
         $response->assertStatus(200);
 
