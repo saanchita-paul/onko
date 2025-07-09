@@ -46,6 +46,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/orders/set-date-session', [OrderController::class, 'setDateSession'])->name('orders.setDateSession');
 
 
+    Route::get('/users', function () {
+        return Inertia::render('user');
+    });
+
 
 });
 

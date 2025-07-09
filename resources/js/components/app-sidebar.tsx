@@ -127,7 +127,7 @@ const mainNavGroups: NavGroup[] = [
                 icon: TreePalm,
             }
         ],
-    }
+    },
 ];
 
 export function AppSidebar() {
